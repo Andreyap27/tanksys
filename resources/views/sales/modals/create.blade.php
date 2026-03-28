@@ -1,5 +1,5 @@
 <div class="modal-overlay" id="createModal">
-    <div class="modal-box" style="max-width:56rem;width:90%;">
+    <div class="modal-box">
         <div class="modal-header">
             <h3 class="modal-title">Tambah Penjualan</h3>
             <button class="modal-close-btn" onclick="closeCreateModal()">&times;</button>
@@ -7,12 +7,12 @@
         <div class="modal-body">
             <form id="createForm" onsubmit="return false;">
                 <div class="form-grid">
-                    <div class="form-group">
+                    <div class="form-group full">
                         <label class="form-label">No Invoice</label>
                         <input type="text" name="invoice_number" class="form-input" placeholder="Memuat..."
                             readonly style="background:#f5f5f4;cursor:not-allowed;">
                     </div>
-                    <div class="form-group">
+                    <div class="form-group full">
                         <label class="form-label">Tanggal <span class="text-danger">*</span></label>
                         <input type="date" name="date" class="form-input" required>
                     </div>
@@ -33,17 +33,17 @@
                         <input type="text" name="description" class="form-input" placeholder="Deskripsi penjualan">
                     </div>
                     <div class="form-group full" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
-                        <div class="form-group" style="margin:0;">
+                        <div class="form-group full" style="margin:0;">
                             <label class="form-label">Qty (Liter) <span class="text-danger">*</span></label>
                             <input type="text" name="quantity" class="form-input fmt-qty" inputmode="decimal"
                                 placeholder="0" required>
                         </div>
-                        <div class="form-group" style="margin:0;">
+                        <div class="form-group full" style="margin:0;">
                             <label class="form-label">Harga/Liter <span class="text-danger">*</span></label>
                             <input type="text" name="price" class="form-input fmt-price" inputmode="numeric"
                                 placeholder="Rp 0" required>
                         </div>
-                        <div class="form-group" style="margin:0;">
+                        <div class="form-group full" style="margin:0;">
                             <label class="form-label">Amount (otomatis)</label>
                             <input type="text" id="createAmountDisplay" class="form-input" readonly
                                 placeholder="Rp 0" style="background:var(--muted);cursor:not-allowed;">
@@ -57,11 +57,11 @@
             </form>
         </div>
         <div class="modal-footer">
-            <button class="btn" onclick="closeCreateModal()">
+            <button class="btn btn-danger" onclick="closeCreateModal()">
                 <i data-lucide="x" style="width:15px;height:15px;"></i>
                 Batal
             </button>
-            <button class="btn btn-primary" onclick="storeSale()">
+            <button class="btn btn-primary" data-save-btn onclick="storeSale()">
                 <i data-lucide="save" style="width:15px;height:15px;"></i>
                 Simpan
             </button>

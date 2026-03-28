@@ -1,5 +1,5 @@
 <div class="modal-overlay" id="createModal">
-    <div class="modal-box" style="max-width:44rem;width:90%;">
+    <div class="modal-box">
         <div class="modal-header">
             <h3 class="modal-title">Tambah Lori</h3>
             <button class="modal-close-btn" onclick="closeCreateModal()">&times;</button>
@@ -7,11 +7,11 @@
         <div class="modal-body">
             <form id="createForm" onsubmit="return false;">
                 <div class="form-grid">
-                    <div class="form-group">
+                    <div class="form-group full">
                         <label class="form-label">Tanggal <span class="text-danger">*</span></label>
                         <input type="date" name="date" class="form-input" required>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group full">
                         <label class="form-label">Customer <span class="text-danger">*</span></label>
                         <div style="display:flex;gap:0.5rem;align-items:flex-start;">
                             <select id="createCustomerSelect" name="customer_id" class="form-select" style="flex:1;min-width:0;">
@@ -23,11 +23,11 @@
                             </button>
                         </div>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group full">
                         <label class="form-label">Dari (From) <span class="text-danger">*</span></label>
                         <input type="text" name="from" class="form-input" placeholder="Lokasi asal" required>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group full">
                         <label class="form-label">Ke (To) <span class="text-danger">*</span></label>
                         <input type="text" name="to" class="form-input" placeholder="Lokasi tujuan" required>
                     </div>
@@ -40,11 +40,11 @@
             </form>
         </div>
         <div class="modal-footer">
-            <button class="btn" onclick="closeCreateModal()">
+            <button class="btn btn-danger" onclick="closeCreateModal()">
                 <i data-lucide="x" style="width:15px;height:15px;"></i>
                 Batal
             </button>
-            <button class="btn btn-primary" onclick="storeLori()">
+            <button class="btn btn-primary" data-save-btn onclick="storeLori()">
                 <i data-lucide="save" style="width:15px;height:15px;"></i>
                 Simpan
             </button>

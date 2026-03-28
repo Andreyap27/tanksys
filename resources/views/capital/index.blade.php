@@ -25,6 +25,7 @@
                         <th>Tanggal</th>
                         <th>Nama</th>
                         <th>Nominal</th>
+                        <th>Catatan</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -78,6 +79,10 @@ $(document).ready(function () {
                 render: (data) => Currency.symbol + ' ' + data
             },
             {
+                data: 'note',
+                render: (data) => data ? escHtml(data) : '-'
+            },
+            {
                 data: null,
                 orderable: false,
                 searchable: false,
@@ -85,7 +90,7 @@ $(document).ready(function () {
                     return `
                         <div class="table-actions">
                             <button class="icon-btn primary" title="Edit"
-                                onclick="openEditModal('${row.id}', '${row.date_raw}', '${escHtml(row.name)}', '${row.nominal_raw}')">
+                                onclick="openEditModal('${row.id}', '${row.date_raw}', '${escHtml(row.name)}', '${row.nominal_raw}', '${escHtml(row.note)}')">
                                 <i data-lucide="pencil" style="width:14px;height:14px;"></i>
                             </button>
                             <button class="icon-btn danger" title="Hapus"
@@ -123,6 +128,7 @@ function storeCapital() {
         date:    createForm.date.value,
         name:    createForm.name.value,
         nominal: getRaw(createForm.nominal),
+        note:    createForm.note.value,
     };
 
     axios.post('{{ route('capital.store') }}', payload)
@@ -143,12 +149,13 @@ function storeCapital() {
 
 // ── Edit ────────────────────────────────────────────────────────────────────
 
-function openEditModal(id, date, name, nominal) {
+function openEditModal(id, date, name, nominal, note) {
     editId = id;
     editForm.date.value = date;
     editForm.name.value = name;
     setRaw(editForm.nominal, nominal);
     editForm.nominal.value = parseInt(nominal) ? Currency.format(nominal) : '';
+    editForm.note.value = note || '';
     editModal.classList.add('active');
 }
 
@@ -162,6 +169,7 @@ function updateCapital() {
         date:    editForm.date.value,
         name:    editForm.name.value,
         nominal: getRaw(editForm.nominal),
+        note:    editForm.note.value,
     };
 
     axios.put(`/capital/${editId}`, payload)

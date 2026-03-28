@@ -51,6 +51,8 @@ Route::middleware('auth.jwt')->group(function () {
 
     // Purchase
     Route::get('/purchase/data', [PurchaseController::class, 'data'])->name('purchase.data');
+    Route::post('/purchase/{purchase}/approve', [PurchaseController::class, 'approve'])->name('purchase.approve');
+    Route::post('/purchase/{purchase}/reject', [PurchaseController::class, 'reject'])->name('purchase.reject');
     Route::resource('purchase', PurchaseController::class)->names('purchase')->except(['create', 'edit', 'show']);
 
     // Stock (read only, auto)
@@ -62,6 +64,8 @@ Route::middleware('auth.jwt')->group(function () {
     Route::get('/sales/next-invoice', [SaleController::class, 'nextInvoice'])->name('sales.next-invoice');
     Route::get('/sales/{sale}/invoice', [SaleController::class, 'invoice'])->name('sales.invoice');
     Route::get('/sales/{sale}', [SaleController::class, 'show'])->name('sales.show');
+    Route::post('/sales/{sale}/approve', [SaleController::class, 'approve'])->name('sales.approve');
+    Route::post('/sales/{sale}/reject', [SaleController::class, 'reject'])->name('sales.reject');
     Route::resource('sales', SaleController::class)->names('sales')->except(['create', 'edit', 'show']);
 
     // Capital

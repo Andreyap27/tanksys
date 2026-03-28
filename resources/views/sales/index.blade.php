@@ -34,6 +34,7 @@
                         <th>Qty (L)</th>
                         <th>Harga/L</th>
                         <th>Amount</th>
+                        <th>Status</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -83,6 +84,7 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@23.1.0/build/js/intlTelInput.min.js"></script>
 <script>
+const canApprove = @json($canApprove);
 let table;
 let editId = null;
 let quickCustomerContext = 'create';
@@ -210,26 +212,54 @@ $(document).ready(function () {
                 render: (data) => Currency.symbol + ' ' + data
             },
             {
+                data: 'status',
+                render: function(data) {
+                    const map = {
+                        pending:  '<span class="badge badge-warning">Pending</span>',
+                        approved: '<span class="badge badge-success">Approved</span>',
+                        rejected: '<span class="badge badge-danger">Rejected</span>',
+                    };
+                    return map[data] || data;
+                }
+            },
+            {
                 data: null,
                 orderable: false,
                 searchable: false,
                 render: function (data, type, row) {
-                    return `
-                        <div class="table-actions">
+                    let actions = '';
+
+                    if (row.status === 'pending') {
+                        actions += `
                             <button class="icon-btn primary" title="Edit"
                                 onclick="openEditModal('${row.id}', '${row.date_raw}', '${escHtml(row.invoice_number)}', '${row.customer_id}', '${escHtml(row.description)}', '${row.quantity_raw}', '${row.price_raw}', '${escHtml(row.noted)}')">
                                 <i data-lucide="pencil" style="width:14px;height:14px;"></i>
+                            </button>`;
+                    }
+
+                    if (canApprove && row.status === 'pending') {
+                        actions += `
+                            <button class="icon-btn success" title="Setujui"
+                                onclick="approveSale('${row.id}', '${escHtml(row.invoice_number)}')">
+                                <i data-lucide="check" style="width:14px;height:14px;"></i>
                             </button>
-                            <button class="icon-btn danger" title="Hapus"
-                                onclick="deleteSale('${row.id}', '${escHtml(row.invoice_number)}')">
-                                <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
-                            </button>
-                            <button class="icon-btn" title="Invoice"
-                                onclick="openInvoiceModal('/sales/${row.id}/invoice')">
-                                <i data-lucide="file-text" style="width:14px;height:14px;"></i>
-                            </button>
-                        </div>
-                    `;
+                            <button class="icon-btn warning" title="Tolak"
+                                onclick="rejectSale('${row.id}', '${escHtml(row.invoice_number)}')">
+                                <i data-lucide="x" style="width:14px;height:14px;"></i>
+                            </button>`;
+                    }
+
+                    actions += `
+                        <button class="icon-btn danger" title="Hapus"
+                            onclick="deleteSale('${row.id}', '${escHtml(row.invoice_number)}')">
+                            <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
+                        </button>
+                        <button class="icon-btn" title="Invoice"
+                            onclick="openInvoiceModal('/sales/${row.id}/invoice')">
+                            <i data-lucide="file-text" style="width:14px;height:14px;"></i>
+                        </button>`;
+
+                    return `<div class="table-actions">${actions}</div>`;
                 }
             }
         ],
@@ -380,6 +410,44 @@ function deleteSale(id, invoice) {
                 table.ajax.reload(null, false);
             } catch (err) {
                 showError('Gagal', err.response?.data?.message || 'Gagal menghapus data');
+            }
+        }
+    });
+}
+
+// ── Approve / Reject ─────────────────────────────────────────────────────────
+
+function approveSale(id, invoice) {
+    showConfirm({
+        title: 'Konfirmasi Persetujuan',
+        message: `Setujui penjualan "${invoice}"? Data akan masuk ke perhitungan stok dan laporan.`,
+        type: 'warning',
+        confirmText: 'Ya, Setujui',
+        onConfirm: async () => {
+            try {
+                const res = await axios.post(`/sales/${id}/approve`);
+                showSuccess('Disetujui', res.data.message);
+                table.ajax.reload(null, false);
+            } catch (err) {
+                showError('Gagal', err.response?.data?.message || 'Gagal menyetujui data');
+            }
+        }
+    });
+}
+
+function rejectSale(id, invoice) {
+    showConfirm({
+        title: 'Konfirmasi Penolakan',
+        message: `Tolak penjualan "${invoice}"?`,
+        type: 'danger',
+        confirmText: 'Ya, Tolak',
+        onConfirm: async () => {
+            try {
+                const res = await axios.post(`/sales/${id}/reject`);
+                showSuccess('Ditolak', res.data.message);
+                table.ajax.reload(null, false);
+            } catch (err) {
+                showError('Gagal', err.response?.data?.message || 'Gagal menolak data');
             }
         }
     });

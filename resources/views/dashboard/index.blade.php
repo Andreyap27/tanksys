@@ -144,7 +144,7 @@
 </div>
 
 {{-- ── Charts Row ───────────────────────────────────────────────────────────── --}}
-<div class="dash-charts-grid">
+<!-- <div class="dash-charts-grid">
 
     {{-- Sales vs Purchase Bar Chart --}}
     <div class="card">
@@ -185,10 +185,10 @@
         </div>
     </div>
 
-</div>
+</div> -->
 
 {{-- ── Profit Trend + Tables ────────────────────────────────────────────────── --}}
-<div class="dash-tables-grid">
+<!-- <div class="dash-tables-grid">
 
     {{-- Recent Sales --}}
     <div class="card">
@@ -278,7 +278,7 @@
         </div>
     </div>
 
-</div>
+</div> -->
 
 @endsection
 

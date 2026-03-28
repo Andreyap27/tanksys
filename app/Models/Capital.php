@@ -13,6 +13,7 @@ class Capital extends Model
         'date',
         'name',
         'nominal',
+        'note',
         'created_by',
     ];
 

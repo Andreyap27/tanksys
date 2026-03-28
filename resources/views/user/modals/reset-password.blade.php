@@ -9,7 +9,7 @@
                 Password baru akan langsung aktif dan dapat digunakan untuk login.
             </p>
             <form id="resetPasswordForm" onsubmit="return false;">
-                <div class="form-group">
+                <div class="form-group full">
                     <label class="form-label">Password Baru <span class="text-danger">*</span></label>
                     <input type="password" name="password" class="form-input"
                         placeholder="Minimal 6 karakter" required autocomplete="new-password">
@@ -17,11 +17,11 @@
             </form>
         </div>
         <div class="modal-footer">
-            <button class="btn" onclick="closeResetPasswordModal()">
+            <button class="btn btn-danger" onclick="closeResetPasswordModal()">
                 <i data-lucide="x" style="width:15px;height:15px;"></i>
                 Batal
             </button>
-            <button class="btn btn-warning" onclick="doResetPassword()">
+            <button class="btn btn-warning" data-save-btn onclick="doResetPassword()">
                 <i data-lucide="key-round" style="width:15px;height:15px;"></i>
                 Reset Password
             </button>

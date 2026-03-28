@@ -21,6 +21,7 @@ class CapitalController extends Controller
             'name'        => $c->name,
             'nominal'     => number_format($c->nominal, 0, ',', '.'),
             'nominal_raw' => $c->nominal,
+            'note'        => $c->note ?? '',
         ]);
         return response()->json(['data' => $capitals]);
     }
@@ -31,12 +32,14 @@ class CapitalController extends Controller
             'date'    => 'required|date',
             'name'    => 'required|string|max:255',
             'nominal' => 'required|numeric|min:0',
+            'note'    => 'nullable|string',
         ]);
 
         Capital::create([
             'date'       => $request->date,
             'name'       => $request->name,
             'nominal'    => $request->nominal,
+            'note'       => $request->note,
             'created_by' => auth()->id(),
         ]);
 
@@ -49,9 +52,10 @@ class CapitalController extends Controller
             'date'    => 'required|date',
             'name'    => 'required|string|max:255',
             'nominal' => 'required|numeric|min:0',
+            'note'    => 'nullable|string',
         ]);
 
-        $capital->update($request->only(['date', 'name', 'nominal']));
+        $capital->update($request->only(['date', 'name', 'nominal', 'note']));
 
         return response()->json(['message' => 'Modal berhasil diupdate.']);
     }

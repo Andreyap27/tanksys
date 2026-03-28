@@ -12,7 +12,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('employee_id')->unique()->comment('No ID Karyawan');
             $table->string('name')->comment('Nama Karyawan');
-            $table->enum('role', ['SPV', 'Admin'])->default('Admin');
+            $table->enum('role', ['Super Admin', 'SPV', 'Admin'])->default('Admin');
             $table->string('username')->unique();
             $table->string('password');
             $table->boolean('reset_password')->default(false)->comment('Flag wajib ganti password saat login');

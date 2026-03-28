@@ -19,6 +19,9 @@ class Sale extends Model
         'amount',
         'noted',
         'created_by',
+        'status',
+        'approved_by',
+        'approved_at',
     ];
 
     protected function casts(): array
@@ -39,6 +42,11 @@ class Sale extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
     public function stock()

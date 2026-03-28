@@ -20,6 +20,16 @@ class Expense extends Model
         'Lori',
     ];
 
+    const EXPENSE_CATEGORIES = [
+        'Gaji',
+        'Spare Part',
+        'Jasa',
+        'BBM ME',
+        'BBM AE',
+        'Umum',
+        'Fee',
+    ];
+
     protected $fillable = [
         'date',
         'description',

@@ -7,11 +7,11 @@
         <div class="modal-body">
             <form id="editForm" onsubmit="return false;">
                 <div class="form-grid">
-                    <div class="form-group">
+                    <div class="form-group full">
                         <label class="form-label">Tanggal <span class="text-danger">*</span></label>
                         <input type="date" name="date" class="form-input" required>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group full">
                         <label class="form-label">Kategori <span class="text-danger">*</span></label>
                         <select name="category" class="form-select" required>
                             <option value="">-- Pilih Kategori --</option>
@@ -42,11 +42,11 @@
             </form>
         </div>
         <div class="modal-footer">
-            <button class="btn" onclick="closeEditModal()">
+            <button class="btn btn-danger" onclick="closeEditModal()">
                 <i data-lucide="x" style="width:15px;height:15px;"></i>
                 Batal
             </button>
-            <button class="btn btn-primary" onclick="updateExpense()">
+            <button class="btn btn-primary" data-save-btn onclick="updateExpense()">
                 <i data-lucide="save" style="width:15px;height:15px;"></i>
                 Simpan
             </button>

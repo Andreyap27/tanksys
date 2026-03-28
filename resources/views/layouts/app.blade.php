@@ -166,6 +166,34 @@
         // Initialize Lucide Icons
         lucide.createIcons();
 
+        // ── Save Button Loading Animation ─────────────────────────────────────
+        const _saveBtnSpinnerHtml = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" style="width:15px;height:15px;flex-shrink:0;animation:spin .7s linear infinite;"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" style="opacity:.3"/><path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>`;
+        let _activeSaveBtn = null;
+
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('[data-save-btn]');
+            if (btn && !btn.disabled) {
+                _activeSaveBtn = btn;
+                btn._origHTML  = btn.innerHTML;
+                btn.disabled   = true;
+                btn.innerHTML  = _saveBtnSpinnerHtml + ' Menyimpan...';
+            }
+        }, true);
+
+        axios.interceptors.response.use(
+            function (response) { _resetSaveBtn(); return response; },
+            function (error)    { _resetSaveBtn(); return Promise.reject(error); }
+        );
+
+        function _resetSaveBtn() {
+            if (!_activeSaveBtn) return;
+            const btn      = _activeSaveBtn;
+            _activeSaveBtn = null;
+            btn.disabled   = false;
+            if (btn._origHTML) { btn.innerHTML = btn._origHTML; btn._origHTML = null; }
+            lucide.createIcons();
+        }
+
         // Sidebar Toggle
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');

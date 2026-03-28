@@ -898,13 +898,23 @@ body {
 }
 
 .icon-btn.warning {
-    color: #e0521c;
-    border-color: rgba(180, 83, 9, 0.25);
+    color: #d97706;
+    border-color: rgba(217, 119, 6, 0.25);
 }
 
 .icon-btn.warning:hover {
-    background-color: rgba(180, 83, 9, 0.1);
-    border-color: rgba(180, 83, 9, 0.4);
+    background-color: rgba(217, 119, 6, 0.1);
+    border-color: rgba(217, 119, 6, 0.4);
+}
+
+.icon-btn.success {
+    color: var(--success);
+    border-color: rgba(22, 163, 74, 0.25);
+}
+
+.icon-btn.success:hover {
+    background-color: rgba(22, 163, 74, 0.1);
+    border-color: rgba(22, 163, 74, 0.4);
 }
 
 /* =============================================================================
@@ -944,9 +954,6 @@ body {
     gap: 1rem;
 }
 
-@media (min-width: 768px) {
-    .form-grid { grid-template-columns: repeat(2, 1fr); }
-}
 
 .form-group {
     display: flex;
@@ -1046,8 +1053,8 @@ body {
 }
 .btn-success:hover { background-color: var(--success); opacity: 0.9; }
 
-.btn-danger { color: var(--destructive); }
-.btn-danger:hover { background-color: rgba(220, 38, 38, 0.1); }
+.btn-danger { background-color: var(--destructive); color: var(--destructive-foreground); border-color: var(--destructive); }
+.btn-danger:hover { background-color: var(--destructive); opacity: 0.9; }
 
 .btn-warning {
     background-color: #e0521c;

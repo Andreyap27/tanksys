@@ -31,7 +31,8 @@ class ReportController extends Controller
         $year  = $this->getYear();
         $years = $this->getYears();
 
-        $purchases = Purchase::selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(amount) as total_amount')
+        $purchases = Purchase::where('status', 'approved')
+            ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(amount) as total_amount')
             ->whereYear('date', $year)
             ->groupBy('month')
             ->get()->keyBy('month');
@@ -44,7 +45,8 @@ class ReportController extends Controller
         $year  = $this->getYear();
         $years = $this->getYears();
 
-        $sales = Sale::selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(amount) as total_amount')
+        $sales = Sale::where('status', 'approved')
+            ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(amount) as total_amount')
             ->whereYear('date', $year)
             ->groupBy('month')
             ->get()->keyBy('month');
@@ -59,11 +61,13 @@ class ReportController extends Controller
 
         $expensesByCategory = Expense::selectRaw('MONTH(date) as month, category, SUM(nominal) as total')
             ->whereYear('date', $year)
+            ->where('category', '!=', 'Lori')
             ->groupBy('month', 'category')
             ->get()->groupBy('month');
 
         $expensesTotal = Expense::selectRaw('MONTH(date) as month, SUM(nominal) as total')
             ->whereYear('date', $year)
+            ->where('category', '!=', 'Lori')
             ->groupBy('month')
             ->pluck('total', 'month');
 
@@ -75,12 +79,14 @@ class ReportController extends Controller
         $year  = $this->getYear();
         $years = $this->getYears();
 
-        $purchases = Purchase::selectRaw('MONTH(date) as month, SUM(amount) as total_amount')
+        $purchases = Purchase::where('status', 'approved')
+            ->selectRaw('MONTH(date) as month, SUM(amount) as total_amount')
             ->whereYear('date', $year)
             ->groupBy('month')
             ->get()->keyBy('month');
 
-        $sales = Sale::selectRaw('MONTH(date) as month, SUM(amount) as total_amount')
+        $sales = Sale::where('status', 'approved')
+            ->selectRaw('MONTH(date) as month, SUM(amount) as total_amount')
             ->whereYear('date', $year)
             ->groupBy('month')
             ->get()->keyBy('month');
@@ -127,26 +133,30 @@ class ReportController extends Controller
 
         switch ($section) {
             case 'purchase':
-                $data['purchases'] = Purchase::selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(amount) as total_amount')
+                $data['purchases'] = Purchase::where('status', 'approved')
+                    ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(amount) as total_amount')
                     ->whereYear('date', $year)->groupBy('month')->get()->keyBy('month');
                 $data['title'] = 'Total Purchase';
                 break;
             case 'sale':
-                $data['sales'] = Sale::selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(amount) as total_amount')
+                $data['sales'] = Sale::where('status', 'approved')
+                    ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(amount) as total_amount')
                     ->whereYear('date', $year)->groupBy('month')->get()->keyBy('month');
                 $data['title'] = 'Total Sale';
                 break;
             case 'expense':
                 $data['expensesByCategory'] = Expense::selectRaw('MONTH(date) as month, category, SUM(nominal) as total')
-                    ->whereYear('date', $year)->groupBy('month', 'category')->get()->groupBy('month');
+                    ->whereYear('date', $year)->where('category', '!=', 'Lori')->groupBy('month', 'category')->get()->groupBy('month');
                 $data['expensesTotal'] = Expense::selectRaw('MONTH(date) as month, SUM(nominal) as total')
-                    ->whereYear('date', $year)->groupBy('month')->pluck('total', 'month');
+                    ->whereYear('date', $year)->where('category', '!=', 'Lori')->groupBy('month')->pluck('total', 'month');
                 $data['title'] = 'Total Expense';
                 break;
             case 'profit-loss':
-                $data['purchases'] = Purchase::selectRaw('MONTH(date) as month, SUM(amount) as total_amount')
+                $data['purchases'] = Purchase::where('status', 'approved')
+                    ->selectRaw('MONTH(date) as month, SUM(amount) as total_amount')
                     ->whereYear('date', $year)->groupBy('month')->get()->keyBy('month');
-                $data['sales'] = Sale::selectRaw('MONTH(date) as month, SUM(amount) as total_amount')
+                $data['sales'] = Sale::where('status', 'approved')
+                    ->selectRaw('MONTH(date) as month, SUM(amount) as total_amount')
                     ->whereYear('date', $year)->groupBy('month')->get()->keyBy('month');
                 $data['expensesTotal'] = Expense::selectRaw('MONTH(date) as month, SUM(nominal) as total')
                     ->whereYear('date', $year)->groupBy('month')->pluck('total', 'month');

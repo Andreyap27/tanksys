@@ -19,16 +19,16 @@ class DashboardController extends Controller
         $prevYear  = $now->copy()->subMonth()->year;
 
         // ── This month ──────────────────────────────────────────────
-        $salesAmt    = (float) Sale::whereYear('date', $thisYear)->whereMonth('date', $thisMonth)->sum('amount');
-        $purchaseAmt = (float) Purchase::whereYear('date', $thisYear)->whereMonth('date', $thisMonth)->sum('amount');
+        $salesAmt    = (float) Sale::where('status', 'approved')->whereYear('date', $thisYear)->whereMonth('date', $thisMonth)->sum('amount');
+        $purchaseAmt = (float) Purchase::where('status', 'approved')->whereYear('date', $thisYear)->whereMonth('date', $thisMonth)->sum('amount');
         $expenseAmt  = (float) Expense::whereYear('date', $thisYear)->whereMonth('date', $thisMonth)->sum('nominal');
         $loriAmt     = (float) Lori::whereYear('date', $thisYear)->whereMonth('date', $thisMonth)->sum('price');
         $profitAmt   = $salesAmt - $purchaseAmt - $expenseAmt;
         $stockBal    = Stock::currentBalance();
 
         // ── Last month (for trend) ───────────────────────────────────
-        $salesPrev    = (float) Sale::whereYear('date', $prevYear)->whereMonth('date', $prevMonth)->sum('amount');
-        $purchasePrev = (float) Purchase::whereYear('date', $prevYear)->whereMonth('date', $prevMonth)->sum('amount');
+        $salesPrev    = (float) Sale::where('status', 'approved')->whereYear('date', $prevYear)->whereMonth('date', $prevMonth)->sum('amount');
+        $purchasePrev = (float) Purchase::where('status', 'approved')->whereYear('date', $prevYear)->whereMonth('date', $prevMonth)->sum('amount');
 
         $trend = function ($now, $prev) {
             if ($prev == 0) return $now > 0 ? ['pct' => null, 'dir' => 'new'] : ['pct' => null, 'dir' => 'flat'];
@@ -43,8 +43,8 @@ class DashboardController extends Controller
         $chartMonths = collect(range(5, 0))->map(fn($i) => $now->copy()->subMonths($i));
 
         $chartLabels   = $chartMonths->map(fn($m) => $m->translatedFormat('M Y'))->values();
-        $chartSales    = $chartMonths->map(fn($m) => (float) Sale::whereYear('date', $m->year)->whereMonth('date', $m->month)->sum('amount'))->values();
-        $chartPurchase = $chartMonths->map(fn($m) => (float) Purchase::whereYear('date', $m->year)->whereMonth('date', $m->month)->sum('amount'))->values();
+        $chartSales    = $chartMonths->map(fn($m) => (float) Sale::where('status', 'approved')->whereYear('date', $m->year)->whereMonth('date', $m->month)->sum('amount'))->values();
+        $chartPurchase = $chartMonths->map(fn($m) => (float) Purchase::where('status', 'approved')->whereYear('date', $m->year)->whereMonth('date', $m->month)->sum('amount'))->values();
         $chartProfit   = $chartSales->zip($chartPurchase)->map(function ($pair) use ($chartMonths) {
             [$s, $p] = $pair;
             return round($s - $p, 2);

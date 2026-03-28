@@ -12,7 +12,9 @@ class SaleController extends Controller
 {
     public function index()
     {
-        return view('sales.index');
+        return view('sales.index', [
+            'canApprove' => auth()->user()->canApprove(),
+        ]);
     }
 
     public function nextInvoice()
@@ -57,6 +59,7 @@ class SaleController extends Controller
             'price_raw'      => $s->price,
             'amount'         => number_format($s->amount, 0, ',', '.'),
             'noted'          => $s->noted ?? '-',
+            'status'         => $s->status,
         ]);
         return response()->json(['data' => $sales]);
     }
@@ -73,45 +76,30 @@ class SaleController extends Controller
             'noted'          => 'nullable|string',
         ]);
 
-        $currentBalance = Stock::currentBalance();
-        if ($request->quantity > $currentBalance) {
-            return response()->json([
-                'message' => 'Stok tidak mencukupi. Stok saat ini: ' . number_format($currentBalance, 2) . ' L',
-                'errors'  => ['quantity' => ['Stok tidak mencukupi.']],
-            ], 422);
-        }
+        Sale::create([
+            'date'           => $request->date,
+            'invoice_number' => $request->invoice_number,
+            'customer_id'    => $request->customer_id,
+            'description'    => $request->description,
+            'quantity'       => $request->quantity,
+            'price'          => $request->price,
+            'amount'         => $request->quantity * $request->price,
+            'noted'          => $request->noted,
+            'created_by'     => auth()->id(),
+            'status'         => 'pending',
+        ]);
 
-        DB::transaction(function () use ($request) {
-            $sale = Sale::create([
-                'date'           => $request->date,
-                'invoice_number' => $request->invoice_number,
-                'customer_id'    => $request->customer_id,
-                'description'    => $request->description,
-                'quantity'       => $request->quantity,
-                'price'          => $request->price,
-                'amount'         => $request->quantity * $request->price,
-                'noted'          => $request->noted,
-                'created_by'     => auth()->id(),
-            ]);
+        $message = 'Penjualan berhasil disimpan dan menunggu persetujuan SPV.';
 
-            $customer = Customer::find($request->customer_id);
-            Stock::create([
-                'date'           => $request->date,
-                'type'           => 'sale',
-                'reference_id'   => $sale->id,
-                'reference_type' => Sale::class,
-                'party'          => $customer->name,
-                'qty_in'         => 0,
-                'qty_out'        => $request->quantity,
-                'balance'        => Stock::currentBalance() - $request->quantity,
-            ]);
-        });
-
-        return response()->json(['message' => 'Penjualan berhasil disimpan.']);
+        return response()->json(['message' => $message]);
     }
 
     public function update(Request $request, Sale $sale)
     {
+        if ($sale->status !== 'pending' && !auth()->user()->canApprove()) {
+            return response()->json(['message' => 'Data yang sudah disetujui tidak dapat diedit.'], 403);
+        }
+
         $request->validate([
             'date'           => 'required|date',
             'invoice_number' => 'required|string|unique:sales,invoice_number,' . $sale->id,
@@ -136,15 +124,17 @@ class SaleController extends Controller
                 'noted'          => $request->noted,
             ]);
 
-            $stock = $sale->stock;
-            if ($stock) {
-                $customer = Customer::find($request->customer_id);
-                $stock->update([
-                    'date'    => $request->date,
-                    'party'   => $customer->name,
-                    'qty_out' => $request->quantity,
-                    'balance' => $stock->balance - $diff,
-                ]);
+            if ($sale->status === 'approved') {
+                $stock = $sale->stock;
+                if ($stock) {
+                    $customer = Customer::find($request->customer_id);
+                    $stock->update([
+                        'date'    => $request->date,
+                        'party'   => $customer->name,
+                        'qty_out' => $request->quantity,
+                        'balance' => $stock->balance - $diff,
+                    ]);
+                }
             }
         });
 
@@ -153,12 +143,72 @@ class SaleController extends Controller
 
     public function destroy(Sale $sale)
     {
+        if ($sale->status === 'approved' && !auth()->user()->canApprove()) {
+            return response()->json(['message' => 'Hanya SPV yang dapat menghapus data yang sudah disetujui.'], 403);
+        }
+
         DB::transaction(function () use ($sale) {
-            $sale->stock?->delete();
+            if ($sale->status === 'approved') {
+                $sale->stock?->delete();
+            }
             $sale->delete();
         });
 
         return response()->json(['message' => 'Penjualan berhasil dihapus.']);
+    }
+
+    public function approve(Sale $sale)
+    {
+        if (!auth()->user()->canApprove()) {
+            return response()->json(['message' => 'Tidak memiliki akses untuk menyetujui.'], 403);
+        }
+
+        if ($sale->status !== 'pending') {
+            return response()->json(['message' => 'Penjualan ini sudah diproses sebelumnya.'], 422);
+        }
+
+        $currentBalance = Stock::currentBalance();
+        if ($sale->quantity > $currentBalance) {
+            return response()->json([
+                'message' => 'Stok tidak mencukupi untuk menyetujui penjualan ini. Stok saat ini: ' . number_format($currentBalance, 2) . ' L',
+            ], 422);
+        }
+
+        DB::transaction(function () use ($sale) {
+            $sale->update([
+                'status'      => 'approved',
+                'approved_by' => auth()->id(),
+                'approved_at' => now(),
+            ]);
+
+            Stock::create([
+                'date'           => $sale->date,
+                'type'           => 'sale',
+                'reference_id'   => $sale->id,
+                'reference_type' => Sale::class,
+                'party'          => $sale->customer->name,
+                'qty_in'         => 0,
+                'qty_out'        => $sale->quantity,
+                'balance'        => Stock::currentBalance() - $sale->quantity,
+            ]);
+        });
+
+        return response()->json(['message' => 'Penjualan berhasil disetujui.']);
+    }
+
+    public function reject(Sale $sale)
+    {
+        if (!auth()->user()->canApprove()) {
+            return response()->json(['message' => 'Tidak memiliki akses.'], 403);
+        }
+
+        if ($sale->status !== 'pending') {
+            return response()->json(['message' => 'Penjualan ini sudah diproses sebelumnya.'], 422);
+        }
+
+        $sale->update(['status' => 'rejected']);
+
+        return response()->json(['message' => 'Penjualan berhasil ditolak.']);
     }
 
     public function invoice(Sale $sale)
