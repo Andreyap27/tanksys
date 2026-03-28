@@ -12,19 +12,49 @@ class SaleController extends Controller
 {
     public function index()
     {
-        return view('dashboard.sales.index');
+        return view('sales.index');
+    }
+
+    public function nextInvoice()
+    {
+        $date   = now()->format('Ymd');
+        $prefix = "INV-{$date}-";
+        $latest = Sale::where('invoice_number', 'like', $prefix . '%')
+            ->orderByRaw('LENGTH(invoice_number) DESC, invoice_number DESC')
+            ->value('invoice_number');
+        $num = $latest ? (int) substr($latest, strlen($prefix)) : 0;
+        return response()->json(['invoice_number' => $prefix . str_pad($num + 1, 3, '0', STR_PAD_LEFT)]);
+    }
+
+    public function show(Sale $sale)
+    {
+        return response()->json([
+            'id'             => $sale->id,
+            'date'           => $sale->date->format('Y-m-d'),
+            'invoice_number' => $sale->invoice_number,
+            'customer_id'    => $sale->customer_id,
+            'customer_name'  => $sale->customer->name,
+            'description'    => $sale->description ?? '',
+            'quantity'       => $sale->quantity,
+            'price'          => $sale->price,
+            'noted'          => $sale->noted ?? '',
+        ]);
     }
 
     public function data()
     {
         $sales = Sale::with('customer')->latest()->get()->map(fn($s) => [
             'id'             => $s->id,
-            'date'           => $s->date->format('d/m/Y'),
+            'date'           => $s->date->translatedFormat('d M Y'),
+            'date_raw'       => $s->date->format('Y-m-d'),
             'invoice_number' => $s->invoice_number,
-            'customer'       => $s->customer->name,
+            'customer_id'    => $s->customer_id,
+            'customer_name'  => $s->customer->name,
             'description'    => $s->description ?? '-',
             'quantity'       => number_format($s->quantity, 2),
+            'quantity_raw'   => $s->quantity,
             'price'          => number_format($s->price, 0, ',', '.'),
+            'price_raw'      => $s->price,
             'amount'         => number_format($s->amount, 0, ',', '.'),
             'noted'          => $s->noted ?? '-',
         ]);
@@ -134,6 +164,6 @@ class SaleController extends Controller
     public function invoice(Sale $sale)
     {
         $sale->load('customer', 'creator');
-        return view('dashboard.sales.invoice', compact('sale'));
+        return view('sales.invoice', compact('sale'));
     }
 }

@@ -9,16 +9,18 @@ class CapitalController extends Controller
 {
     public function index()
     {
-        return view('dashboard.capital.index');
+        return view('capital.index');
     }
 
     public function data()
     {
         $capitals = Capital::with('creator')->latest()->get()->map(fn($c) => [
-            'id'      => $c->id,
-            'date'    => $c->date->format('d/m/Y'),
-            'name'    => $c->name,
-            'nominal' => number_format($c->nominal, 0, ',', '.'),
+            'id'          => $c->id,
+            'date'        => $c->date->translatedFormat('d M Y'),
+            'date_raw'    => $c->date->format('Y-m-d'),
+            'name'        => $c->name,
+            'nominal'     => number_format($c->nominal, 0, ',', '.'),
+            'nominal_raw' => $c->nominal,
         ]);
         return response()->json(['data' => $capitals]);
     }

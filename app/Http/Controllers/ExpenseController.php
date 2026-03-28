@@ -9,17 +9,19 @@ class ExpenseController extends Controller
 {
     public function index()
     {
-        return view('dashboard.expenses.index');
+        return view('expenses.index');
     }
 
     public function data()
     {
         $expenses = Expense::latest()->get()->map(fn($e) => [
             'id'          => $e->id,
-            'date'        => $e->date->format('d/m/Y'),
+            'date'        => $e->date->translatedFormat('d M Y'),
+            'date_raw'    => $e->date->format('Y-m-d'),
             'description' => $e->description,
             'category'    => $e->category,
             'nominal'     => number_format($e->nominal, 0, ',', '.'),
+            'nominal_raw' => $e->nominal,
             'noted'       => $e->noted ?? '-',
         ]);
         return response()->json(['data' => $expenses]);

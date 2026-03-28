@@ -9,7 +9,31 @@ class UserController extends Controller
 {
     public function index()
     {
-        return view('dashboard.user.index');
+        return view('user.index');
+    }
+
+    public function nextId()
+    {
+        return response()->json(['employee_id' => $this->generateNextEmployeeId()]);
+    }
+
+    private function generateNextEmployeeId(): string
+    {
+        $latest = User::where('employee_id', 'like', 'EMP%')
+            ->orderByRaw('LENGTH(employee_id) DESC, employee_id DESC')
+            ->value('employee_id');
+        if (!$latest) return 'EMP001';
+        $number = (int) substr($latest, 3);
+        return 'EMP' . str_pad($number + 1, 3, '0', STR_PAD_LEFT);
+    }
+
+    public function checkUsername(Request $request)
+    {
+        $exists = User::where('username', $request->query('username'))
+            ->when($request->query('exclude_id'), fn($q, $id) => $q->where('id', '!=', $id))
+            ->exists();
+
+        return response()->json(['available' => !$exists]);
     }
 
     public function data()
@@ -27,15 +51,14 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'employee_id' => 'required|string|unique:users',
-            'name'        => 'required|string|max:255',
-            'role'        => 'required|in:SPV,Admin',
-            'username'    => 'required|string|unique:users',
-            'password'    => 'required|string|min:6',
+            'name'     => 'required|string|max:255',
+            'role'     => 'required|in:SPV,Admin',
+            'username' => 'required|string|unique:users',
+            'password' => 'required|string|min:6',
         ]);
 
         User::create([
-            'employee_id'    => $request->employee_id,
+            'employee_id'    => $this->generateNextEmployeeId(),
             'name'           => $request->name,
             'role'           => $request->role,
             'username'       => $request->username,
@@ -49,23 +72,28 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $request->validate([
-            'employee_id' => 'required|string|unique:users,employee_id,' . $user->id,
-            'name'        => 'required|string|max:255',
-            'role'        => 'required|in:SPV,Admin',
-            'username'    => 'required|string|unique:users,username,' . $user->id,
+            'name'     => 'required|string|max:255',
+            'role'     => 'required|in:SPV,Admin',
+            'username' => 'required|string|unique:users,username,' . $user->id,
         ]);
 
-        $data = $request->only(['employee_id', 'name', 'role', 'username']);
-
-        if ($request->filled('password')) {
-            $request->validate(['password' => 'min:6']);
-            $data['password']       = $request->password;
-            $data['reset_password'] = true;
-        }
-
-        $user->update($data);
+        $user->update($request->only(['name', 'role', 'username']));
 
         return response()->json(['message' => 'User berhasil diupdate.']);
+    }
+
+    public function adminResetPassword(Request $request, User $user)
+    {
+        $request->validate([
+            'password' => 'required|string|min:6',
+        ]);
+
+        $user->update([
+            'password'       => $request->password,
+            'reset_password' => false,
+        ]);
+
+        return response()->json(['message' => 'Password berhasil direset.']);
     }
 
     public function destroy(User $user)

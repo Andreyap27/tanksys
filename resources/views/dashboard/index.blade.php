@@ -3,250 +3,396 @@
 @section('title', 'Dashboard')
 
 @section('content')
-<div class="space-y-6">
-    <!-- Page Header -->
+
+@php
+    $fmt    = fn($n) => number_format((float)$n, 0, ',', '.');
+    $fmtQty = fn($n) => number_format((float)$n, 2, ',', '.');
+    $isProfit = $profitAmt >= 0;
+    $profitClass = $isProfit ? 'ds-profit' : 'ds-loss';
+    $profitIcon  = $isProfit ? 'trending-up' : 'trending-down';
+@endphp
+
+{{-- ── Page Header ──────────────────────────────────────────────────────────── --}}
+<div class="page-header">
     <div>
-        <h1 class="text-2xl font-bold text-foreground">Dashboard</h1>
-        <p class="text-muted-foreground">Selamat datang di TankSys Pro</p>
-    </div>
-
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- Total Penjualan -->
-        <div class="bg-card border border-border rounded-xl p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-muted-foreground">Total Penjualan</p>
-                    <p class="text-2xl font-bold text-foreground mt-1">Rp {{ number_format($totalSales ?? 245000000) }}</p>
-                    <p class="text-xs text-chart-2 mt-1 flex items-center gap-1">
-                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                        </svg>
-                        +12.5% dari bulan lalu
-                    </p>
-                </div>
-                <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <svg class="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                    </svg>
-                </div>
-            </div>
-        </div>
-
-        <!-- Total Pembelian -->
-        <div class="bg-card border border-border rounded-xl p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-muted-foreground">Total Pembelian</p>
-                    <p class="text-2xl font-bold text-foreground mt-1">Rp {{ number_format($totalPurchases ?? 180000000) }}</p>
-                    <p class="text-xs text-chart-1 mt-1 flex items-center gap-1">
-                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                        </svg>
-                        -5.2% dari bulan lalu
-                    </p>
-                </div>
-                <div class="w-12 h-12 rounded-full bg-chart-4/10 flex items-center justify-center">
-                    <svg class="w-6 h-6 text-chart-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                </div>
-            </div>
-        </div>
-
-        <!-- Profit -->
-        <div class="bg-card border border-border rounded-xl p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-muted-foreground">Profit Bulan Ini</p>
-                    <p class="text-2xl font-bold text-chart-2 mt-1">Rp {{ number_format($profit ?? 65000000) }}</p>
-                    <p class="text-xs text-chart-2 mt-1 flex items-center gap-1">
-                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                        </svg>
-                        +18.3% dari bulan lalu
-                    </p>
-                </div>
-                <div class="w-12 h-12 rounded-full bg-chart-2/10 flex items-center justify-center">
-                    <svg class="w-6 h-6 text-chart-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-            </div>
-        </div>
-
-        <!-- Total Stok -->
-        <div class="bg-card border border-border rounded-xl p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-muted-foreground">Total Stok BBM</p>
-                    <p class="text-2xl font-bold text-foreground mt-1">{{ number_format($totalStock ?? 125000) }} L</p>
-                    <p class="text-xs text-muted-foreground mt-1">
-                        Terakhir update: {{ now()->format('d M Y') }}
-                    </p>
-                </div>
-                <div class="w-12 h-12 rounded-full bg-chart-3/10 flex items-center justify-center">
-                    <svg class="w-6 h-6 text-chart-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                    </svg>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Charts Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Sales Chart -->
-        <div class="bg-card border border-border rounded-xl p-6">
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <h3 class="font-semibold text-foreground">Grafik Penjualan</h3>
-                    <p class="text-sm text-muted-foreground">6 bulan terakhir</p>
-                </div>
-                <select class="text-sm bg-input border border-border rounded-lg px-3 py-1.5">
-                    <option>6 Bulan</option>
-                    <option>12 Bulan</option>
-                    <option>Tahun Ini</option>
-                </select>
-            </div>
-            <div class="h-64 flex items-center justify-center text-muted-foreground">
-                <canvas id="salesChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Stock Distribution -->
-        <div class="bg-card border border-border rounded-xl p-6">
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <h3 class="font-semibold text-foreground">Distribusi Stok</h3>
-                    <p class="text-sm text-muted-foreground">Per jenis BBM</p>
-                </div>
-            </div>
-            <div class="h-64 flex items-center justify-center text-muted-foreground">
-                <canvas id="stockChart"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <!-- Recent Transactions -->
-    <div class="bg-card border border-border rounded-xl">
-        <div class="p-6 border-b border-border">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h3 class="font-semibold text-foreground">Transaksi Terbaru</h3>
-                    <p class="text-sm text-muted-foreground">5 transaksi terakhir</p>
-                </div>
-                <a href="{{ route('sales.index') }}" class="text-sm text-primary hover:text-primary/80 font-medium">
-                    Lihat Semua
-                </a>
-            </div>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead class="bg-muted/50">
-                    <tr>
-                        <th class="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-3">No. Invoice</th>
-                        <th class="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-3">Customer</th>
-                        <th class="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-3">Produk</th>
-                        <th class="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-3">Jumlah</th>
-                        <th class="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-3">Total</th>
-                        <th class="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-3">Status</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-border">
-                    @forelse($recentTransactions ?? [] as $transaction)
-                    <tr class="hover:bg-muted/30 transition-colors">
-                        <td class="px-6 py-4 text-sm font-medium text-foreground">{{ $transaction->invoice_no }}</td>
-                        <td class="px-6 py-4 text-sm text-foreground">{{ $transaction->customer->name }}</td>
-                        <td class="px-6 py-4 text-sm text-foreground">{{ $transaction->product->name }}</td>
-                        <td class="px-6 py-4 text-sm text-foreground">{{ number_format($transaction->quantity) }} L</td>
-                        <td class="px-6 py-4 text-sm font-medium text-foreground">Rp {{ number_format($transaction->total) }}</td>
-                        <td class="px-6 py-4">
-                            <span class="px-2.5 py-1 text-xs font-medium rounded-full 
-                                @if($transaction->status === 'completed') bg-chart-2/10 text-chart-2
-                                @elseif($transaction->status === 'pending') bg-chart-4/10 text-chart-4
-                                @else bg-chart-1/10 text-chart-1 @endif">
-                                {{ ucfirst($transaction->status) }}
-                            </span>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="6" class="px-6 py-12 text-center text-muted-foreground">
-                            <svg class="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                            </svg>
-                            Belum ada transaksi
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+        <h1 class="page-title-text">Dashboard</h1>
+        <p class="page-subtitle">{{ now()->translatedFormat('l, d F Y') }}</p>
     </div>
 </div>
+
+{{-- ── Stat Cards ───────────────────────────────────────────────────────────── --}}
+<div class="dash-grid">
+
+    {{-- Sales --}}
+    <div class="dash-stat ds-sales">
+        <div class="dash-stat__row">
+            <div>
+                <div class="dash-stat__label">Penjualan Bulan Ini</div>
+                <div class="dash-stat__value">Rp {{ $fmt($salesAmt) }}</div>
+            </div>
+            <div class="dash-stat__icon">
+                <i data-lucide="arrow-up-from-line" style="width:1.1rem;height:1.1rem;"></i>
+            </div>
+        </div>
+        <div class="dash-stat__trend {{ $salesTrend['dir'] === 'up' ? 'up' : ($salesTrend['dir'] === 'down' ? 'down' : 'flat') }}">
+            @if($salesTrend['dir'] === 'up')
+                <i data-lucide="trending-up"></i> +{{ $salesTrend['pct'] }}% vs bulan lalu
+            @elseif($salesTrend['dir'] === 'down')
+                <i data-lucide="trending-down"></i> -{{ $salesTrend['pct'] }}% vs bulan lalu
+            @elseif($salesTrend['dir'] === 'new')
+                <i data-lucide="star"></i> Baru bulan ini
+            @else
+                <i data-lucide="minus"></i> Sama seperti bulan lalu
+            @endif
+        </div>
+    </div>
+
+    {{-- Purchase --}}
+    <div class="dash-stat ds-purchase">
+        <div class="dash-stat__row">
+            <div>
+                <div class="dash-stat__label">Pembelian Bulan Ini</div>
+                <div class="dash-stat__value">Rp {{ $fmt($purchaseAmt) }}</div>
+            </div>
+            <div class="dash-stat__icon">
+                <i data-lucide="arrow-down-to-line" style="width:1.1rem;height:1.1rem;"></i>
+            </div>
+        </div>
+        <div class="dash-stat__trend {{ $purchaseTrend['dir'] === 'up' ? 'up' : ($purchaseTrend['dir'] === 'down' ? 'down' : 'flat') }}">
+            @if($purchaseTrend['dir'] === 'up')
+                <i data-lucide="trending-up"></i> +{{ $purchaseTrend['pct'] }}% vs bulan lalu
+            @elseif($purchaseTrend['dir'] === 'down')
+                <i data-lucide="trending-down"></i> -{{ $purchaseTrend['pct'] }}% vs bulan lalu
+            @elseif($purchaseTrend['dir'] === 'new')
+                <i data-lucide="star"></i> Baru bulan ini
+            @else
+                <i data-lucide="minus"></i> Sama seperti bulan lalu
+            @endif
+        </div>
+    </div>
+
+    {{-- Profit / Loss --}}
+    <div class="dash-stat {{ $profitClass }}">
+        <div class="dash-stat__row">
+            <div>
+                <div class="dash-stat__label">Profit / Loss Bulan Ini</div>
+                <div class="dash-stat__value" style="color:{{ $isProfit ? 'var(--success)' : 'var(--destructive)' }};">
+                    {{ $profitAmt < 0 ? '-' : '' }}Rp {{ $fmt(abs($profitAmt)) }}
+                </div>
+            </div>
+            <div class="dash-stat__icon">
+                <i data-lucide="{{ $profitIcon }}" style="width:1.1rem;height:1.1rem;"></i>
+            </div>
+        </div>
+        <div class="dash-stat__trend flat">
+            <i data-lucide="calculator"></i>
+            Sales − Purchase − Expenses
+        </div>
+    </div>
+
+    {{-- Expenses --}}
+    <div class="dash-stat ds-expense">
+        <div class="dash-stat__row">
+            <div>
+                <div class="dash-stat__label">Pengeluaran Bulan Ini</div>
+                <div class="dash-stat__value">Rp {{ $fmt($expenseAmt) }}</div>
+            </div>
+            <div class="dash-stat__icon">
+                <i data-lucide="receipt" style="width:1.1rem;height:1.1rem;"></i>
+            </div>
+        </div>
+        <div class="dash-stat__trend flat">
+            <i data-lucide="layers"></i>
+            {{ $expByCategory->count() }} kategori pengeluaran
+        </div>
+    </div>
+
+    {{-- Stock --}}
+    <div class="dash-stat ds-stock">
+        <div class="dash-stat__row">
+            <div>
+                <div class="dash-stat__label">Saldo Stok BBM</div>
+                <div class="dash-stat__value">{{ $fmtQty($stockBal) }} <span style="font-size:0.9rem;font-weight:500;color:var(--muted-foreground);">L</span></div>
+            </div>
+            <div class="dash-stat__icon">
+                <i data-lucide="fuel" style="width:1.1rem;height:1.1rem;"></i>
+            </div>
+        </div>
+        <div class="dash-stat__trend flat">
+            <i data-lucide="clock"></i>
+            Per {{ now()->translatedFormat('d M Y') }}
+        </div>
+    </div>
+
+    {{-- Lori --}}
+    <div class="dash-stat ds-lori">
+        <div class="dash-stat__row">
+            <div>
+                <div class="dash-stat__label">Mobil Tangki Bulan Ini</div>
+                <div class="dash-stat__value">Rp {{ $fmt($loriAmt) }}</div>
+            </div>
+            <div class="dash-stat__icon">
+                <i data-lucide="truck" style="width:1.1rem;height:1.1rem;"></i>
+            </div>
+        </div>
+        <div class="dash-stat__trend flat">
+            <i data-lucide="map-pin"></i>
+            Pendapatan pengiriman
+        </div>
+    </div>
+
+</div>
+
+{{-- ── Charts Row ───────────────────────────────────────────────────────────── --}}
+<div class="dash-charts-grid">
+
+    {{-- Sales vs Purchase Bar Chart --}}
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <div class="card-title">Penjualan vs Pembelian</div>
+                <div style="font-size:0.72rem;color:var(--muted-foreground);margin-top:0.1rem;">6 bulan terakhir</div>
+            </div>
+        </div>
+        <div class="card-content">
+            <div style="height:240px;position:relative;">
+                <canvas id="salesPurchaseChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    {{-- Expenses Doughnut --}}
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <div class="card-title">Pengeluaran per Kategori</div>
+                <div style="font-size:0.72rem;color:var(--muted-foreground);margin-top:0.1rem;">Bulan ini</div>
+            </div>
+        </div>
+        <div class="card-content">
+            <div style="height:240px;position:relative;">
+                @if($expByCategory->isEmpty())
+                    <div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted-foreground);font-size:0.8rem;">
+                        <div style="text-align:center;">
+                            <i data-lucide="inbox" style="width:2rem;height:2rem;display:block;margin:0 auto 0.5rem;opacity:0.4;"></i>
+                            Belum ada pengeluaran bulan ini
+                        </div>
+                    </div>
+                @else
+                    <canvas id="expenseCategoryChart"></canvas>
+                @endif
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{{-- ── Profit Trend + Tables ────────────────────────────────────────────────── --}}
+<div class="dash-tables-grid">
+
+    {{-- Recent Sales --}}
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <div class="card-title">Penjualan Terbaru</div>
+                <div style="font-size:0.72rem;color:var(--muted-foreground);margin-top:0.1rem;">5 transaksi terakhir</div>
+            </div>
+            <a href="{{ route('sales.index') }}" class="btn" style="font-size:0.75rem;padding:0.35rem 0.75rem;">
+                Lihat Semua
+            </a>
+        </div>
+        <div class="card-content" style="padding:0;">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Invoice</th>
+                            <th>Customer</th>
+                            <th class="text-right">Amount</th>
+                            <th>Tanggal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($recentSales as $s)
+                        <tr>
+                            <td><span style="font-size:0.75rem;font-weight:600;color:var(--primary);">{{ $s->invoice_number }}</span></td>
+                            <td style="font-size:0.8rem;">{{ $s->customer->name ?? '-' }}</td>
+                            <td class="text-right" style="font-weight:600;font-size:0.8rem;">Rp {{ $fmt($s->amount) }}</td>
+                            <td style="font-size:0.75rem;color:var(--muted-foreground);">{{ $s->date->translatedFormat('d M Y') }}</td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="4" style="text-align:center;padding:2rem;color:var(--muted-foreground);">
+                                <i data-lucide="inbox" style="width:1.5rem;height:1.5rem;display:block;margin:0 auto 0.4rem;opacity:0.4;"></i>
+                                Belum ada penjualan
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {{-- Recent Expenses --}}
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <div class="card-title">Pengeluaran Terbaru</div>
+                <div style="font-size:0.72rem;color:var(--muted-foreground);margin-top:0.1rem;">5 pengeluaran terakhir</div>
+            </div>
+            <a href="{{ route('expenses.index') }}" class="btn" style="font-size:0.75rem;padding:0.35rem 0.75rem;">
+                Lihat Semua
+            </a>
+        </div>
+        <div class="card-content" style="padding:0;">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Deskripsi</th>
+                            <th>Kategori</th>
+                            <th class="text-right">Nominal</th>
+                            <th>Tanggal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($recentExpenses as $e)
+                        <tr>
+                            <td style="font-size:0.8rem;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $e->description }}</td>
+                            <td><span class="badge badge-warning" style="font-size:0.65rem;">{{ $e->category }}</span></td>
+                            <td class="text-right" style="font-weight:600;font-size:0.8rem;color:var(--destructive);">Rp {{ $fmt($e->nominal) }}</td>
+                            <td style="font-size:0.75rem;color:var(--muted-foreground);">{{ $e->date->translatedFormat('d M Y') }}</td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="4" style="text-align:center;padding:2rem;color:var(--muted-foreground);">
+                                <i data-lucide="inbox" style="width:1.5rem;height:1.5rem;display:block;margin:0 auto 0.4rem;opacity:0.4;"></i>
+                                Belum ada pengeluaran
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@endsection
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Sales Chart
-    const salesCtx = document.getElementById('salesChart').getContext('2d');
-    new Chart(salesCtx, {
-        type: 'line',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [{
-                label: 'Penjualan',
-                data: [180, 220, 195, 250, 230, 245],
-                borderColor: '#f97316',
-                backgroundColor: 'rgba(249, 115, 22, 0.1)',
-                fill: true,
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: 'rgba(255,255,255,0.1)' },
-                    ticks: { color: '#94a3b8' }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: { color: '#94a3b8' }
-                }
-            }
-        }
-    });
+const tickColor = '#78716c';
+const gridColor = 'rgba(0,0,0,0.05)';
 
-    // Stock Chart
-    const stockCtx = document.getElementById('stockChart').getContext('2d');
-    new Chart(stockCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Solar', 'Pertalite', 'Pertamax', 'Pertamax Turbo'],
-            datasets: [{
-                data: [45000, 35000, 30000, 15000],
-                backgroundColor: ['#f97316', '#3b82f6', '#10b981', '#8b5cf6'],
-                borderWidth: 0
-            }]
+// ── Sales vs Purchase Chart ───────────────────────────────────────────────────
+new Chart(document.getElementById('salesPurchaseChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+        labels: @json($chartLabels),
+        datasets: [
+            {
+                label: 'Penjualan',
+                data: @json($chartSales),
+                backgroundColor: 'rgba(217,119,6,0.85)',
+                borderRadius: 5,
+                borderSkipped: false,
+            },
+            {
+                label: 'Pembelian',
+                data: @json($chartPurchase),
+                backgroundColor: 'rgba(37,99,235,0.75)',
+                borderRadius: 5,
+                borderSkipped: false,
+            },
+            {
+                label: 'Profit',
+                data: @json($chartProfit),
+                type: 'line',
+                borderColor: '#16a34a',
+                backgroundColor: 'rgba(22,163,74,0.08)',
+                borderWidth: 2,
+                pointBackgroundColor: '#16a34a',
+                pointRadius: 4,
+                fill: true,
+                tension: 0.4,
+                yAxisID: 'y',
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: { color: tickColor, font: { size: 11 }, padding: 14, boxWidth: 12 }
+            },
+            tooltip: {
+                callbacks: {
+                    label: ctx => ' Rp ' + new Intl.NumberFormat('id-ID').format(ctx.raw)
+                }
+            }
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: { color: '#94a3b8' }
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: { color: gridColor },
+                ticks: {
+                    color: tickColor,
+                    font: { size: 10 },
+                    callback: v => {
+                        if (v >= 1e9) return 'Rp ' + (v/1e9).toFixed(1) + 'M';
+                        if (v >= 1e6) return 'Rp ' + (v/1e6).toFixed(1) + 'jt';
+                        if (v >= 1e3) return 'Rp ' + (v/1e3).toFixed(0) + 'rb';
+                        return 'Rp ' + v;
+                    }
+                }
+            },
+            x: { grid: { display: false }, ticks: { color: tickColor, font: { size: 11 } } }
+        }
+    }
+});
+
+// ── Expense Category Doughnut ─────────────────────────────────────────────────
+@if($expByCategory->isNotEmpty())
+new Chart(document.getElementById('expenseCategoryChart').getContext('2d'), {
+    type: 'doughnut',
+    data: {
+        labels: @json($expByCategory->keys()),
+        datasets: [{
+            data: @json($expByCategory->values()),
+            backgroundColor: [
+                '#d97706','#2563eb','#16a34a','#dc2626',
+                '#7c3aed','#0891b2','#ea580c','#65a30d'
+            ],
+            borderWidth: 0,
+            hoverOffset: 6,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '65%',
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: { color: tickColor, font: { size: 10 }, padding: 10, boxWidth: 10 }
+            },
+            tooltip: {
+                callbacks: {
+                    label: ctx => ' Rp ' + new Intl.NumberFormat('id-ID').format(ctx.raw)
                 }
             }
         }
-    });
+    }
+});
+@endif
+
+lucide.createIcons();
 </script>
 @endpush
-@endsection

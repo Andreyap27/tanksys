@@ -11,20 +11,23 @@ class PurchaseController extends Controller
 {
     public function index()
     {
-        return view('dashboard.purchase.index');
+        return view('purchase.index');
     }
 
     public function data()
     {
         $purchases = Purchase::with('creator')->latest()->get()->map(fn($p) => [
-            'id'          => $p->id,
-            'date'        => $p->date->format('d/m/Y'),
-            'vendor'      => $p->vendor,
-            'description' => $p->description ?? '-',
-            'quantity'    => number_format($p->quantity, 2),
-            'price'       => number_format($p->price, 0, ',', '.'),
-            'amount'      => number_format($p->amount, 0, ',', '.'),
-            'noted'       => $p->noted ?? '-',
+            'id'            => $p->id,
+            'date'          => $p->date->translatedFormat('d M Y'),
+            'date_raw'      => $p->date->format('Y-m-d'),
+            'vendor'        => $p->vendor,
+            'description'   => $p->description ?? '',
+            'quantity'      => number_format($p->quantity, 2, ',', '.'),
+            'quantity_raw'  => $p->quantity,
+            'price'         => number_format($p->price, 0, ',', '.'),
+            'price_raw'     => $p->price,
+            'amount'        => number_format($p->amount, 0, ',', '.'),
+            'noted'         => $p->noted ?? '',
         ]);
         return response()->json(['data' => $purchases]);
     }

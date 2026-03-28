@@ -1,15 +1,19 @@
 <aside class="sidebar" id="sidebar">
-    <!-- Logo -->
+    <!-- Company Logo -->
     <div class="sidebar-logo">
-        <div class="logo-icon">
-            <i data-lucide="fuel" style="width: 1.25rem; height: 1.25rem;"></i>
+        <div class="company-logo-wrap">
+            <img src="/images/logo-company.png" alt="Logo Perusahaan" class="company-logo-img"
+                onerror="this.style.display='none';document.getElementById('logoFallback').style.display='flex';">
+            <div class="logo-fallback" id="logoFallback">
+                <i data-lucide="fuel" style="width:1.5rem;height:1.5rem;"></i>
+            </div>
         </div>
-        <div>
+        <div class="logo-info">
             <div class="logo-text">TankSys Pro</div>
             <div class="logo-sub">Manajemen Bisnis</div>
         </div>
-        <button class="menu-btn" onclick="toggleSidebar()" style="margin-left: auto;">
-            <i data-lucide="x" style="width: 1.25rem; height: 1.25rem;"></i>
+        <button class="sidebar-close-btn" onclick="toggleSidebar()">
+            <i data-lucide="x" style="width:1.1rem;height:1.1rem;"></i>
         </button>
     </div>
 
@@ -19,54 +23,98 @@
         <div class="nav-section">Master</div>
         <a href="{{ route('dashboard') }}" class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
             <i data-lucide="layout-dashboard"></i>
-            Dashboard
+            <span>Dashboard</span>
         </a>
         <a href="{{ route('user.index') }}" class="nav-item {{ request()->routeIs('user.*') ? 'active' : '' }}">
             <i data-lucide="users"></i>
-            User
+            <span>User</span>
         </a>
         <a href="{{ route('customer.index') }}" class="nav-item {{ request()->routeIs('customer.*') ? 'active' : '' }}">
             <i data-lucide="building-2"></i>
-            Customer
+            <span>Customer</span>
+        </a>
+        <a href="{{ route('vendor.index') }}" class="nav-item {{ request()->routeIs('vendor.*') ? 'active' : '' }}">
+            <i data-lucide="factory"></i>
+            <span>Vendor</span>
         </a>
 
         <!-- Transaksi -->
         <div class="nav-section">Transaksi</div>
         <a href="{{ route('purchase.index') }}" class="nav-item {{ request()->routeIs('purchase.*') ? 'active' : '' }}">
             <i data-lucide="arrow-down-to-line"></i>
-            Purchase
+            <span>Purchase</span>
         </a>
         <a href="{{ route('stock.index') }}" class="nav-item {{ request()->routeIs('stock.*') ? 'active' : '' }}">
             <i data-lucide="package"></i>
-            Stock
+            <span>Stock</span>
         </a>
         <a href="{{ route('sales.index') }}" class="nav-item {{ request()->routeIs('sales.*') ? 'active' : '' }}">
             <i data-lucide="arrow-up-from-line"></i>
-            Sales
+            <span>Sales</span>
         </a>
         <a href="{{ route('capital.index') }}" class="nav-item {{ request()->routeIs('capital.*') ? 'active' : '' }}">
             <i data-lucide="wallet"></i>
-            Capital
+            <span>Capital</span>
         </a>
         <a href="{{ route('expenses.index') }}" class="nav-item {{ request()->routeIs('expenses.*') ? 'active' : '' }}">
             <i data-lucide="receipt"></i>
-            Expenses
+            <span>Expenses</span>
         </a>
         <a href="{{ route('lori.index') }}" class="nav-item {{ request()->routeIs('lori.*') ? 'active' : '' }}">
             <i data-lucide="truck"></i>
-            Mobil Tangki
+            <span>Mobil Tangki</span>
         </a>
 
         <!-- Laporan -->
         <div class="nav-section">Laporan</div>
-        <a href="{{ route('report.index') }}" class="nav-item {{ request()->routeIs('report.*') ? 'active' : '' }}">
-            <i data-lucide="file-bar-chart"></i>
-            Report
-        </a>
+        @php $reportActive = request()->routeIs('report.*'); @endphp
+        <div class="nav-group">
+            <div class="nav-group-header {{ $reportActive ? 'open' : '' }}" onclick="toggleNavGroup(this)">
+                <i data-lucide="file-bar-chart"></i>
+                <span>Laporan</span>
+                <i data-lucide="chevron-right" class="nav-chevron"></i>
+            </div>
+            <div class="nav-sub {{ $reportActive ? 'open' : '' }}">
+                <a href="{{ route('report.purchase') }}" class="nav-sub-item {{ request()->routeIs('report.purchase') ? 'active' : '' }}">
+                    Total Purchase
+                </a>
+                <a href="{{ route('report.sale') }}" class="nav-sub-item {{ request()->routeIs('report.sale') ? 'active' : '' }}">
+                    Total Sale
+                </a>
+                <a href="{{ route('report.expense') }}" class="nav-sub-item {{ request()->routeIs('report.expense') ? 'active' : '' }}">
+                    Total Expense
+                </a>
+                <a href="{{ route('report.profit-loss') }}" class="nav-sub-item {{ request()->routeIs('report.profit-loss') ? 'active' : '' }}">
+                    Profit / Loss
+                </a>
+                <a href="{{ route('report.lori') }}" class="nav-sub-item {{ request()->routeIs('report.lori') ? 'active' : '' }}">
+                    Mobil Tangki
+                </a>
+            </div>
+        </div>
     </nav>
 
-    <!-- Footer -->
-    <div class="sidebar-footer">
-        &copy; {{ date('Y') }} TankSys Pro
+    <!-- User Profile Strip -->
+    <div class="sidebar-profile">
+        <div class="sidebar-profile-avatar">
+            {{ strtoupper(substr(auth()->user()->name ?? 'AD', 0, 2)) }}
+        </div>
+        <div class="sidebar-profile-info">
+            <div class="sidebar-profile-name">{{ auth()->user()->name ?? 'Admin' }}</div>
+            <div class="sidebar-profile-role">{{ auth()->user()->role ?? 'SPV' }}</div>
+        </div>
+        <form action="{{ route('logout') }}" method="POST" style="margin:0;">
+            @csrf
+            <button type="submit" class="sidebar-profile-logout" title="Keluar">
+                <i data-lucide="log-out" style="width:0.95rem;height:0.95rem;"></i>
+            </button>
+        </form>
     </div>
 </aside>
+
+<script>
+function toggleNavGroup(header) {
+    header.classList.toggle('open');
+    header.nextElementSibling.classList.toggle('open');
+}
+</script>

@@ -10,20 +10,21 @@ class LoriController extends Controller
 {
     public function index()
     {
-        return view('dashboard.lori.index');
+        return view('lori.index');
     }
 
     public function data()
     {
         $loris = Lori::with('customer')->latest()->get()->map(fn($l) => [
-            'id'       => $l->id,
-            'date'     => $l->date->format('d/m/Y'),
-            'customer' => $l->customer->name,
-            'route'    => $l->from . ' → ' . $l->to,
-            'from'     => $l->from,
-            'to'       => $l->to,
-            'price'    => number_format($l->price, 0, ',', '.'),
-            'customer_id' => $l->customer_id,
+            'id'            => $l->id,
+            'date'          => $l->date->translatedFormat('d M Y'),
+            'date_raw'      => $l->date->format('Y-m-d'),
+            'customer_name' => $l->customer->name,
+            'customer_id'   => $l->customer_id,
+            'from'          => $l->from,
+            'to'            => $l->to,
+            'price'         => number_format($l->price, 0, ',', '.'),
+            'price_raw'     => $l->price,
         ]);
         return response()->json(['data' => $loris]);
     }
