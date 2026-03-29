@@ -18,7 +18,6 @@ class Expense extends Model
         'BBM AE',
         'Umum',
         'Fee',
-        'Lori',
     ];
 
     const EXPENSE_CATEGORIES = [

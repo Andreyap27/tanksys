@@ -62,16 +62,12 @@
             <i data-lucide="receipt"></i>
             <span>Expenses</span>
         </a>
-        <a href="{{ route('lori.index') }}" class="nav-item {{ request()->routeIs('lori.*') ? 'active' : '' }}">
-            <i data-lucide="truck"></i>
-            <span>Mobil Tangki</span>
-        </a>
 
         <!-- Laporan -->
         <div class="nav-section">Laporan</div>
         @php
             $laporanActive = request()->routeIs('report.purchase') || request()->routeIs('report.sale') || request()->routeIs('report.expense') || request()->routeIs('report.capital');
-            $loriActive    = request()->routeIs('report.lori*');
+            $loriActive    = request()->routeIs('lori.index') || request()->routeIs('lori-expense.*') || request()->routeIs('report.lori-omset') || request()->routeIs('report.lori-expense') || request()->routeIs('report.lori');
         @endphp
         <div class="nav-group">
             <div class="nav-group-header {{ $laporanActive ? 'open' : '' }}" onclick="toggleNavGroup(this)">
@@ -97,17 +93,23 @@
         <div class="nav-group">
             <div class="nav-group-header {{ $loriActive ? 'open' : '' }}" onclick="toggleNavGroup(this)">
                 <i data-lucide="truck"></i>
-                <span>Mobil Tangki</span>
+                <span>Mobil</span>
                 <i data-lucide="chevron-right" class="nav-chevron"></i>
             </div>
             <div class="nav-sub {{ $loriActive ? 'open' : '' }}">
-                <a href="{{ route('report.lori-omset') }}" class="nav-sub-item {{ request()->routeIs('report.lori-omset') ? 'active' : '' }}">
-                    Omset
+                <a href="{{ route('lori.index') }}" class="nav-sub-item {{ request()->routeIs('lori.index') || (request()->routeIs('lori.*') && !request()->routeIs('lori-expense.*')) ? 'active' : '' }}">
+                    Sale
                 </a>
-                <a href="{{ route('report.lori-expense') }}" class="nav-sub-item {{ request()->routeIs('report.lori-expense') ? 'active' : '' }}">
+                <a href="{{ route('lori-expense.index') }}" class="nav-sub-item {{ request()->routeIs('lori-expense.*') ? 'active' : '' }}">
                     Expenses
                 </a>
-                <a href="{{ route('report.lori') }}" class="nav-sub-item {{ request()->routeIs('report.lori') && !request()->routeIs('report.lori-*') ? 'active' : '' }}">
+                <a href="{{ route('report.lori-omset') }}" class="nav-sub-item {{ request()->routeIs('report.lori-omset') ? 'active' : '' }}">
+                    Laporan Omset
+                </a>
+                <a href="{{ route('report.lori-expense') }}" class="nav-sub-item {{ request()->routeIs('report.lori-expense') ? 'active' : '' }}">
+                    Laporan Expense
+                </a>
+                <a href="{{ route('report.lori') }}" class="nav-sub-item {{ request()->routeIs('report.lori') ? 'active' : '' }}">
                     Profit / Loss
                 </a>
             </div>

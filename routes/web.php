@@ -12,6 +12,7 @@ use App\Http\Controllers\CapitalController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\LoriController;
+use App\Http\Controllers\LoriExpenseController;
 use App\Http\Controllers\ReportController;
 
 // Guest routes
@@ -78,9 +79,13 @@ Route::middleware('auth.jwt')->group(function () {
     Route::get('/expenses/data', [ExpenseController::class, 'data'])->name('expenses.data');
     Route::resource('expenses', ExpenseController::class)->names('expenses')->except(['create', 'edit', 'show']);
 
-    // Mobil Tangki / Lori
+    // Mobil Tangki / Lori Sale
     Route::get('/lori/data', [LoriController::class, 'data'])->name('lori.data');
     Route::resource('lori', LoriController::class)->names('lori')->except(['create', 'edit', 'show']);
+
+    // Mobil Tangki / Lori Expense
+    Route::get('/lori-expense/data', [LoriExpenseController::class, 'data'])->name('lori-expense.data');
+    Route::resource('lori-expense', LoriExpenseController::class)->names('lori-expense')->except(['create', 'edit', 'show']);
 
     // Report
     Route::get('/report', fn() => redirect()->route('report.purchase'))->name('report.index');

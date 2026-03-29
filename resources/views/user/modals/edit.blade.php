@@ -19,7 +19,7 @@
                     <div class="form-group full">
                         <label class="form-label">Jabatan <span class="text-danger">*</span></label>
                         <select name="role" class="form-select" required>
-                            <option value="">-- Pilih Jabatan --</option>
+                            <option value="" disabled hidden>-- Pilih Jabatan --</option>
                             <option value="Admin">Admin</option>
                             <option value="SPV">SPV</option>
                         </select>

@@ -14,15 +14,10 @@
                     <div class="form-group full">
                         <label class="form-label">Kategori <span class="text-danger">*</span></label>
                         <select name="category" class="form-select" required>
-                            <option value="">-- Pilih Kategori --</option>
-                            <option value="Gaji">Gaji</option>
-                            <option value="Spare Part">Spare Part</option>
-                            <option value="Jasa">Jasa</option>
-                            <option value="BBM ME">BBM ME</option>
-                            <option value="BBM AE">BBM AE</option>
-                            <option value="Umum">Umum</option>
-                            <option value="Fee">Fee</option>
-                            <option value="Lori">Lori</option>
+                            <option value="" disabled hidden>-- Pilih Kategori --</option>
+                            @foreach(\App\Models\Expense::CATEGORIES as $cat)
+                                <option value="{{ $cat }}">{{ $cat }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div class="form-group full">

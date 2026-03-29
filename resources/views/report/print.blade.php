@@ -407,6 +407,36 @@
                 </tfoot>
             </table>
 
+        {{-- ── Lori Omset ──────────────────────────────────────────── --}}
+        @elseif($section === 'lori-omset')
+            @php
+                $gTotal = 0;
+                foreach (range(1,12) as $m) { $gTotal += (float)($loris[$m] ?? 0); }
+            @endphp
+            <table class="rpt-table">
+                <thead>
+                    <tr>
+                        <th>Bulan</th>
+                        <th class="r">Total Omset</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($months as $m => $name)
+                        @php $income = (float)($loris[$m] ?? 0); @endphp
+                        <tr>
+                            <td>{{ $name }}</td>
+                            <td class="r">{{ $income ? 'Rp '.$fmt($income) : '-' }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td>Total</td>
+                        <td class="r">Rp {{ $fmt($gTotal) }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+
         {{-- ── Lori Expense ────────────────────────────────────────── --}}
         @elseif($section === 'lori-expense')
             @php
