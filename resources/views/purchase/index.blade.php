@@ -14,10 +14,12 @@
         <p class="page-subtitle">Kelola data pembelian bahan bakar</p>
     </div>
     <div class="page-actions">
+        @if($canManage)
         <button class="btn btn-primary" onclick="openCreateModal()">
             <i data-lucide="plus" style="width:16px;height:16px;"></i>
             Tambah Pembelian
         </button>
+        @endif
     </div>
 </div>
 <div class="card">
@@ -61,6 +63,8 @@
 <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@23.1.0/build/js/intlTelInput.min.js"></script>
 <script>
 const canApprove = @json($canApprove);
+const canManage  = @json($canManage);
+const canDelete  = @json($canDelete);
 let table;
 let editId = null;
 let quickVendorContext = 'create';
@@ -214,7 +218,7 @@ $(document).ready(function () {
                 render: function (data, type, row) {
                     let actions = '';
 
-                    if (row.status === 'pending') {
+                    if (canManage) {
                         actions += `
                             <button class="icon-btn primary" title="Edit"
                                 onclick="openEditModal(
@@ -242,11 +246,13 @@ $(document).ready(function () {
                             </button>`;
                     }
 
-                    actions += `
+                    if (canDelete) {
+                        actions += `
                         <button class="icon-btn danger" title="Hapus"
                             onclick="deletePurchase('${row.id}', '${escHtml(row.vendor)}')">
                             <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
                         </button>`;
+                    }
 
                     return `<div class="table-actions">${actions}</div>`;
                 }

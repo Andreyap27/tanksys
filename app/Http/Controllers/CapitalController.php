@@ -9,7 +9,10 @@ class CapitalController extends Controller
 {
     public function index()
     {
-        return view('capital.index');
+        $canApprove = auth()->user()->canApprove();
+        $canManage  = auth()->user()->canManage();
+        $canDelete  = auth()->user()->canDelete();
+        return view('capital.index', compact('canApprove', 'canManage', 'canDelete'));
     }
 
     public function data()
@@ -22,6 +25,7 @@ class CapitalController extends Controller
             'nominal'     => number_format($c->nominal, 0, ',', '.'),
             'nominal_raw' => $c->nominal,
             'note'        => $c->note ?? '',
+            'status'      => $c->status,
         ]);
         return response()->json(['data' => $capitals]);
     }
@@ -40,14 +44,19 @@ class CapitalController extends Controller
             'name'       => $request->name,
             'nominal'    => $request->nominal,
             'note'       => $request->note,
+            'status'     => 'pending',
             'created_by' => auth()->id(),
         ]);
 
-        return response()->json(['message' => 'Modal berhasil disimpan.']);
+        return response()->json(['message' => 'Modal berhasil disimpan dan menunggu persetujuan.']);
     }
 
     public function update(Request $request, Capital $capital)
     {
+        if (!auth()->user()->canManage()) {
+            return response()->json(['message' => 'Anda tidak memiliki izin untuk mengedit.'], 403);
+        }
+
         $request->validate([
             'date'    => 'required|date',
             'name'    => 'required|string|max:255',
@@ -55,14 +64,51 @@ class CapitalController extends Controller
             'note'    => 'nullable|string',
         ]);
 
-        $capital->update($request->only(['date', 'name', 'nominal', 'note']));
+        $capital->update(array_merge(
+            $request->only(['date', 'name', 'nominal', 'note']),
+            ['status' => 'pending', 'approved_by' => null, 'approved_at' => null]
+        ));
 
-        return response()->json(['message' => 'Modal berhasil diupdate.']);
+        return response()->json(['message' => 'Modal berhasil diupdate dan menunggu persetujuan ulang.']);
     }
 
     public function destroy(Capital $capital)
     {
+        if (!auth()->user()->canDelete()) {
+            return response()->json(['message' => 'Anda tidak memiliki izin untuk menghapus data.'], 403);
+        }
+
         $capital->delete();
         return response()->json(['message' => 'Modal berhasil dihapus.']);
+    }
+
+    public function approve(Capital $capital)
+    {
+        if (!auth()->user()->canApprove()) {
+            return response()->json(['message' => 'Anda tidak memiliki izin untuk menyetujui.'], 403);
+        }
+
+        $capital->update([
+            'status'      => 'approved',
+            'approved_by' => auth()->id(),
+            'approved_at' => now(),
+        ]);
+
+        return response()->json(['message' => 'Modal berhasil disetujui.']);
+    }
+
+    public function reject(Capital $capital)
+    {
+        if (!auth()->user()->canApprove()) {
+            return response()->json(['message' => 'Anda tidak memiliki izin untuk menolak.'], 403);
+        }
+
+        $capital->update([
+            'status'      => 'rejected',
+            'approved_by' => auth()->id(),
+            'approved_at' => now(),
+        ]);
+
+        return response()->json(['message' => 'Modal berhasil ditolak.']);
     }
 }

@@ -9,10 +9,12 @@
         <p class="page-subtitle">Kelola data pengguna sistem</p>
     </div>
     <div class="page-actions">
+        @if($canManage)
         <button class="btn btn-primary" onclick="openCreateModal()">
             <i data-lucide="plus" style="width:16px;height:16px;"></i>
             Tambah User
         </button>
+        @endif
     </div>
 </div>
 <div class="card">
@@ -44,6 +46,8 @@
 let table;
 let editId = null;
 let resetId = null;
+const canManage          = @json($canManage);
+const canDelete          = @json($canDelete);
 const createForm         = document.getElementById('createForm');
 const editForm           = document.getElementById('editForm');
 const resetPasswordForm  = document.getElementById('resetPasswordForm');
@@ -72,6 +76,7 @@ $(document).ready(function () {
                 render: function (data, type, row) {
                     return `
                         <div class="table-actions">
+                            ${canManage ? `
                             <button class="icon-btn primary" title="Edit"
                                 onclick="openEditModal('${row.id}', '${escHtml(row.employee_id)}', '${escHtml(row.name)}', '${escHtml(row.role)}', '${escHtml(row.username)}')">
                                 <i data-lucide="pencil" style="width:14px;height:14px;"></i>
@@ -79,11 +84,12 @@ $(document).ready(function () {
                             <button class="icon-btn warning" title="Reset Password"
                                 onclick="openResetPasswordModal('${row.id}', '${escHtml(row.name)}')">
                                 <i data-lucide="key-round" style="width:14px;height:14px;"></i>
-                            </button>
+                            </button>` : ''}
+                            ${canDelete ? `
                             <button class="icon-btn danger" title="Hapus"
                                 onclick="deleteUser('${row.id}', '${escHtml(row.name)}')">
                                 <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
-                            </button>
+                            </button>` : ''}
                         </div>
                     `;
                 }

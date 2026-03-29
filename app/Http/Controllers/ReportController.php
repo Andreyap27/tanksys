@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Capital;
 use App\Models\Purchase;
 use App\Models\Sale;
 use App\Models\Expense;
@@ -16,6 +17,7 @@ class ReportController extends Controller
             Sale::selectRaw('YEAR(date) as y')->distinct(),
             Expense::selectRaw('YEAR(date) as y')->distinct(),
             Lori::selectRaw('YEAR(date) as y')->distinct(),
+            Capital::selectRaw('YEAR(date) as y')->distinct(),
         ])->flatMap(fn($q) => $q->pluck('y'))
           ->push(now()->year)
           ->unique()->sort()->values();
@@ -99,6 +101,54 @@ class ReportController extends Controller
         return view('report.profit-loss', compact('year', 'years', 'purchases', 'sales', 'expensesTotal'));
     }
 
+    public function capital()
+    {
+        $year  = $this->getYear();
+        $years = $this->getYears();
+
+        $capitals = Capital::where('status', 'approved')
+            ->selectRaw('MONTH(date) as month, COUNT(*) as total_count, SUM(nominal) as total_nominal')
+            ->whereYear('date', $year)
+            ->groupBy('month')
+            ->get()->keyBy('month');
+
+        return view('report.capital', compact('year', 'years', 'capitals'));
+    }
+
+    public function loriOmset()
+    {
+        $year  = $this->getYear();
+        $years = $this->getYears();
+
+        $loris = Lori::selectRaw('MONTH(date) as month, SUM(price) as total_income')
+            ->whereYear('date', $year)
+            ->groupBy('month')
+            ->pluck('total_income', 'month');
+
+        return view('report.lori-omset', compact('year', 'years', 'loris'));
+    }
+
+    public function loriExpense()
+    {
+        $year  = $this->getYear();
+        $years = $this->getYears();
+        $cats  = \App\Models\Expense::LORI_EXPENSE_CATEGORIES;
+
+        $loriExpensesByCategory = Expense::selectRaw('MONTH(date) as month, category, SUM(nominal) as total')
+            ->whereYear('date', $year)
+            ->whereIn('category', $cats)
+            ->groupBy('month', 'category')
+            ->get()->groupBy('month');
+
+        $loriExpensesTotal = Expense::selectRaw('MONTH(date) as month, SUM(nominal) as total')
+            ->whereYear('date', $year)
+            ->whereIn('category', $cats)
+            ->groupBy('month')
+            ->pluck('total', 'month');
+
+        return view('report.lori-expense', compact('year', 'years', 'loriExpensesByCategory', 'loriExpensesTotal', 'cats'));
+    }
+
     public function lori()
     {
         $year  = $this->getYear();
@@ -145,10 +195,16 @@ class ReportController extends Controller
                 $data['title'] = 'Total Sale';
                 break;
             case 'expense':
+                $allExpCats    = \App\Models\Expense::EXPENSE_CATEGORIES;
+                $selectedCats  = request()->has('categories')
+                    ? array_values(array_intersect(request('categories', []), $allExpCats))
+                    : $allExpCats;
+                if (empty($selectedCats)) $selectedCats = $allExpCats;
+                $data['categories'] = $selectedCats;
                 $data['expensesByCategory'] = Expense::selectRaw('MONTH(date) as month, category, SUM(nominal) as total')
-                    ->whereYear('date', $year)->where('category', '!=', 'Lori')->groupBy('month', 'category')->get()->groupBy('month');
+                    ->whereYear('date', $year)->whereIn('category', $selectedCats)->groupBy('month', 'category')->get()->groupBy('month');
                 $data['expensesTotal'] = Expense::selectRaw('MONTH(date) as month, SUM(nominal) as total')
-                    ->whereYear('date', $year)->where('category', '!=', 'Lori')->groupBy('month')->pluck('total', 'month');
+                    ->whereYear('date', $year)->whereIn('category', $selectedCats)->groupBy('month')->pluck('total', 'month');
                 $data['title'] = 'Total Expense';
                 break;
             case 'profit-loss':
@@ -162,12 +218,37 @@ class ReportController extends Controller
                     ->whereYear('date', $year)->groupBy('month')->pluck('total', 'month');
                 $data['title'] = 'Profit / Loss';
                 break;
+            case 'capital':
+                $data['capitals'] = Capital::where('status', 'approved')
+                    ->selectRaw('MONTH(date) as month, COUNT(*) as total_count, SUM(nominal) as total_nominal')
+                    ->whereYear('date', $year)->groupBy('month')->get()->keyBy('month');
+                $data['title'] = 'Total Capital';
+                break;
+            case 'lori-omset':
+                $data['loris'] = Lori::selectRaw('MONTH(date) as month, SUM(price) as total_income')
+                    ->whereYear('date', $year)->groupBy('month')->pluck('total_income', 'month');
+                $data['title'] = 'Omset Mobil Tangki';
+                break;
+            case 'lori-expense':
+                $allLoriCats  = \App\Models\Expense::LORI_EXPENSE_CATEGORIES;
+                $selectedCats = request()->has('categories')
+                    ? array_values(array_intersect(request('categories', []), $allLoriCats))
+                    : $allLoriCats;
+                if (empty($selectedCats)) $selectedCats = $allLoriCats;
+                $cats = $selectedCats;
+                $data['cats'] = $cats;
+                $data['loriExpensesByCategory'] = Expense::selectRaw('MONTH(date) as month, category, SUM(nominal) as total')
+                    ->whereYear('date', $year)->whereIn('category', $cats)->groupBy('month', 'category')->get()->groupBy('month');
+                $data['loriExpensesTotal'] = Expense::selectRaw('MONTH(date) as month, SUM(nominal) as total')
+                    ->whereYear('date', $year)->whereIn('category', $cats)->groupBy('month')->pluck('total', 'month');
+                $data['title'] = 'Expenses Mobil Tangki';
+                break;
             case 'lori':
                 $data['loris'] = Lori::selectRaw('MONTH(date) as month, SUM(price) as total_income')
                     ->whereYear('date', $year)->groupBy('month')->pluck('total_income', 'month');
                 $data['loriExpenses'] = Expense::selectRaw('MONTH(date) as month, SUM(nominal) as total')
                     ->whereYear('date', $year)->where('category', 'Lori')->groupBy('month')->pluck('total', 'month');
-                $data['title'] = 'Total Mobil Tangki (Lori)';
+                $data['title'] = 'Profit / Loss Mobil Tangki';
                 break;
             default:
                 abort(404);

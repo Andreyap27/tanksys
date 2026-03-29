@@ -14,6 +14,9 @@ class Capital extends Model
         'name',
         'nominal',
         'note',
+        'status',
+        'approved_by',
+        'approved_at',
         'created_by',
     ];
 
@@ -28,5 +31,10 @@ class Capital extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 }

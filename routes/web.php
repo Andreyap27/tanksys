@@ -70,6 +70,8 @@ Route::middleware('auth.jwt')->group(function () {
 
     // Capital
     Route::get('/capital/data', [CapitalController::class, 'data'])->name('capital.data');
+    Route::post('/capital/{capital}/approve', [CapitalController::class, 'approve'])->name('capital.approve');
+    Route::post('/capital/{capital}/reject', [CapitalController::class, 'reject'])->name('capital.reject');
     Route::resource('capital', CapitalController::class)->names('capital')->except(['create', 'edit', 'show']);
 
     // Expenses
@@ -82,10 +84,13 @@ Route::middleware('auth.jwt')->group(function () {
 
     // Report
     Route::get('/report', fn() => redirect()->route('report.purchase'))->name('report.index');
-    Route::get('/report/print',       [ReportController::class, 'printReport'])->name('report.print');
-    Route::get('/report/purchase',    [ReportController::class, 'purchase'])->name('report.purchase');
-    Route::get('/report/sale',        [ReportController::class, 'sale'])->name('report.sale');
-    Route::get('/report/expense',     [ReportController::class, 'expense'])->name('report.expense');
-    Route::get('/report/profit-loss', [ReportController::class, 'profitLoss'])->name('report.profit-loss');
-    Route::get('/report/lori',        [ReportController::class, 'lori'])->name('report.lori');
+    Route::get('/report/print',         [ReportController::class, 'printReport'])->name('report.print');
+    Route::get('/report/purchase',      [ReportController::class, 'purchase'])->name('report.purchase');
+    Route::get('/report/sale',          [ReportController::class, 'sale'])->name('report.sale');
+    Route::get('/report/expense',       [ReportController::class, 'expense'])->name('report.expense');
+    Route::get('/report/capital',       [ReportController::class, 'capital'])->name('report.capital');
+    Route::get('/report/lori-omset',    [ReportController::class, 'loriOmset'])->name('report.lori-omset');
+    Route::get('/report/lori-expense',  [ReportController::class, 'loriExpense'])->name('report.lori-expense');
+    Route::get('/report/lori',          [ReportController::class, 'lori'])->name('report.lori');
+    Route::get('/report/profit-loss',   [ReportController::class, 'profitLoss'])->name('report.profit-loss');
 });

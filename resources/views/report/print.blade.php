@@ -308,7 +308,6 @@
         {{-- ── Expense ─────────────────────────────────────────────── --}}
         @elseif($section === 'expense')
             @php
-                $categories = \App\Models\Expense::CATEGORIES;
                 $expMatrix  = [];
                 foreach ($expensesByCategory as $m => $items) {
                     foreach ($items as $item) {
@@ -404,6 +403,54 @@
                         <td class="r {{ $gPL >= 0 ? 'text-profit' : 'text-loss' }}">
                             {{ $gPL < 0 ? '-' : '' }}Rp {{ $fmt(abs($gPL)) }}
                         </td>
+                    </tr>
+                </tfoot>
+            </table>
+
+        {{-- ── Lori Expense ────────────────────────────────────────── --}}
+        @elseif($section === 'lori-expense')
+            @php
+                $expMatrix  = [];
+                foreach ($loriExpensesByCategory as $m => $items) {
+                    foreach ($items as $item) {
+                        $expMatrix[(int)$m][$item->category] = (float)$item->total;
+                    }
+                }
+                $gCatTotal = array_fill_keys($cats, 0);
+                $gTotal    = 0;
+                foreach (range(1,12) as $m) {
+                    $gTotal += (float)($loriExpensesTotal[$m] ?? 0);
+                    foreach ($cats as $cat) { $gCatTotal[$cat] += $expMatrix[$m][$cat] ?? 0; }
+                }
+            @endphp
+            <table class="rpt-table">
+                <thead>
+                    <tr>
+                        <th>Bulan</th>
+                        @foreach($cats as $cat)<th class="r">{{ $cat }}</th>@endforeach
+                        <th class="r">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($months as $m => $name)
+                        @php $rowTotal = (float)($loriExpensesTotal[$m] ?? 0); @endphp
+                        <tr>
+                            <td>{{ $name }}</td>
+                            @foreach($cats as $cat)
+                                @php $val = $expMatrix[$m][$cat] ?? 0; @endphp
+                                <td class="r">{{ $val ? 'Rp '.$fmt($val) : '-' }}</td>
+                            @endforeach
+                            <td class="r">{{ $rowTotal ? 'Rp '.$fmt($rowTotal) : '-' }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td>Total</td>
+                        @foreach($cats as $cat)
+                            <td class="r">{{ $gCatTotal[$cat] ? 'Rp '.$fmt($gCatTotal[$cat]) : '-' }}</td>
+                        @endforeach
+                        <td class="r">Rp {{ $fmt($gTotal) }}</td>
                     </tr>
                 </tfoot>
             </table>

@@ -13,6 +13,7 @@ class Expense extends Model
         'Gaji',
         'Spare Part',
         'Jasa',
+        'Maintenance',
         'BBM ME',
         'BBM AE',
         'Umum',
@@ -24,10 +25,18 @@ class Expense extends Model
         'Gaji',
         'Spare Part',
         'Jasa',
+        'Maintenance',
         'BBM ME',
         'BBM AE',
         'Umum',
         'Fee',
+    ];
+
+    // Kategori yang dihitung sebagai biaya operasional Mobil Tangki
+    const LORI_EXPENSE_CATEGORIES = [
+        'Gaji',
+        'Maintenance',
+        'Umum',
     ];
 
     protected $fillable = [

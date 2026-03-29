@@ -9,10 +9,12 @@
         <p class="page-subtitle">Kelola data pengeluaran operasional</p>
     </div>
     <div class="page-actions">
+        @if($canManage)
         <button class="btn btn-primary" onclick="openCreateModal()">
             <i data-lucide="plus" style="width:16px;height:16px;"></i>
             Tambah Pengeluaran
         </button>
+        @endif
     </div>
 </div>
 <div class="card">
@@ -43,6 +45,8 @@
 <script>
 let table;
 let editId = null;
+const canManage   = @json($canManage);
+const canDelete   = @json($canDelete);
 const createForm  = document.getElementById('createForm');
 const editForm    = document.getElementById('editForm');
 const createModal = document.getElementById('createModal');
@@ -108,14 +112,14 @@ $(document).ready(function () {
                 render: function (data, type, row) {
                     return `
                         <div class="table-actions">
-                            <button class="icon-btn primary" title="Edit"
+                            ${canManage ? `<button class="icon-btn primary" title="Edit"
                                 onclick="openEditModal('${row.id}', '${row.date_raw}', '${escHtml(row.description)}', '${escHtml(row.category)}', '${row.nominal_raw}', '${escHtml(row.noted)}')">
                                 <i data-lucide="pencil" style="width:14px;height:14px;"></i>
-                            </button>
-                            <button class="icon-btn danger" title="Hapus"
+                            </button>` : ''}
+                            ${canDelete ? `<button class="icon-btn danger" title="Hapus"
                                 onclick="deleteExpense('${row.id}', '${escHtml(row.description)}')">
                                 <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
-                            </button>
+                            </button>` : ''}
                         </div>
                     `;
                 }

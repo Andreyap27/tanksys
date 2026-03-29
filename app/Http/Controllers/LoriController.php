@@ -10,7 +10,10 @@ class LoriController extends Controller
 {
     public function index()
     {
-        return view('lori.index');
+        return view('lori.index', [
+            'canManage' => auth()->user()->canManage(),
+            'canDelete' => auth()->user()->canDelete(),
+        ]);
     }
 
     public function data()
@@ -68,6 +71,10 @@ class LoriController extends Controller
 
     public function destroy(Lori $lori)
     {
+        if (!auth()->user()->canDelete()) {
+            return response()->json(['message' => 'Anda tidak memiliki izin untuk menghapus data.'], 403);
+        }
+
         $lori->delete();
         return response()->json(['message' => 'Data mobil tangki berhasil dihapus.']);
     }

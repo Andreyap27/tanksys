@@ -9,7 +9,10 @@ class CustomerController extends Controller
 {
     public function index()
     {
-        return view('customer.index');
+        return view('customer.index', [
+            'canManage' => auth()->user()->canManage(),
+            'canDelete' => auth()->user()->canDelete(),
+        ]);
     }
 
     public function nextId()
@@ -76,6 +79,10 @@ class CustomerController extends Controller
 
     public function destroy(Customer $customer)
     {
+        if (!auth()->user()->canDelete()) {
+            return response()->json(['message' => 'Anda tidak memiliki izin untuk menghapus data.'], 403);
+        }
+
         $customer->delete();
         return response()->json(['message' => 'Customer berhasil dihapus.']);
     }

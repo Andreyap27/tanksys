@@ -14,10 +14,12 @@
         <p class="page-subtitle">Kelola data penjualan bahan bakar</p>
     </div>
     <div class="page-actions">
+        @if($canManage)
         <button class="btn btn-primary" onclick="openCreateModal()">
             <i data-lucide="plus" style="width:16px;height:16px;"></i>
             Tambah Penjualan
         </button>
+        @endif
     </div>
 </div>
 <div class="card">
@@ -85,6 +87,8 @@
 <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@23.1.0/build/js/intlTelInput.min.js"></script>
 <script>
 const canApprove = @json($canApprove);
+const canManage  = @json($canManage);
+const canDelete  = @json($canDelete);
 let table;
 let editId = null;
 let quickCustomerContext = 'create';
@@ -229,7 +233,7 @@ $(document).ready(function () {
                 render: function (data, type, row) {
                     let actions = '';
 
-                    if (row.status === 'pending') {
+                    if (canManage) {
                         actions += `
                             <button class="icon-btn primary" title="Edit"
                                 onclick="openEditModal('${row.id}', '${row.date_raw}', '${escHtml(row.invoice_number)}', '${row.customer_id}', '${escHtml(row.description)}', '${row.quantity_raw}', '${row.price_raw}', '${escHtml(row.noted)}')">
@@ -249,11 +253,15 @@ $(document).ready(function () {
                             </button>`;
                     }
 
-                    actions += `
+                    if (canDelete) {
+                        actions += `
                         <button class="icon-btn danger" title="Hapus"
                             onclick="deleteSale('${row.id}', '${escHtml(row.invoice_number)}')">
                             <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
-                        </button>
+                        </button>`;
+                    }
+
+                    actions += `
                         <button class="icon-btn" title="Invoice"
                             onclick="openInvoiceModal('/sales/${row.id}/invoice')">
                             <i data-lucide="file-text" style="width:14px;height:14px;"></i>

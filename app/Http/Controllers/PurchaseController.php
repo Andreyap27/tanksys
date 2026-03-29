@@ -13,6 +13,8 @@ class PurchaseController extends Controller
     {
         return view('purchase.index', [
             'canApprove' => auth()->user()->canApprove(),
+            'canManage'  => auth()->user()->canManage(),
+            'canDelete'  => auth()->user()->canDelete(),
         ]);
     }
 
@@ -65,8 +67,8 @@ class PurchaseController extends Controller
 
     public function update(Request $request, Purchase $purchase)
     {
-        if ($purchase->status !== 'pending' && !auth()->user()->canApprove()) {
-            return response()->json(['message' => 'Data yang sudah disetujui tidak dapat diedit.'], 403);
+        if (!auth()->user()->canManage()) {
+            return response()->json(['message' => 'Anda tidak memiliki izin untuk mengedit.'], 403);
         }
 
         $request->validate([
@@ -79,7 +81,9 @@ class PurchaseController extends Controller
         ]);
 
         DB::transaction(function () use ($request, $purchase) {
-            $diff = $request->quantity - $purchase->quantity;
+            if ($purchase->status === 'approved' && $purchase->stock) {
+                $purchase->stock->delete();
+            }
 
             $purchase->update([
                 'date'        => $request->date,
@@ -89,28 +93,19 @@ class PurchaseController extends Controller
                 'price'       => $request->price,
                 'amount'      => $request->quantity * $request->price,
                 'noted'       => $request->noted,
+                'status'      => 'pending',
+                'approved_by' => null,
+                'approved_at' => null,
             ]);
-
-            if ($purchase->status === 'approved') {
-                $stock = $purchase->stock;
-                if ($stock) {
-                    $stock->update([
-                        'date'    => $request->date,
-                        'party'   => $request->vendor,
-                        'qty_in'  => $request->quantity,
-                        'balance' => $stock->balance + $diff,
-                    ]);
-                }
-            }
         });
 
-        return response()->json(['message' => 'Purchase berhasil diupdate.']);
+        return response()->json(['message' => 'Purchase berhasil diupdate dan menunggu persetujuan ulang.']);
     }
 
     public function destroy(Purchase $purchase)
     {
-        if ($purchase->status === 'approved' && !auth()->user()->canApprove()) {
-            return response()->json(['message' => 'Hanya SPV yang dapat menghapus data yang sudah disetujui.'], 403);
+        if (!auth()->user()->canDelete()) {
+            return response()->json(['message' => 'Anda tidak memiliki izin untuk menghapus data.'], 403);
         }
 
         DB::transaction(function () use ($purchase) {
@@ -140,7 +135,6 @@ class PurchaseController extends Controller
                 'approved_at' => now(),
             ]);
 
-            $balance = Stock::currentBalance() + $purchase->quantity;
             Stock::create([
                 'date'           => $purchase->date,
                 'type'           => 'purchase',
@@ -149,7 +143,6 @@ class PurchaseController extends Controller
                 'party'          => $purchase->vendor,
                 'qty_in'         => $purchase->quantity,
                 'qty_out'        => 0,
-                'balance'        => $balance,
             ]);
         });
 

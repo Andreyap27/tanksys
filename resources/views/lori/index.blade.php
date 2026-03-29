@@ -14,10 +14,12 @@
         <p class="page-subtitle">Kelola data pengiriman mobil tangki</p>
     </div>
     <div class="page-actions">
+        @if($canManage)
         <button class="btn btn-primary" onclick="openCreateModal()">
             <i data-lucide="plus" style="width:16px;height:16px;"></i>
             Tambah Lori
         </button>
+        @endif
     </div>
 </div>
 <div class="card">
@@ -56,6 +58,8 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@23.1.0/build/js/intlTelInput.min.js"></script>
 <script>
+const canManage          = @json($canManage);
+const canDelete          = @json($canDelete);
 let table;
 let editId = null;
 let quickCustomerContext = 'create';
@@ -155,14 +159,14 @@ $(document).ready(function () {
                 render: function (data, type, row) {
                     return `
                         <div class="table-actions">
-                            <button class="icon-btn primary" title="Edit"
+                            ${canManage ? `<button class="icon-btn primary" title="Edit"
                                 onclick="openEditModal('${row.id}', '${row.date_raw}', '${row.customer_id}', '${escHtml(row.from)}', '${escHtml(row.to)}', '${row.price_raw}')">
                                 <i data-lucide="pencil" style="width:14px;height:14px;"></i>
-                            </button>
-                            <button class="icon-btn danger" title="Hapus"
+                            </button>` : ''}
+                            ${canDelete ? `<button class="icon-btn danger" title="Hapus"
                                 onclick="deleteLori('${row.id}', '${escHtml(row.customer_name)}')">
                                 <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
-                            </button>
+                            </button>` : ''}
                         </div>
                     `;
                 }

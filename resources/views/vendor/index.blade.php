@@ -13,10 +13,12 @@
         <p class="page-subtitle">Kelola data vendor / supplier BBM</p>
     </div>
     <div class="page-actions">
+        @if($canManage)
         <button class="btn btn-primary" onclick="openCreateModal()">
             <i data-lucide="plus" style="width:16px;height:16px;"></i>
             Tambah Vendor
         </button>
+        @endif
     </div>
 </div>
 <div class="card">
@@ -45,6 +47,7 @@
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@23.1.0/build/js/intlTelInput.min.js"></script>
+<script>const canManage = @json($canManage); const canDelete = @json($canDelete);</script>
 <script>
 let table;
 let editId = null;
@@ -91,14 +94,14 @@ $(document).ready(function () {
                 render: function (data, type, row) {
                     return `
                         <div class="table-actions">
-                            <button class="icon-btn primary" title="Edit"
+                            ${canManage ? `<button class="icon-btn primary" title="Edit"
                                 onclick="openEditModal('${row.id}', '${escHtml(row.vendor_code)}', '${escHtml(row.name)}', '${escHtml(row.pic_name)}', '${escHtml(row.contact)}', '${escHtml(row.address)}')">
                                 <i data-lucide="pencil" style="width:14px;height:14px;"></i>
-                            </button>
-                            <button class="icon-btn danger" title="Hapus"
+                            </button>` : ''}
+                            ${canDelete ? `<button class="icon-btn danger" title="Hapus"
                                 onclick="deleteVendor('${row.id}', '${escHtml(row.name)}')">
                                 <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
-                            </button>
+                            </button>` : ''}
                         </div>
                     `;
                 }

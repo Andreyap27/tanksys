@@ -25,10 +25,12 @@
             <i data-lucide="layout-dashboard"></i>
             <span>Dashboard</span>
         </a>
+        @if(auth()->user()->role === 'Super Admin')
         <a href="{{ route('user.index') }}" class="nav-item {{ request()->routeIs('user.*') ? 'active' : '' }}">
             <i data-lucide="users"></i>
             <span>User</span>
         </a>
+        @endif
         <a href="{{ route('customer.index') }}" class="nav-item {{ request()->routeIs('customer.*') ? 'active' : '' }}">
             <i data-lucide="building-2"></i>
             <span>Customer</span>
@@ -67,14 +69,17 @@
 
         <!-- Laporan -->
         <div class="nav-section">Laporan</div>
-        @php $reportActive = request()->routeIs('report.*'); @endphp
+        @php
+            $laporanActive = request()->routeIs('report.purchase') || request()->routeIs('report.sale') || request()->routeIs('report.expense') || request()->routeIs('report.capital');
+            $loriActive    = request()->routeIs('report.lori*');
+        @endphp
         <div class="nav-group">
-            <div class="nav-group-header {{ $reportActive ? 'open' : '' }}" onclick="toggleNavGroup(this)">
+            <div class="nav-group-header {{ $laporanActive ? 'open' : '' }}" onclick="toggleNavGroup(this)">
                 <i data-lucide="file-bar-chart"></i>
                 <span>Laporan</span>
                 <i data-lucide="chevron-right" class="nav-chevron"></i>
             </div>
-            <div class="nav-sub {{ $reportActive ? 'open' : '' }}">
+            <div class="nav-sub {{ $laporanActive ? 'open' : '' }}">
                 <a href="{{ route('report.purchase') }}" class="nav-sub-item {{ request()->routeIs('report.purchase') ? 'active' : '' }}">
                     Total Purchase
                 </a>
@@ -84,11 +89,26 @@
                 <a href="{{ route('report.expense') }}" class="nav-sub-item {{ request()->routeIs('report.expense') ? 'active' : '' }}">
                     Total Expense
                 </a>
-                <a href="{{ route('report.profit-loss') }}" class="nav-sub-item {{ request()->routeIs('report.profit-loss') ? 'active' : '' }}">
-                    Profit / Loss
+                <a href="{{ route('report.capital') }}" class="nav-sub-item {{ request()->routeIs('report.capital') ? 'active' : '' }}">
+                    Total Capital
                 </a>
-                <a href="{{ route('report.lori') }}" class="nav-sub-item {{ request()->routeIs('report.lori') ? 'active' : '' }}">
-                    Mobil Tangki
+            </div>
+        </div>
+        <div class="nav-group">
+            <div class="nav-group-header {{ $loriActive ? 'open' : '' }}" onclick="toggleNavGroup(this)">
+                <i data-lucide="truck"></i>
+                <span>Mobil Tangki</span>
+                <i data-lucide="chevron-right" class="nav-chevron"></i>
+            </div>
+            <div class="nav-sub {{ $loriActive ? 'open' : '' }}">
+                <a href="{{ route('report.lori-omset') }}" class="nav-sub-item {{ request()->routeIs('report.lori-omset') ? 'active' : '' }}">
+                    Omset
+                </a>
+                <a href="{{ route('report.lori-expense') }}" class="nav-sub-item {{ request()->routeIs('report.lori-expense') ? 'active' : '' }}">
+                    Expenses
+                </a>
+                <a href="{{ route('report.lori') }}" class="nav-sub-item {{ request()->routeIs('report.lori') && !request()->routeIs('report.lori-*') ? 'active' : '' }}">
+                    Profit / Loss
                 </a>
             </div>
         </div>

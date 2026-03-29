@@ -9,7 +9,10 @@ class UserController extends Controller
 {
     public function index()
     {
-        return view('user.index');
+        return view('user.index', [
+            'canManage' => auth()->user()->canManage(),
+            'canDelete' => auth()->user()->canDelete(),
+        ]);
     }
 
     public function nextId()
@@ -98,6 +101,10 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
+        if (!auth()->user()->canDelete()) {
+            return response()->json(['message' => 'Anda tidak memiliki izin untuk menghapus data.'], 403);
+        }
+
         if ($user->id === auth()->id()) {
             return response()->json(['message' => 'Tidak dapat menghapus akun sendiri.'], 422);
         }

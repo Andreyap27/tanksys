@@ -9,7 +9,10 @@ class VendorController extends Controller
 {
     public function index()
     {
-        return view('vendor.index');
+        return view('vendor.index', [
+            'canManage' => auth()->user()->canManage(),
+            'canDelete' => auth()->user()->canDelete(),
+        ]);
     }
 
     public function nextId()
@@ -82,6 +85,10 @@ class VendorController extends Controller
 
     public function destroy(Vendor $vendor)
     {
+        if (!auth()->user()->canDelete()) {
+            return response()->json(['message' => 'Anda tidak memiliki izin untuk menghapus data.'], 403);
+        }
+
         $vendor->delete();
         return response()->json(['message' => 'Vendor berhasil dihapus.']);
     }

@@ -1,9 +1,9 @@
 @extends('layouts.app')
-@section('title', 'Laporan Mobil Tangki')
+@section('title', 'Profit / Loss Mobil Tangki')
 @section('content')
 
 @php
-    $pageTitle = 'Total Mobil Tangki (Lori)';
+    $pageTitle = 'Profit / Loss Mobil Tangki';
     $months = [
         1=>'Januari', 2=>'Februari', 3=>'Maret', 4=>'April',
         5=>'Mei', 6=>'Juni', 7=>'Juli', 8=>'Agustus',
@@ -22,7 +22,7 @@
 @include('report._header')
 
 <div class="card">
-    <div class="card-header"><div class="card-title">Total Mobil Tangki (Lori)</div></div>
+    <div class="card-header"><div class="card-title">Profit / Loss Mobil Tangki</div></div>
     <div class="card-content" style="padding:0;">
         <div class="table-wrap">
             <table>

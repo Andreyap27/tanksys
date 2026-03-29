@@ -9,7 +9,10 @@ class ExpenseController extends Controller
 {
     public function index()
     {
-        return view('expenses.index');
+        return view('expenses.index', [
+            'canManage' => auth()->user()->canManage(),
+            'canDelete' => auth()->user()->canDelete(),
+        ]);
     }
 
     public function data()
@@ -66,6 +69,10 @@ class ExpenseController extends Controller
 
     public function destroy(Expense $expense)
     {
+        if (!auth()->user()->canDelete()) {
+            return response()->json(['message' => 'Anda tidak memiliki izin untuk menghapus data.'], 403);
+        }
+
         $expense->delete();
         return response()->json(['message' => 'Pengeluaran berhasil dihapus.']);
     }

@@ -37,6 +37,6 @@ class Stock extends Model
 
     public static function currentBalance(): float
     {
-        return (float) static::latest('id')->value('balance') ?? 0;
+        return (float) (static::sum('qty_in') - static::sum('qty_out'));
     }
 }
