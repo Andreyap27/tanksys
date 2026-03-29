@@ -14,6 +14,7 @@ use App\Http\Controllers\VendorController;
 use App\Http\Controllers\LoriController;
 use App\Http\Controllers\LoriExpenseController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\NotificationController;
 
 // Guest routes
 Route::middleware('guest.jwt')->group(function () {
@@ -86,6 +87,11 @@ Route::middleware('auth.jwt')->group(function () {
     // Mobil Tangki / Lori Expense
     Route::get('/lori-expense/data', [LoriExpenseController::class, 'data'])->name('lori-expense.data');
     Route::resource('lori-expense', LoriExpenseController::class)->names('lori-expense')->except(['create', 'edit', 'show']);
+
+    // Notifications
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
 
     // Report
     Route::get('/report', fn() => redirect()->route('report.purchase'))->name('report.index');

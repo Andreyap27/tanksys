@@ -45,6 +45,7 @@
         <a href="{{ route('purchase.index') }}" class="nav-item {{ request()->routeIs('purchase.*') ? 'active' : '' }}">
             <i data-lucide="arrow-down-to-line"></i>
             <span>Purchase</span>
+            <span class="sidebar-notif-badge" id="sidebarBadge-purchase" style="display:none;"></span>
         </a>
         <a href="{{ route('stock.index') }}" class="nav-item {{ request()->routeIs('stock.*') ? 'active' : '' }}">
             <i data-lucide="package"></i>
@@ -53,14 +54,17 @@
         <a href="{{ route('sales.index') }}" class="nav-item {{ request()->routeIs('sales.*') ? 'active' : '' }}">
             <i data-lucide="arrow-up-from-line"></i>
             <span>Sales</span>
+            <span class="sidebar-notif-badge" id="sidebarBadge-sales" style="display:none;"></span>
         </a>
         <a href="{{ route('capital.index') }}" class="nav-item {{ request()->routeIs('capital.*') ? 'active' : '' }}">
             <i data-lucide="wallet"></i>
             <span>Capital</span>
+            <span class="sidebar-notif-badge" id="sidebarBadge-capital" style="display:none;"></span>
         </a>
         <a href="{{ route('expenses.index') }}" class="nav-item {{ request()->routeIs('expenses.*') ? 'active' : '' }}">
             <i data-lucide="receipt"></i>
             <span>Expenses</span>
+            <span class="sidebar-notif-badge" id="sidebarBadge-expenses" style="display:none;"></span>
         </a>
 
         <!-- Laporan -->
@@ -99,9 +103,11 @@
             <div class="nav-sub {{ $loriActive ? 'open' : '' }}">
                 <a href="{{ route('lori.index') }}" class="nav-sub-item {{ request()->routeIs('lori.index') || (request()->routeIs('lori.*') && !request()->routeIs('lori-expense.*')) ? 'active' : '' }}">
                     Sale
+                    <span class="sidebar-notif-badge" id="sidebarBadge-lori" style="display:none;"></span>
                 </a>
                 <a href="{{ route('lori-expense.index') }}" class="nav-sub-item {{ request()->routeIs('lori-expense.*') ? 'active' : '' }}">
                     Expenses
+                    <span class="sidebar-notif-badge" id="sidebarBadge-lori-expense" style="display:none;"></span>
                 </a>
                 <a href="{{ route('report.lori-omset') }}" class="nav-sub-item {{ request()->routeIs('report.lori-omset') ? 'active' : '' }}">
                     Laporan Omset

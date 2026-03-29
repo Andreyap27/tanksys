@@ -168,17 +168,28 @@
 
         // ── Save Button Loading Animation ─────────────────────────────────────
         const _saveBtnSpinnerHtml = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" style="width:15px;height:15px;flex-shrink:0;animation:spin .7s linear infinite;"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" style="opacity:.3"/><path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>`;
-        let _activeSaveBtn = null;
+        let _activeSaveBtn   = null;
+        let _pendingClickBtn = null;
 
+        // Capture click — store the candidate button but don't disable it yet
         document.addEventListener('click', function (e) {
             const btn = e.target.closest('[data-save-btn]');
             if (btn && !btn.disabled) {
-                _activeSaveBtn = btn;
-                btn._origHTML  = btn.innerHTML;
-                btn.disabled   = true;
-                btn.innerHTML  = _saveBtnSpinnerHtml + ' Menyimpan...';
+                _pendingClickBtn = btn;
             }
         }, true);
+
+        // Request interceptor — only fires when axios actually sends a request
+        axios.interceptors.request.use(function (config) {
+            if (_pendingClickBtn) {
+                _activeSaveBtn             = _pendingClickBtn;
+                _activeSaveBtn._origHTML   = _activeSaveBtn.innerHTML;
+                _activeSaveBtn.disabled    = true;
+                _activeSaveBtn.innerHTML   = _saveBtnSpinnerHtml + ' Menyimpan...';
+            }
+            _pendingClickBtn = null;
+            return config;
+        });
 
         axios.interceptors.response.use(
             function (response) { _resetSaveBtn(); return response; },
@@ -193,6 +204,13 @@
             if (btn._origHTML) { btn.innerHTML = btn._origHTML; btn._origHTML = null; }
             lucide.createIcons();
         }
+
+        // If client-side validation returns early (no axios request), clear the pending ref
+        document.addEventListener('click', function (e) {
+            // After all synchronous click handlers have run, if _pendingClickBtn was never
+            // consumed by an axios request, clear it so it doesn't latch onto the next request
+            setTimeout(function () { _pendingClickBtn = null; }, 0);
+        });
 
         // Sidebar Toggle
         function toggleSidebar() {

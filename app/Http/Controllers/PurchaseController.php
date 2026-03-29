@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Purchase;
 use App\Models\Stock;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -59,6 +60,10 @@ class PurchaseController extends Controller
             'created_by'  => auth()->id(),
             'status'      => 'pending',
         ]);
+
+        Notification::sendToApprovers('approval', 'Purchase Baru',
+            auth()->user()->name . ' menambahkan purchase dari ' . $request->vendor . ' menunggu persetujuan.',
+            route('purchase.index'));
 
         $message = 'Purchase berhasil disimpan dan menunggu persetujuan SPV.';
 
@@ -146,6 +151,11 @@ class PurchaseController extends Controller
             ]);
         });
 
+        // Notify creator
+        Notification::send([$purchase->created_by], 'info', 'Purchase Disetujui',
+            'Purchase dari ' . $purchase->vendor . ' telah disetujui.',
+            route('purchase.index'));
+
         return response()->json(['message' => 'Purchase berhasil disetujui.']);
     }
 
@@ -160,6 +170,10 @@ class PurchaseController extends Controller
         }
 
         $purchase->update(['status' => 'rejected']);
+
+        Notification::send([$purchase->created_by], 'info', 'Purchase Ditolak',
+            'Purchase dari ' . $purchase->vendor . ' telah ditolak.',
+            route('purchase.index'));
 
         return response()->json(['message' => 'Purchase berhasil ditolak.']);
     }

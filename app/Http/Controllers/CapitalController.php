@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Capital;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 
 class CapitalController extends Controller
@@ -47,6 +48,10 @@ class CapitalController extends Controller
             'status'     => 'pending',
             'created_by' => auth()->id(),
         ]);
+
+        Notification::sendToApprovers('approval', 'Modal Baru',
+            auth()->user()->name . ' menambahkan modal "' . $request->name . '" menunggu persetujuan.',
+            route('capital.index'));
 
         return response()->json(['message' => 'Modal berhasil disimpan dan menunggu persetujuan.']);
     }
@@ -94,6 +99,10 @@ class CapitalController extends Controller
             'approved_at' => now(),
         ]);
 
+        Notification::send([$capital->created_by], 'info', 'Modal Disetujui',
+            'Modal "' . $capital->name . '" telah disetujui.',
+            route('capital.index'));
+
         return response()->json(['message' => 'Modal berhasil disetujui.']);
     }
 
@@ -108,6 +117,10 @@ class CapitalController extends Controller
             'approved_by' => auth()->id(),
             'approved_at' => now(),
         ]);
+
+        Notification::send([$capital->created_by], 'info', 'Modal Ditolak',
+            'Modal "' . $capital->name . '" telah ditolak.',
+            route('capital.index'));
 
         return response()->json(['message' => 'Modal berhasil ditolak.']);
     }

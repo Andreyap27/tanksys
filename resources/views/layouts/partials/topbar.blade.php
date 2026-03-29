@@ -21,8 +21,22 @@
 
     {{-- Right: notification + user --}}
     <div class="topbar-right">
-        <div class="topbar-action-btn" onclick="showInfo('Notifikasi', 'Tidak ada notifikasi baru')" title="Notifikasi">
-            <i data-lucide="bell" style="width:1.1rem;height:1.1rem;"></i>
+        <div class="notif-wrap" id="notifWrap">
+            <button class="topbar-action-btn" onclick="toggleNotifDropdown()" title="Notifikasi" id="notifBtn">
+                <i data-lucide="bell" style="width:1.1rem;height:1.1rem;"></i>
+                <span class="notif-badge" id="notifBadge" style="display:none;"></span>
+            </button>
+            <div class="notif-dropdown" id="notifDropdown">
+                <div class="notif-header">
+                    <span class="notif-header-title">Notifikasi</span>
+                    <button class="notif-read-all" onclick="markAllRead()" id="notifReadAllBtn" style="display:none;">
+                        Tandai semua dibaca
+                    </button>
+                </div>
+                <div class="notif-list" id="notifList">
+                    <div class="notif-empty">Tidak ada notifikasi</div>
+                </div>
+            </div>
         </div>
 
         <div class="topbar-divider"></div>
@@ -101,4 +115,138 @@ function confirmLogout(form) {
     updateClock();
     setInterval(updateClock, 1000);
 })();
+
+// ── Notification Dropdown ──────────────────────────────────────────────────
+function toggleNotifDropdown() {
+    const dropdown = document.getElementById('notifDropdown');
+    const isOpen = dropdown.classList.contains('active');
+    // Close user menu first
+    document.getElementById('userDropdown')?.classList.remove('active');
+    dropdown.classList.toggle('active');
+    if (!isOpen) loadNotifications();
+}
+
+function loadNotifications() {
+    axios.get('/notifications').then(res => {
+        const { data, unread } = res.data;
+        renderNotifications(data);
+        updateBadge(unread);
+        updateSidebarBadges(data);
+    });
+}
+
+function renderNotifications(items) {
+    const list = document.getElementById('notifList');
+    const readAllBtn = document.getElementById('notifReadAllBtn');
+    if (!items.length) {
+        list.innerHTML = '<div class="notif-empty">Tidak ada notifikasi</div>';
+        if (readAllBtn) readAllBtn.style.display = 'none';
+        return;
+    }
+    const hasUnread = items.some(n => !n.is_read);
+    if (readAllBtn) readAllBtn.style.display = hasUnread ? 'block' : 'none';
+    list.innerHTML = items.map(n => `
+        <div class="notif-item ${n.is_read ? '' : 'unread'}" onclick="handleNotifClick('${n.id}', '${n.url || ''}')">
+            <div class="notif-icon ${n.type === 'approval' ? 'approval' : 'info'}">
+                <i data-lucide="${n.type === 'approval' ? 'clock' : 'info'}" style="width:14px;height:14px;"></i>
+            </div>
+            <div class="notif-content">
+                <div class="notif-title">${escNotif(n.title)}</div>
+                <div class="notif-message">${escNotif(n.message)}</div>
+                <div class="notif-time">${escNotif(n.created_at)}</div>
+            </div>
+            ${!n.is_read ? '<div class="notif-dot"></div>' : ''}
+        </div>
+    `).join('');
+    lucide.createIcons();
+}
+
+function handleNotifClick(id, url) {
+    axios.post(`/notifications/${id}/read`).then(() => {
+        loadNotificationsCount();
+        if (url) window.location.href = url;
+        else loadNotifications();
+    });
+}
+
+function markAllRead() {
+    axios.post('/notifications/read-all').then(() => {
+        loadNotifications();
+        updateBadge(0);
+    });
+}
+
+function updateBadge(count) {
+    const badge = document.getElementById('notifBadge');
+    if (!badge) return;
+    if (count > 0) {
+        badge.textContent = count > 99 ? '99+' : count;
+        badge.style.display = 'flex';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+// Map URL pathname → sidebar badge element ID
+const _sidebarBadgeMap = {
+    '/purchase':      'sidebarBadge-purchase',
+    '/sales':         'sidebarBadge-sales',
+    '/capital':       'sidebarBadge-capital',
+    '/expenses':      'sidebarBadge-expenses',
+    '/lori':          'sidebarBadge-lori',
+    '/lori-expense':  'sidebarBadge-lori-expense',
+};
+
+function updateSidebarBadges(items) {
+    // Reset all
+    Object.values(_sidebarBadgeMap).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+    // Count unread per path
+    const counts = {};
+    items.forEach(function (n) {
+        if (n.is_read || !n.url) return;
+        try {
+            const path = new URL(n.url).pathname.replace(/\/$/, '') || '/';
+            counts[path] = (counts[path] || 0) + 1;
+        } catch (e) {}
+    });
+    // Apply
+    Object.entries(counts).forEach(function ([path, count]) {
+        const id = _sidebarBadgeMap[path];
+        if (!id) return;
+        const el = document.getElementById(id);
+        if (el) {
+            el.textContent     = count > 99 ? '99+' : count;
+            el.style.display   = 'inline-flex';
+        }
+    });
+}
+
+function loadNotificationsCount() {
+    axios.get('/notifications').then(function (res) {
+        updateBadge(res.data.unread);
+        updateSidebarBadges(res.data.data);
+    });
+}
+
+function escNotif(str) {
+    if (str == null) return '';
+    const d = document.createElement('div');
+    d.textContent = String(str);
+    return d.innerHTML;
+}
+
+// Close when clicking outside
+document.addEventListener('click', function(e) {
+    const wrap = document.getElementById('notifWrap');
+    if (wrap && !wrap.contains(e.target)) {
+        document.getElementById('notifDropdown')?.classList.remove('active');
+    }
+});
+
+// Poll every 30 seconds
+loadNotificationsCount();
+setInterval(loadNotificationsCount, 30000);
 </script>

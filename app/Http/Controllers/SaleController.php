@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Sale;
 use App\Models\Customer;
 use App\Models\Stock;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -90,6 +91,10 @@ class SaleController extends Controller
             'created_by'     => auth()->id(),
             'status'         => 'pending',
         ]);
+
+        Notification::sendToApprovers('approval', 'Penjualan Baru',
+            auth()->user()->name . ' menambahkan penjualan ' . $request->invoice_number . ' menunggu persetujuan.',
+            route('sales.index'));
 
         $message = 'Penjualan berhasil disimpan dan menunggu persetujuan SPV.';
 
@@ -186,6 +191,10 @@ class SaleController extends Controller
             ]);
         });
 
+        Notification::send([$sale->created_by], 'info', 'Penjualan Disetujui',
+            'Penjualan ' . $sale->invoice_number . ' telah disetujui.',
+            route('sales.index'));
+
         return response()->json(['message' => 'Penjualan berhasil disetujui.']);
     }
 
@@ -200,6 +209,10 @@ class SaleController extends Controller
         }
 
         $sale->update(['status' => 'rejected']);
+
+        Notification::send([$sale->created_by], 'info', 'Penjualan Ditolak',
+            'Penjualan ' . $sale->invoice_number . ' telah ditolak.',
+            route('sales.index'));
 
         return response()->json(['message' => 'Penjualan berhasil ditolak.']);
     }
