@@ -9,10 +9,12 @@
         <p class="page-subtitle">Kelola data modal usaha</p>
     </div>
     <div class="page-actions">
+        @if($canManage)
         <button class="btn btn-primary" onclick="openCreateModal()">
             <i data-lucide="plus" style="width:16px;height:16px;"></i>
             Tambah Modal
         </button>
+        @endif
     </div>
 </div>
 <div class="card">
