@@ -17,6 +17,21 @@
         @endif
     </div>
 </div>
+<div class="dash-stat ds-expense" style="margin-bottom:1.25rem;max-width:320px;">
+    <div class="dash-stat__row">
+        <div>
+            <div class="dash-stat__label">Total Pengeluaran</div>
+            <div class="dash-stat__value" id="expensesTotalCard">Rp 0</div>
+        </div>
+        <div class="dash-stat__icon">
+            <i data-lucide="receipt" style="width:1.1rem;height:1.1rem;"></i>
+        </div>
+    </div>
+    <div class="dash-stat__trend flat">
+        <i data-lucide="clipboard-list"></i> <span id="expensesCountCard">0</span> transaksi
+    </div>
+</div>
+
 <div class="card">
     <div class="card-toolbar"><div class="dt-search-slot"></div></div>
     <div class="card-content" style="padding:0;">
@@ -126,9 +141,20 @@ $(document).ready(function () {
             }
         ],
         order: [[0, 'desc']],
-        drawCallback: function () { lucide.createIcons(); }
+        drawCallback: function () {
+            lucide.createIcons();
+            updateExpensesTotal(this.api());
+        }
     });
 });
+
+function updateExpensesTotal(api) {
+    const rows = api.rows({ search: 'applied' }).data();
+    let total = 0;
+    for (let i = 0; i < rows.length; i++) total += parseFloat(rows[i].nominal_raw) || 0;
+    document.getElementById('expensesTotalCard').textContent = 'Rp ' + Currency.number(total);
+    document.getElementById('expensesCountCard').textContent = rows.length;
+}
 
 function escHtml(str) {
     if (str == null) return '';
