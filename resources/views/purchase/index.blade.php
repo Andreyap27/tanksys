@@ -306,6 +306,7 @@ $(document).ready(function () {
                                     '${row.price_raw}',
                                     '${escHtml(row.noted)}',
                                     '${row.kapal_id || ''}'
+                                )">
                                 <i data-lucide="pencil" style="width:14px;height:14px;"></i>
                             </button>`;
                     }

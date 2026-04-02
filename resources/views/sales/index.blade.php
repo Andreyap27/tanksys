@@ -22,6 +22,34 @@
         @endif
     </div>
 </div>
+
+{{-- Summary Cards --}}
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.25rem;">
+    <div class="dash-stat ds-sale">
+        <div class="dash-stat__row">
+            <div>
+                <div class="dash-stat__label">Total Amount (Approved)</div>
+                <div class="dash-stat__value" id="salesTotalAmount">Rp 0</div>
+            </div>
+            <div class="dash-stat__icon"><i data-lucide="wallet" style="width:1.1rem;height:1.1rem;"></i></div>
+        </div>
+    </div>
+    <div class="dash-stat ds-purchase">
+        <div class="dash-stat__row">
+            <div>
+                <div class="dash-stat__label">Total Qty (Approved)</div>
+                <div class="dash-stat__value" id="salesTotalQty">0 L</div>
+            </div>
+            <div class="dash-stat__icon"><i data-lucide="fuel" style="width:1.1rem;height:1.1rem;"></i></div>
+        </div>
+    </div>
+</div>
+
+{{-- Kapal Tabs --}}
+<div class="tab-bar" id="salesTabs">
+    <button class="tab active" data-kapal-id="" onclick="switchSaleTab(this, '')">Semua</button>
+</div>
+
 <div class="card">
     <div class="card-toolbar"><div class="dt-search-slot"></div></div>
     <div class="card-content" style="padding:0;">
@@ -91,6 +119,7 @@ const canManage  = @json($canManage);
 const canDelete  = @json($canDelete);
 let table;
 let editId = null;
+let activeSaleKapalId = '';
 let quickCustomerContext = 'create';
 const createForm         = document.getElementById('createForm');
 const editForm           = document.getElementById('editForm');
@@ -104,6 +133,59 @@ const itiQuickCustomer = window.intlTelInput(document.getElementById('quickCusto
     separateDialCode: true,
     utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@23.1.0/build/js/utils.js',
 });
+
+// ── Kapal tabs ───────────────────────────────────────────────────────────────
+let saleKapalList = [];
+function loadSaleKapals() {
+    axios.get('{{ route('kapal.list') }}').then(res => {
+        saleKapalList = res.data;
+        const tabBar = document.getElementById('salesTabs');
+        const opts = res.data.map(k => `<option value="${k.id}">${k.code} — ${k.name}</option>`).join('');
+        saleKapalList.forEach(k => {
+            const btn = document.createElement('button');
+            btn.className = 'tab';
+            btn.dataset.kapalId = k.id;
+            btn.textContent = k.name;
+            btn.onclick = function() { switchSaleTab(this, k.id); };
+            tabBar.appendChild(btn);
+        });
+        document.getElementById('createSaleKapalSelect').innerHTML = '<option value="">-- Pilih Kapal --</option>' + opts;
+        document.getElementById('editSaleKapalSelect').innerHTML   = '<option value="">-- Pilih Kapal --</option>' + opts;
+    });
+}
+
+function switchSaleTab(btn, kapalId) {
+    document.querySelectorAll('#salesTabs .tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    activeSaleKapalId = kapalId;
+    table.ajax.reload(null, false);
+}
+
+// ── Mobil tabs ───────────────────────────────────────────────────────────────
+function updateSalesSummary(api) {
+    const rows = api.rows({ search: 'applied' }).data();
+    let totalAmount = 0, totalQty = 0;
+    for (let i = 0; i < rows.length; i++) {
+        if (rows[i].status === 'approved') {
+            totalAmount += parseFloat(rows[i].amount_raw) || 0;
+            totalQty    += parseFloat(rows[i].quantity_raw) || 0;
+        }
+    }
+    document.getElementById('salesTotalAmount').textContent = 'Rp ' + Currency.number(totalAmount);
+    document.getElementById('salesTotalQty').textContent    = Currency.number(totalQty) + ' L';
+}
+
+// When kapal changes in create modal, reload invoice number
+function onCreateSaleKapalChange() {
+    const kapalId = document.getElementById('createSaleKapalSelect').value;
+    const invInput = createForm.invoice_number;
+    invInput.value = '';
+    invInput.placeholder = 'Memuat...';
+    const params = kapalId ? { kapal_id: kapalId } : {};
+    axios.get('{{ route('sales.next-invoice') }}', { params })
+        .then(res => { invInput.value = res.data.invoice_number; invInput.placeholder = ''; })
+        .catch(() => { invInput.placeholder = 'Gagal memuat nomor'; });
+}
 
 // ── Select2 init ─────────────────────────────────────────────────────────────
 function initSelect2() {
@@ -195,9 +277,16 @@ function triggerAmountCalc(el) {
 // ── DataTable ────────────────────────────────────────────────────────────────
 $(document).ready(function () {
     initSelect2();
+    loadSaleKapals();
 
     table = $('#salesTable').DataTable({
-        ajax: { url: '{{ route('sales.data') }}', type: 'GET' },
+        ajax: {
+            url: '{{ route('sales.data') }}',
+            type: 'GET',
+            data: function(d) {
+                if (activeSaleKapalId) d.kapal_id = activeSaleKapalId;
+            }
+        },
         columns: [
             { data: 'date' },
             { data: 'invoice_number' },
@@ -236,7 +325,7 @@ $(document).ready(function () {
                     if (canManage) {
                         actions += `
                             <button class="icon-btn primary" title="Edit"
-                                onclick="openEditModal('${row.id}', '${row.date_raw}', '${escHtml(row.invoice_number)}', '${row.customer_id}', '${escHtml(row.description)}', '${row.quantity_raw}', '${row.price_raw}', '${escHtml(row.noted)}')">
+                                onclick="openEditModal('${row.id}', '${row.date_raw}', '${escHtml(row.invoice_number)}', '${escHtml(row.description)}', '${row.quantity_raw}', '${row.price_raw}', '${escHtml(row.noted)}', '${row.kapal_id || ''}')">
                                 <i data-lucide="pencil" style="width:14px;height:14px;"></i>
                             </button>`;
                     }
@@ -272,7 +361,10 @@ $(document).ready(function () {
             }
         ],
         order: [[0, 'desc']],
-        drawCallback: function () { lucide.createIcons(); }
+        drawCallback: function () {
+            lucide.createIcons();
+            updateSalesSummary(this.api());
+        }
     });
 });
 
@@ -292,18 +384,20 @@ function calcCreateAmount() {
 function openCreateModal() {
     createForm.reset();
     document.getElementById('createAmountDisplay').value = '';
+    createForm.invoice_number.value = '';
     createForm.invoice_number.placeholder = 'Memuat...';
+    const kapalSel = document.getElementById('createSaleKapalSelect');
+    if (activeSaleKapalId) { kapalSel.value = activeSaleKapalId; }
     loadCustomerOptions();
     createModal.classList.add('active');
 
-    axios.get('{{ route('sales.next-invoice') }}')
+    const params = activeSaleKapalId ? { kapal_id: activeSaleKapalId } : {};
+    axios.get('{{ route('sales.next-invoice') }}', { params })
         .then(res => {
             createForm.invoice_number.value       = res.data.invoice_number;
             createForm.invoice_number.placeholder = '';
         })
-        .catch(() => {
-            createForm.invoice_number.placeholder = 'Gagal memuat nomor';
-        });
+        .catch(() => { createForm.invoice_number.placeholder = 'Gagal memuat nomor'; });
 }
 
 function closeCreateModal() {
@@ -315,6 +409,7 @@ function storeSale() {
     if (!customer) { showError('Validasi', 'Customer wajib dipilih.'); return; }
 
     const payload = {
+        kapal_id:       document.getElementById('createSaleKapalSelect').value || null,
         date:           createForm.date.value,
         invoice_number: createForm.invoice_number.value,
         customer_id:    customer,
@@ -348,12 +443,13 @@ function calcEditAmount() {
     document.getElementById('editAmountDisplay').value = Currency.format(qty * price);
 }
 
-function openEditModal(id, date, invoice_number, customer_id, description, quantity, price, noted) {
+function openEditModal(id, date, invoice_number, customer_id, description, quantity, price, noted, kapalId) {
     editId = id;
     editForm.invoice_number.value = invoice_number;
     editForm.date.value           = date;
     editForm.description.value    = description !== '-' ? description : '';
     editForm.noted.value          = noted !== '-' ? noted : '';
+    document.getElementById('editSaleKapalSelect').value = kapalId || '';
 
     setRaw(editForm.quantity, quantity);
     editForm.quantity.value = parseFloat(quantity)
@@ -378,6 +474,7 @@ function updateSale() {
     if (!customer) { showError('Validasi', 'Customer wajib dipilih.'); return; }
 
     const payload = {
+        kapal_id:       document.getElementById('editSaleKapalSelect').value || null,
         date:           editForm.date.value,
         invoice_number: editForm.invoice_number.value,
         customer_id:    customer,
