@@ -25,7 +25,7 @@
 
 {{-- Summary Cards --}}
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.25rem;margin-bottom:1.5rem;">
-    <div class="dash-stat ds-sales">
+    <div class="dash-stat ds-purchase">
         <div class="dash-stat__header">
             <div class="dash-stat__icon"><i data-lucide="wallet" style="width:20px;height:20px;"></i></div>
             <div>

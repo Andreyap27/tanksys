@@ -43,7 +43,7 @@
         </div>
         <div class="dash-stat__bg-icon"><i data-lucide="receipt" style="width:110px;height:110px;"></i></div>
     </div>
-    <div class="dash-stat ds-sales">
+    <div class="dash-stat" id="expensesBalanceCardWrapper">
         <div class="dash-stat__header">
             <div class="dash-stat__icon"><i data-lucide="trending-up" style="width:20px;height:20px;"></i></div>
             <div>
@@ -156,6 +156,11 @@ function updateBalance() {
     const totalText = document.getElementById('expensesTotalCard').textContent.replace(/[^0-9]/g, '');
     const balance = expensesCapital - (parseFloat(totalText) || 0);
     document.getElementById('expensesBalanceCard').textContent = 'Rp ' + Currency.number(balance);
+    
+    // Update balance card color based on value
+    const balanceWrapper = document.getElementById('expensesBalanceCardWrapper');
+    balanceWrapper.classList.remove('ds-profit', 'ds-loss');
+    balanceWrapper.classList.add(balance >= 0 ? 'ds-profit' : 'ds-loss');
 }
 
 // ── Input formatter ───────────────────────────────────────────────────────────

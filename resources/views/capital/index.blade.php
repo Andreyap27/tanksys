@@ -40,7 +40,7 @@
         </div>
         <div class="dash-stat__bg-icon"><i data-lucide="user" style="width:110px;height:110px;"></i></div>
     </div>
-    <div class="dash-stat ds-sales">
+    <div class="dash-stat ds-purchase">
         <div class="dash-stat__header">
             <div class="dash-stat__icon"><i data-lucide="wallet" style="width:20px;height:20px;"></i></div>
             <div>
