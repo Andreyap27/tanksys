@@ -291,6 +291,13 @@ $profitIcon = $isProfit ? 'trending-up' : 'trending-down';
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+    // Initialize Lucide icons for page load
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    });
+
     const tickColor = '#78716c';
     const gridColor = 'rgba(0,0,0,0.05)';
 
@@ -429,6 +436,5 @@ $profitIcon = $isProfit ? 'trending-up' : 'trending-down';
     });
     @endif
 
-    lucide.createIcons();
 </script>
 @endpush

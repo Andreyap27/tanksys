@@ -86,6 +86,13 @@
 
 @push('scripts')
 <script>
+// Initialize Lucide icons for page load
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+});
+
 let table;
 let editId = null;
 let activeExpenseKapalId = '';

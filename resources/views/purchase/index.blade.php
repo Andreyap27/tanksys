@@ -92,6 +92,13 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@23.1.0/build/js/intlTelInput.min.js"></script>
 <script>
+// Initialize Lucide icons for page load
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+});
+
 const canApprove = @json($canApprove);
 const canManage  = @json($canManage);
 const canDelete  = @json($canDelete);
