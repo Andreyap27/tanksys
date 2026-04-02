@@ -27,10 +27,10 @@
 @if(isset($kapals) && $kapals->count() > 0)
 <div class="tab-bar" style="margin-bottom:1rem;">
     <a href="{{ request()->fullUrlWithQuery(['kapal_id' => '']) }}"
-       class="tab {{ !isset($kapalId) || !$kapalId ? 'active' : '' }}">Semua</a>
+       class="tab {{ !isset($kapalId) || !$kapalId ? 'active' : '' }}"><i data-lucide="list" style="width:16px;height:16px;"></i> Semua</a>
     @foreach($kapals as $k)
     <a href="{{ request()->fullUrlWithQuery(['kapal_id' => $k->id]) }}"
-       class="tab {{ (isset($kapalId) && $kapalId == $k->id) ? 'active' : '' }}">{{ $k->name }}</a>
+       class="tab {{ (isset($kapalId) && $kapalId == $k->id) ? 'active' : '' }}"><i data-lucide="ship" style="width:16px;height:16px;"></i> {{ $k->name }}</a>
     @endforeach
 </div>
 @endif
@@ -38,10 +38,10 @@
 @if(isset($mobils) && $mobils->count() > 0)
 <div class="tab-bar" style="margin-bottom:1rem;">
     <a href="{{ request()->fullUrlWithQuery(['mobil_id' => '']) }}"
-       class="tab {{ !isset($mobilId) || !$mobilId ? 'active' : '' }}">Semua</a>
+       class="tab {{ !isset($mobilId) || !$mobilId ? 'active' : '' }}"><i data-lucide="list" style="width:16px;height:16px;"></i> Semua</a>
     @foreach($mobils as $m)
     <a href="{{ request()->fullUrlWithQuery(['mobil_id' => $m->id]) }}"
-       class="tab {{ (isset($mobilId) && $mobilId == $m->id) ? 'active' : '' }}">{{ $m->plat_nomer ?: $m->name }}</a>
+       class="tab {{ (isset($mobilId) && $mobilId == $m->id) ? 'active' : '' }}"><i data-lucide="truck" style="width:16px;height:16px;"></i> {{ $m->plat_nomer ?: $m->name }}</a>
     @endforeach
 </div>
 @endif

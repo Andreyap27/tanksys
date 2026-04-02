@@ -86,20 +86,31 @@
 
     // ── Mobil Tabs ────────────────────────────────────────────────────────────────
     function loadLoriMobils() {
-        axios.get('{{ route('
-            mobil - master.list ') }}').then(res => {
+        axios.get('{{ route('mobil-master.list') }}').then(res => {
             const tabBar = document.getElementById('loriMobilTabs');
             const opts = res.data.map(m => `<option value="${m.id}">${m.name}${m.plat_nomer ? ' — '+m.plat_nomer : ''}</option>`).join('');
+            
+            // Add "Semua" (All) tab
+            const allBtn = document.createElement('button');
+            allBtn.className = 'tab active';
+            allBtn.innerHTML = '<i data-lucide="list" style="width:16px;height:16px;"></i> Semua';
+            allBtn.onclick = function() {
+                switchLoriTab(this, null);
+            };
+            tabBar.appendChild(allBtn);
+            
             res.data.forEach(m => {
                 const btn = document.createElement('button');
                 btn.className = 'tab';
                 btn.dataset.mobilId = m.id;
-                btn.textContent = m.plat_nomer || m.name;
+                btn.innerHTML = `<i data-lucide="truck" style="width:16px;height:16px;"></i> ${m.plat_nomer || m.name}`;
                 btn.onclick = function() {
                     switchLoriTab(this, m.id);
                 };
                 tabBar.appendChild(btn);
             });
+            lucide.createIcons();
+            
             document.getElementById('createLoriMobilSelect').innerHTML = '<option value="">-- Pilih Mobil --</option>' + opts;
             document.getElementById('editLoriMobilSelect').innerHTML = '<option value="">-- Pilih Mobil --</option>' + opts;
         });
