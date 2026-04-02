@@ -21,8 +21,12 @@ class PurchaseController extends Controller
 
     public function data()
     {
-        $purchases = Purchase::with('creator')->latest()->get()->map(fn($p) => [
+        $kapalId   = request('kapal_id');
+        $query     = Purchase::with('creator')->orderBy('date', 'desc');
+        if ($kapalId) $query->where('kapal_id', $kapalId);
+        $purchases = $query->get()->map(fn($p) => [
             'id'            => $p->id,
+            'kapal_id'      => $p->kapal_id,
             'date'          => $p->date->translatedFormat('d M Y'),
             'date_raw'      => $p->date->format('Y-m-d'),
             'vendor'        => $p->vendor,
@@ -32,6 +36,7 @@ class PurchaseController extends Controller
             'price'         => number_format($p->price, 0, ',', '.'),
             'price_raw'     => $p->price,
             'amount'        => number_format($p->amount, 0, ',', '.'),
+            'amount_raw'    => $p->amount,
             'noted'         => $p->noted ?? '',
             'status'        => $p->status,
         ]);
@@ -41,6 +46,7 @@ class PurchaseController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'kapal_id'    => 'nullable|exists:kapals,id',
             'date'        => 'required|date',
             'vendor'      => 'required|string|max:255',
             'description' => 'nullable|string|max:255',
@@ -50,6 +56,7 @@ class PurchaseController extends Controller
         ]);
 
         Purchase::create([
+            'kapal_id'    => $request->kapal_id ?: null,
             'date'        => $request->date,
             'vendor'      => $request->vendor,
             'description' => $request->description,
@@ -77,6 +84,7 @@ class PurchaseController extends Controller
         }
 
         $request->validate([
+            'kapal_id'    => 'nullable|exists:kapals,id',
             'date'        => 'required|date',
             'vendor'      => 'required|string|max:255',
             'description' => 'nullable|string|max:255',
@@ -91,6 +99,7 @@ class PurchaseController extends Controller
             }
 
             $purchase->update([
+                'kapal_id'    => $request->kapal_id ?: null,
                 'date'        => $request->date,
                 'vendor'      => $request->vendor,
                 'description' => $request->description,
@@ -141,6 +150,7 @@ class PurchaseController extends Controller
             ]);
 
             Stock::create([
+                'kapal_id'       => $purchase->kapal_id,
                 'date'           => $purchase->date,
                 'type'           => 'purchase',
                 'reference_id'   => $purchase->id,

@@ -18,8 +18,12 @@ class CapitalController extends Controller
 
     public function data()
     {
-        $capitals = Capital::with('creator')->latest()->get()->map(fn($c) => [
+        $kapalId  = request('kapal_id');
+        $query    = Capital::with('creator')->orderBy('date', 'desc');
+        if ($kapalId) $query->where('kapal_id', $kapalId);
+        $capitals = $query->get()->map(fn($c) => [
             'id'          => $c->id,
+            'kapal_id'    => $c->kapal_id,
             'date'        => $c->date->translatedFormat('d M Y'),
             'date_raw'    => $c->date->format('Y-m-d'),
             'name'        => $c->name,
@@ -31,16 +35,35 @@ class CapitalController extends Controller
         return response()->json(['data' => $capitals]);
     }
 
+    public function summary()
+    {
+        $kapalId = request('kapal_id');
+        $query   = Capital::where('status', 'approved');
+        if ($kapalId) $query->where('kapal_id', $kapalId);
+
+        $totals = $query->selectRaw('name, SUM(nominal) as total')
+            ->groupBy('name')
+            ->pluck('total', 'name');
+
+        return response()->json([
+            'pt_aldive'   => (float) ($totals['PT ALDIVE'] ?? 0),
+            'rudi_hartono'=> (float) ($totals['RUDI HARTONO'] ?? 0),
+            'total'       => (float) $totals->sum(),
+        ]);
+    }
+
     public function store(Request $request)
     {
         $request->validate([
-            'date'    => 'required|date',
-            'name'    => 'required|string|max:255',
-            'nominal' => 'required|numeric|min:0',
-            'note'    => 'nullable|string',
+            'kapal_id' => 'nullable|exists:kapals,id',
+            'date'     => 'required|date',
+            'name'     => 'required|in:PT ALDIVE,RUDI HARTONO',
+            'nominal'  => 'required|numeric|min:0',
+            'note'     => 'nullable|string',
         ]);
 
         Capital::create([
+            'kapal_id'   => $request->kapal_id ?: null,
             'date'       => $request->date,
             'name'       => $request->name,
             'nominal'    => $request->nominal,
@@ -63,15 +86,15 @@ class CapitalController extends Controller
         }
 
         $request->validate([
-            'date'    => 'required|date',
-            'name'    => 'required|string|max:255',
-            'nominal' => 'required|numeric|min:0',
-            'note'    => 'nullable|string',
+            'kapal_id' => 'nullable|exists:kapals,id',
+            'date'     => 'required|date',
+            'name'     => 'required|in:PT ALDIVE,RUDI HARTONO',
+            'nominal'  => 'required|numeric|min:0',
+            'note'     => 'nullable|string',
         ]);
 
         $capital->update(array_merge(
-            $request->only(['date', 'name', 'nominal', 'note']),
-            ['status' => 'pending', 'approved_by' => null, 'approved_at' => null]
+            $request->only(['kapal_id', 'date', 'name', 'nominal', 'note']),
         ));
 
         return response()->json(['message' => 'Modal berhasil diupdate dan menunggu persetujuan ulang.']);

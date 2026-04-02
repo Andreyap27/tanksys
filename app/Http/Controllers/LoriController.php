@@ -18,8 +18,12 @@ class LoriController extends Controller
 
     public function data()
     {
-        $loris = Lori::with('customer')->latest()->get()->map(fn($l) => [
+        $mobilId = request('mobil_id');
+        $query   = Lori::with('customer')->orderBy('date', 'desc');
+        if ($mobilId) $query->where('mobil_id', $mobilId);
+        $loris = $query->get()->map(fn($l) => [
             'id'            => $l->id,
+            'mobil_id'      => $l->mobil_id,
             'date'          => $l->date->translatedFormat('d M Y'),
             'date_raw'      => $l->date->format('Y-m-d'),
             'customer_name' => $l->customer->name,
@@ -35,6 +39,7 @@ class LoriController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'mobil_id'    => 'nullable|exists:mobils,id',
             'date'        => 'required|date',
             'customer_id' => 'required|exists:customers,id',
             'from'        => 'required|string|max:255',
@@ -43,6 +48,7 @@ class LoriController extends Controller
         ]);
 
         Lori::create([
+            'mobil_id'    => $request->mobil_id ?: null,
             'date'        => $request->date,
             'customer_id' => $request->customer_id,
             'from'        => $request->from,
@@ -57,6 +63,7 @@ class LoriController extends Controller
     public function update(Request $request, Lori $lori)
     {
         $request->validate([
+            'mobil_id'    => 'nullable|exists:mobils,id',
             'date'        => 'required|date',
             'customer_id' => 'required|exists:customers,id',
             'from'        => 'required|string|max:255',
@@ -64,7 +71,10 @@ class LoriController extends Controller
             'price'       => 'required|numeric|min:0',
         ]);
 
-        $lori->update($request->only(['date', 'customer_id', 'from', 'to', 'price']));
+        $lori->update(array_merge(
+            $request->only(['date', 'customer_id', 'from', 'to', 'price']),
+            ['mobil_id' => $request->mobil_id ?: null]
+        ));
 
         return response()->json(['message' => 'Data mobil tangki berhasil diupdate.']);
     }

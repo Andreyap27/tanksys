@@ -22,8 +22,17 @@ class SaleController extends Controller
 
     public function nextInvoice()
     {
-        $date   = now()->format('Ymd');
-        $prefix = "INV-{$date}-";
+        $kapalId = request('kapal_id');
+        $date    = now()->format('Ymd');
+
+        if ($kapalId) {
+            $kapal  = \App\Models\Kapal::find($kapalId);
+            $code   = $kapal ? $kapal->code : 'K000';
+            $prefix = "INV-{$date}-{$code}-";
+        } else {
+            $prefix = "INV-{$date}-";
+        }
+
         $latest = Sale::where('invoice_number', 'like', $prefix . '%')
             ->orderByRaw('LENGTH(invoice_number) DESC, invoice_number DESC')
             ->value('invoice_number');
@@ -48,8 +57,12 @@ class SaleController extends Controller
 
     public function data()
     {
-        $sales = Sale::with('customer')->latest()->get()->map(fn($s) => [
+        $kapalId = request('kapal_id');
+        $query   = Sale::with('customer')->orderBy('date', 'desc');
+        if ($kapalId) $query->where('kapal_id', $kapalId);
+        $sales = $query->get()->map(fn($s) => [
             'id'             => $s->id,
+            'kapal_id'       => $s->kapal_id,
             'date'           => $s->date->translatedFormat('d M Y'),
             'date_raw'       => $s->date->format('Y-m-d'),
             'invoice_number' => $s->invoice_number,
@@ -61,6 +74,7 @@ class SaleController extends Controller
             'price'          => number_format($s->price, 0, ',', '.'),
             'price_raw'      => $s->price,
             'amount'         => number_format($s->amount, 0, ',', '.'),
+            'amount_raw'     => $s->amount,
             'noted'          => $s->noted ?? '-',
             'status'         => $s->status,
         ]);
@@ -70,6 +84,7 @@ class SaleController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'kapal_id'       => 'nullable|exists:kapals,id',
             'date'           => 'required|date',
             'invoice_number' => 'required|string|unique:sales',
             'customer_id'    => 'required|exists:customers,id',
@@ -80,6 +95,7 @@ class SaleController extends Controller
         ]);
 
         Sale::create([
+            'kapal_id'       => $request->kapal_id ?: null,
             'date'           => $request->date,
             'invoice_number' => $request->invoice_number,
             'customer_id'    => $request->customer_id,
@@ -108,6 +124,7 @@ class SaleController extends Controller
         }
 
         $request->validate([
+            'kapal_id'       => 'nullable|exists:kapals,id',
             'date'           => 'required|date',
             'invoice_number' => 'required|string|unique:sales,invoice_number,' . $sale->id,
             'customer_id'    => 'required|exists:customers,id',
@@ -123,6 +140,7 @@ class SaleController extends Controller
             }
 
             $sale->update([
+                'kapal_id'       => $request->kapal_id ?: null,
                 'date'           => $request->date,
                 'invoice_number' => $request->invoice_number,
                 'customer_id'    => $request->customer_id,
@@ -181,6 +199,7 @@ class SaleController extends Controller
             ]);
 
             Stock::create([
+                'kapal_id'       => $sale->kapal_id,
                 'date'           => $sale->date,
                 'type'           => 'sale',
                 'reference_id'   => $sale->id,

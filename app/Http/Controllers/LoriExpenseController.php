@@ -17,8 +17,12 @@ class LoriExpenseController extends Controller
 
     public function data()
     {
-        $expenses = LoriExpense::latest()->get()->map(fn($e) => [
+        $mobilId  = request('mobil_id');
+        $query    = LoriExpense::orderBy('date', 'desc');
+        if ($mobilId) $query->where('mobil_id', $mobilId);
+        $expenses = $query->get()->map(fn($e) => [
             'id'          => $e->id,
+            'mobil_id'    => $e->mobil_id,
             'date'        => $e->date->translatedFormat('d M Y'),
             'date_raw'    => $e->date->format('Y-m-d'),
             'description' => $e->description,
@@ -33,6 +37,7 @@ class LoriExpenseController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'mobil_id'    => 'nullable|exists:mobils,id',
             'date'        => 'required|date',
             'description' => 'required|string|max:255',
             'category'    => 'required|in:' . implode(',', LoriExpense::CATEGORIES),
@@ -41,6 +46,7 @@ class LoriExpenseController extends Controller
         ]);
 
         LoriExpense::create([
+            'mobil_id'    => $request->mobil_id ?: null,
             'date'        => $request->date,
             'description' => $request->description,
             'category'    => $request->category,
@@ -59,6 +65,7 @@ class LoriExpenseController extends Controller
         }
 
         $request->validate([
+            'mobil_id'    => 'nullable|exists:mobils,id',
             'date'        => 'required|date',
             'description' => 'required|string|max:255',
             'category'    => 'required|in:' . implode(',', LoriExpense::CATEGORIES),
@@ -66,7 +73,10 @@ class LoriExpenseController extends Controller
             'noted'       => 'nullable|string',
         ]);
 
-        $loriExpense->update($request->only(['date', 'description', 'category', 'nominal', 'noted']));
+        $loriExpense->update(array_merge(
+            $request->only(['date', 'description', 'category', 'nominal', 'noted']),
+            ['mobil_id' => $request->mobil_id ?: null]
+        ));
 
         return response()->json(['message' => 'Expense berhasil diupdate.']);
     }

@@ -21,7 +21,7 @@ class StockController extends Controller
     public function data()
     {
         $kapalId = request('kapal_id');
-        $query   = Stock::orderBy('date')->orderBy('created_at');
+        $query   = Stock::orderBy('date', 'desc')->orderBy('created_at', 'desc');
         if ($kapalId) $query->where('kapal_id', $kapalId);
         $running = 0;
         $stocks  = $query->get()
