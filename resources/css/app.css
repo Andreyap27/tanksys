@@ -1497,8 +1497,8 @@ table.dataTable thead .sorting_desc::after {
 .tab-bar {
     display: flex;
     flex-wrap: wrap;
-    gap: -0.25rem;
-    margin-bottom: 0;
+    gap: 0;
+    margin-bottom: 1rem;
     padding-left: 0;
     align-items: flex-end;
     position: relative;
@@ -1563,7 +1563,7 @@ table.dataTable thead .sorting_desc::after {
 
 /* Connect tabs to card */
 .tab-bar + .card {
-    margin-top: -1px;
+    margin-top: -1rem;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
 }

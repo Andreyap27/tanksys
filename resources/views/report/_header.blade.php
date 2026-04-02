@@ -25,7 +25,7 @@
 </div>
 
 @if(isset($kapals) && $kapals->count() > 0)
-<div class="tab-bar" style="margin-bottom:1rem;">
+<div class="tab-bar">
     <a href="{{ request()->fullUrlWithQuery(['kapal_id' => '']) }}"
        class="tab {{ !isset($kapalId) || !$kapalId ? 'active' : '' }}"><i data-lucide="list" style="width:16px;height:16px;"></i> Semua</a>
     @foreach($kapals as $k)
@@ -36,7 +36,7 @@
 @endif
 
 @if(isset($mobils) && $mobils->count() > 0)
-<div class="tab-bar" style="margin-bottom:1rem;">
+<div class="tab-bar">
     <a href="{{ request()->fullUrlWithQuery(['mobil_id' => '']) }}"
        class="tab {{ !isset($mobilId) || !$mobilId ? 'active' : '' }}"><i data-lucide="list" style="width:16px;height:16px;"></i> Semua</a>
     @foreach($mobils as $m)
