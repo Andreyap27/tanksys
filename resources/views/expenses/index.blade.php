@@ -131,7 +131,7 @@ function switchExpenseTab(btn, kapalId) {
     table.ajax.reload(null, false);
 }
 
-// ── Input formatter ───────────────────────────────────────────────────────────
+function refreshExpenseSummary(kapalId) {
     const params = {};
     if (kapalId) params.kapal_id = kapalId;
     axios.get('{{ route('expenses.capital-total') }}', { params }).then(res => {
