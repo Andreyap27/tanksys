@@ -103,7 +103,12 @@ $(document).ready(function () {
     table = $('#expensesTable').DataTable({
         ajax: { url: '{{ route('expenses.data') }}', type: 'GET' },
         columns: [
-            { data: 'date' },
+            {
+                data: 'date',
+                render: function (data, type, row) {
+                    return (type === 'sort' || type === 'type') ? row.date_raw : data;
+                }
+            },
             { data: 'description' },
             {
                 data: 'category',
