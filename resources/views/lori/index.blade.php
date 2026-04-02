@@ -88,7 +88,7 @@
         axios.get('{{ route('mobil-master.list') }}').then(res => {
             const tabBar = document.getElementById('loriMobilTabs');
             const opts = res.data.map(m => `<option value="${m.id}">${m.name}${m.plat_nomer ? ' — '+m.plat_nomer : ''}</option>`).join('');
-            
+
             // Add "Semua" (All) tab
             const allBtn = document.createElement('button');
             allBtn.className = 'tab active';
@@ -97,7 +97,7 @@
                 switchLoriTab(this, null);
             };
             tabBar.appendChild(allBtn);
-            
+
             res.data.forEach(m => {
                 const btn = document.createElement('button');
                 btn.className = 'tab';
@@ -109,7 +109,7 @@
                 tabBar.appendChild(btn);
             });
             lucide.createIcons();
-            
+
             document.getElementById('createLoriMobilSelect').innerHTML = '<option value="">-- Pilih Mobil --</option>' + opts;
             document.getElementById('editLoriMobilSelect').innerHTML = '<option value="">-- Pilih Mobil --</option>' + opts;
         });
@@ -277,8 +277,7 @@
             price: getRaw(createForm.price),
         };
 
-        axios.post('{{ route('
-                lori.store ') }}', payload)
+        axios.post('{{ route('lori.store') }}', payload)
             .then(res => {
                 showSuccess('Berhasil', res.data.message || 'Data berhasil disimpan');
                 closeCreateModal();
@@ -386,8 +385,7 @@
             contact: itiQuickCustomer.getNumber(),
         };
 
-        axios.post('{{ route('
-                customer.store ') }}', payload)
+        axios.post('{{ route('customer.store') }}', payload)
             .then(res => {
                 const newId = res.data.id;
                 showSuccess('Berhasil', res.data.message || 'Customer berhasil ditambahkan');

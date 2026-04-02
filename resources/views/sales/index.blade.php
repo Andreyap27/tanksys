@@ -24,30 +24,32 @@
 </div>
 
 {{-- Summary Cards --}}
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.25rem;">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.25rem;margin-bottom:1.5rem;">
     <div class="dash-stat ds-sale">
-        <div class="dash-stat__row">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon"><i data-lucide="wallet" style="width:20px;height:20px;"></i></div>
             <div>
                 <div class="dash-stat__label">Total Amount (Approved)</div>
                 <div class="dash-stat__value" id="salesTotalAmount">Rp 0</div>
             </div>
-            <div class="dash-stat__icon"><i data-lucide="wallet" style="width:1.1rem;height:1.1rem;"></i></div>
         </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="wallet" style="width:110px;height:110px;"></i></div>
     </div>
     <div class="dash-stat ds-purchase">
-        <div class="dash-stat__row">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon"><i data-lucide="fuel" style="width:20px;height:20px;"></i></div>
             <div>
                 <div class="dash-stat__label">Total Qty (Approved)</div>
                 <div class="dash-stat__value" id="salesTotalQty">0 L</div>
             </div>
-            <div class="dash-stat__icon"><i data-lucide="fuel" style="width:1.1rem;height:1.1rem;"></i></div>
         </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="fuel" style="width:110px;height:110px;"></i></div>
     </div>
 </div>
 
 {{-- Kapal Tabs --}}
 <div class="tab-bar" id="salesTabs">
-    <button class="tab active" data-kapal-id="" onclick="switchSaleTab(this, '')">Semua</button>
+    <button class="tab active" data-kapal-id="" onclick="switchSaleTab(this, '')"><i data-lucide="list" style="width:16px;height:16px;"></i> Semua</button>
 </div>
 
 <div class="card">
@@ -145,10 +147,11 @@ function loadSaleKapals() {
             const btn = document.createElement('button');
             btn.className = 'tab';
             btn.dataset.kapalId = k.id;
-            btn.textContent = k.name;
+            btn.innerHTML = `<i data-lucide="ship" style="width:16px;height:16px;"></i> ${k.name}`;
             btn.onclick = function() { switchSaleTab(this, k.id); };
             tabBar.appendChild(btn);
         });
+        lucide.createIcons();
         document.getElementById('createSaleKapalSelect').innerHTML = '<option value="">-- Pilih Kapal --</option>' + opts;
         document.getElementById('editSaleKapalSelect').innerHTML   = '<option value="">-- Pilih Kapal --</option>' + opts;
     });

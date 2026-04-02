@@ -8,6 +8,12 @@
             <form id="createForm" onsubmit="return false;">
                 <div class="form-grid">
                     <div class="form-group full">
+                        <label class="form-label">Kapal</label>
+                        <select name="kapal_id" id="createSaleKapalSelect" class="form-select" onchange="onCreateSaleKapalChange()">
+                            <option value="">-- Pilih Kapal --</option>
+                        </select>
+                    </div>
+                    <div class="form-group full">
                         <label class="form-label">No Invoice</label>
                         <input type="text" name="invoice_number" class="form-input" placeholder="Memuat..."
                             readonly style="background:#f5f5f4;cursor:not-allowed;">

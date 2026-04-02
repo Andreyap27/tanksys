@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Capital;
+use App\Models\Kapal;
+use App\Models\Mobil;
 use App\Models\Purchase;
 use App\Models\Sale;
 use App\Models\Expense;
@@ -32,145 +34,178 @@ class ReportController extends Controller
 
     public function purchase()
     {
-        $year  = $this->getYear();
-        $years = $this->getYears();
+        $year     = $this->getYear();
+        $years    = $this->getYears();
+        $kapalId  = request('kapal_id') ?: null;
+        $kapals   = Kapal::orderBy('code')->get();
 
         $purchases = Purchase::where('status', 'approved')
             ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(amount) as total_amount')
             ->whereYear('date', $year)
+            ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
             ->groupBy('month')
             ->get()->keyBy('month');
 
-        return view('report.purchase', compact('year', 'years', 'purchases'));
+        return view('report.purchase', compact('year', 'years', 'purchases', 'kapals', 'kapalId'));
     }
 
     public function sale()
     {
-        $year  = $this->getYear();
-        $years = $this->getYears();
+        $year    = $this->getYear();
+        $years   = $this->getYears();
+        $kapalId = request('kapal_id') ?: null;
+        $kapals  = Kapal::orderBy('code')->get();
 
         $sales = Sale::where('status', 'approved')
             ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(amount) as total_amount')
             ->whereYear('date', $year)
+            ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
             ->groupBy('month')
             ->get()->keyBy('month');
 
-        return view('report.sale', compact('year', 'years', 'sales'));
+        return view('report.sale', compact('year', 'years', 'sales', 'kapals', 'kapalId'));
     }
 
     public function expense()
     {
-        $year  = $this->getYear();
-        $years = $this->getYears();
+        $year    = $this->getYear();
+        $years   = $this->getYears();
+        $kapalId = request('kapal_id') ?: null;
+        $kapals  = Kapal::orderBy('code')->get();
 
         $expensesByCategory = Expense::selectRaw('MONTH(date) as month, category, SUM(nominal) as total')
             ->whereYear('date', $year)
             ->where('category', '!=', 'Lori')
+            ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
             ->groupBy('month', 'category')
             ->get()->groupBy('month');
 
         $expensesTotal = Expense::selectRaw('MONTH(date) as month, SUM(nominal) as total')
             ->whereYear('date', $year)
             ->where('category', '!=', 'Lori')
+            ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
             ->groupBy('month')
             ->pluck('total', 'month');
 
-        return view('report.expense', compact('year', 'years', 'expensesByCategory', 'expensesTotal'));
+        return view('report.expense', compact('year', 'years', 'expensesByCategory', 'expensesTotal', 'kapals', 'kapalId'));
     }
 
     public function profitLoss()
     {
-        $year  = $this->getYear();
-        $years = $this->getYears();
+        $year    = $this->getYear();
+        $years   = $this->getYears();
+        $kapalId = request('kapal_id') ?: null;
+        $kapals  = Kapal::orderBy('code')->get();
 
         $purchases = Purchase::where('status', 'approved')
             ->selectRaw('MONTH(date) as month, SUM(amount) as total_amount')
             ->whereYear('date', $year)
+            ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
             ->groupBy('month')
             ->get()->keyBy('month');
 
         $sales = Sale::where('status', 'approved')
             ->selectRaw('MONTH(date) as month, SUM(amount) as total_amount')
             ->whereYear('date', $year)
+            ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
             ->groupBy('month')
             ->get()->keyBy('month');
 
         $expensesTotal = Expense::selectRaw('MONTH(date) as month, SUM(nominal) as total')
             ->whereYear('date', $year)
+            ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
             ->groupBy('month')
             ->pluck('total', 'month');
 
-        return view('report.profit-loss', compact('year', 'years', 'purchases', 'sales', 'expensesTotal'));
+        return view('report.profit-loss', compact('year', 'years', 'purchases', 'sales', 'expensesTotal', 'kapals', 'kapalId'));
     }
 
     public function capital()
     {
-        $year  = $this->getYear();
-        $years = $this->getYears();
+        $year    = $this->getYear();
+        $years   = $this->getYears();
+        $kapalId = request('kapal_id') ?: null;
+        $kapals  = Kapal::orderBy('code')->get();
 
         $capitals = Capital::where('status', 'approved')
             ->selectRaw('MONTH(date) as month, COUNT(*) as total_count, SUM(nominal) as total_nominal')
             ->whereYear('date', $year)
+            ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
             ->groupBy('month')
             ->get()->keyBy('month');
 
-        return view('report.capital', compact('year', 'years', 'capitals'));
+        return view('report.capital', compact('year', 'years', 'capitals', 'kapals', 'kapalId'));
     }
 
     public function loriOmset()
     {
-        $year  = $this->getYear();
-        $years = $this->getYears();
+        $year    = $this->getYear();
+        $years   = $this->getYears();
+        $mobilId = request('mobil_id') ?: null;
+        $mobils  = Mobil::orderBy('name')->get();
 
         $loris = Lori::selectRaw('MONTH(date) as month, SUM(price) as total_income')
             ->whereYear('date', $year)
+            ->when($mobilId, fn($q) => $q->where('mobil_id', $mobilId))
             ->groupBy('month')
             ->pluck('total_income', 'month');
 
-        return view('report.lori-omset', compact('year', 'years', 'loris'));
+        return view('report.lori-omset', compact('year', 'years', 'loris', 'mobils', 'mobilId'));
     }
 
     public function loriExpense()
     {
-        $year  = $this->getYear();
-        $years = $this->getYears();
-        $cats  = LoriExpense::CATEGORIES;
+        $year    = $this->getYear();
+        $years   = $this->getYears();
+        $mobilId = request('mobil_id') ?: null;
+        $mobils  = Mobil::orderBy('name')->get();
+        $cats    = LoriExpense::CATEGORIES;
 
         $loriExpensesByCategory = LoriExpense::selectRaw('MONTH(date) as month, category, SUM(nominal) as total')
             ->whereYear('date', $year)
+            ->when($mobilId, fn($q) => $q->where('mobil_id', $mobilId))
             ->groupBy('month', 'category')
             ->get()->groupBy('month');
 
         $loriExpensesTotal = LoriExpense::selectRaw('MONTH(date) as month, SUM(nominal) as total')
             ->whereYear('date', $year)
+            ->when($mobilId, fn($q) => $q->where('mobil_id', $mobilId))
             ->groupBy('month')
             ->pluck('total', 'month');
 
-        return view('report.lori-expense', compact('year', 'years', 'loriExpensesByCategory', 'loriExpensesTotal', 'cats'));
+        return view('report.lori-expense', compact('year', 'years', 'loriExpensesByCategory', 'loriExpensesTotal', 'cats', 'mobils', 'mobilId'));
     }
 
     public function lori()
     {
-        $year  = $this->getYear();
-        $years = $this->getYears();
+        $year    = $this->getYear();
+        $years   = $this->getYears();
+        $mobilId = request('mobil_id') ?: null;
+        $mobils  = Mobil::orderBy('name')->get();
 
         $loris = Lori::selectRaw('MONTH(date) as month, SUM(price) as total_income')
             ->whereYear('date', $year)
+            ->when($mobilId, fn($q) => $q->where('mobil_id', $mobilId))
             ->groupBy('month')
             ->pluck('total_income', 'month');
 
         $loriExpenses = LoriExpense::selectRaw('MONTH(date) as month, SUM(nominal) as total')
             ->whereYear('date', $year)
+            ->when($mobilId, fn($q) => $q->where('mobil_id', $mobilId))
             ->groupBy('month')
             ->pluck('total', 'month');
 
-        return view('report.lori', compact('year', 'years', 'loris', 'loriExpenses'));
+        return view('report.lori', compact('year', 'years', 'loris', 'loriExpenses', 'mobils', 'mobilId'));
     }
 
     public function printReport()
     {
-        $year    = $this->getYear();
-        $section = request('section', 'purchase');
+        $year      = $this->getYear();
+        $section   = request('section', 'purchase');
+        $kapalId   = request('kapal_id') ?: null;
+        $kapalName = $kapalId ? optional(Kapal::find($kapalId))->name : null;
+        $mobilId   = request('mobil_id') ?: null;
+        $mobilName = $mobilId ? optional(Mobil::find($mobilId))->name : null;
 
         $months = [
             1=>'Januari', 2=>'Februari', 3=>'Maret',    4=>'April',
@@ -178,19 +213,23 @@ class ReportController extends Controller
             9=>'September', 10=>'Oktober', 11=>'November', 12=>'Desember',
         ];
 
-        $data = compact('year', 'section', 'months');
+        $data = compact('year', 'section', 'months', 'kapalId', 'kapalName', 'mobilId', 'mobilName');
 
         switch ($section) {
             case 'purchase':
                 $data['purchases'] = Purchase::where('status', 'approved')
                     ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(amount) as total_amount')
-                    ->whereYear('date', $year)->groupBy('month')->get()->keyBy('month');
+                    ->whereYear('date', $year)
+                    ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
+                    ->groupBy('month')->get()->keyBy('month');
                 $data['title'] = 'Total Purchase';
                 break;
             case 'sale':
                 $data['sales'] = Sale::where('status', 'approved')
                     ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(amount) as total_amount')
-                    ->whereYear('date', $year)->groupBy('month')->get()->keyBy('month');
+                    ->whereYear('date', $year)
+                    ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
+                    ->groupBy('month')->get()->keyBy('month');
                 $data['title'] = 'Total Sale';
                 break;
             case 'expense':
@@ -201,31 +240,45 @@ class ReportController extends Controller
                 if (empty($selectedCats)) $selectedCats = $allExpCats;
                 $data['categories'] = $selectedCats;
                 $data['expensesByCategory'] = Expense::selectRaw('MONTH(date) as month, category, SUM(nominal) as total')
-                    ->whereYear('date', $year)->whereIn('category', $selectedCats)->groupBy('month', 'category')->get()->groupBy('month');
+                    ->whereYear('date', $year)->whereIn('category', $selectedCats)
+                    ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
+                    ->groupBy('month', 'category')->get()->groupBy('month');
                 $data['expensesTotal'] = Expense::selectRaw('MONTH(date) as month, SUM(nominal) as total')
-                    ->whereYear('date', $year)->whereIn('category', $selectedCats)->groupBy('month')->pluck('total', 'month');
+                    ->whereYear('date', $year)->whereIn('category', $selectedCats)
+                    ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
+                    ->groupBy('month')->pluck('total', 'month');
                 $data['title'] = 'Total Expense';
                 break;
             case 'profit-loss':
                 $data['purchases'] = Purchase::where('status', 'approved')
                     ->selectRaw('MONTH(date) as month, SUM(amount) as total_amount')
-                    ->whereYear('date', $year)->groupBy('month')->get()->keyBy('month');
+                    ->whereYear('date', $year)
+                    ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
+                    ->groupBy('month')->get()->keyBy('month');
                 $data['sales'] = Sale::where('status', 'approved')
                     ->selectRaw('MONTH(date) as month, SUM(amount) as total_amount')
-                    ->whereYear('date', $year)->groupBy('month')->get()->keyBy('month');
+                    ->whereYear('date', $year)
+                    ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
+                    ->groupBy('month')->get()->keyBy('month');
                 $data['expensesTotal'] = Expense::selectRaw('MONTH(date) as month, SUM(nominal) as total')
-                    ->whereYear('date', $year)->groupBy('month')->pluck('total', 'month');
+                    ->whereYear('date', $year)
+                    ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
+                    ->groupBy('month')->pluck('total', 'month');
                 $data['title'] = 'Profit / Loss';
                 break;
             case 'capital':
                 $data['capitals'] = Capital::where('status', 'approved')
                     ->selectRaw('MONTH(date) as month, COUNT(*) as total_count, SUM(nominal) as total_nominal')
-                    ->whereYear('date', $year)->groupBy('month')->get()->keyBy('month');
+                    ->whereYear('date', $year)
+                    ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
+                    ->groupBy('month')->get()->keyBy('month');
                 $data['title'] = 'Total Capital';
                 break;
             case 'lori-omset':
                 $data['loris'] = Lori::selectRaw('MONTH(date) as month, SUM(price) as total_income')
-                    ->whereYear('date', $year)->groupBy('month')->pluck('total_income', 'month');
+                    ->whereYear('date', $year)
+                    ->when($mobilId, fn($q) => $q->where('mobil_id', $mobilId))
+                    ->groupBy('month')->pluck('total_income', 'month');
                 $data['title'] = 'Omset Mobil Tangki';
                 break;
             case 'lori-expense':
@@ -237,16 +290,24 @@ class ReportController extends Controller
                 $cats = $selectedCats;
                 $data['cats'] = $cats;
                 $data['loriExpensesByCategory'] = LoriExpense::selectRaw('MONTH(date) as month, category, SUM(nominal) as total')
-                    ->whereYear('date', $year)->whereIn('category', $cats)->groupBy('month', 'category')->get()->groupBy('month');
+                    ->whereYear('date', $year)->whereIn('category', $cats)
+                    ->when($mobilId, fn($q) => $q->where('mobil_id', $mobilId))
+                    ->groupBy('month', 'category')->get()->groupBy('month');
                 $data['loriExpensesTotal'] = LoriExpense::selectRaw('MONTH(date) as month, SUM(nominal) as total')
-                    ->whereYear('date', $year)->whereIn('category', $cats)->groupBy('month')->pluck('total', 'month');
+                    ->whereYear('date', $year)->whereIn('category', $cats)
+                    ->when($mobilId, fn($q) => $q->where('mobil_id', $mobilId))
+                    ->groupBy('month')->pluck('total', 'month');
                 $data['title'] = 'Expenses Mobil Tangki';
                 break;
             case 'lori':
                 $data['loris'] = Lori::selectRaw('MONTH(date) as month, SUM(price) as total_income')
-                    ->whereYear('date', $year)->groupBy('month')->pluck('total_income', 'month');
+                    ->whereYear('date', $year)
+                    ->when($mobilId, fn($q) => $q->where('mobil_id', $mobilId))
+                    ->groupBy('month')->pluck('total_income', 'month');
                 $data['loriExpenses'] = LoriExpense::selectRaw('MONTH(date) as month, SUM(nominal) as total')
-                    ->whereYear('date', $year)->groupBy('month')->pluck('total', 'month');
+                    ->whereYear('date', $year)
+                    ->when($mobilId, fn($q) => $q->where('mobil_id', $mobilId))
+                    ->groupBy('month')->pluck('total', 'month');
                 $data['title'] = 'Profit / Loss Mobil Tangki';
                 break;
             default:

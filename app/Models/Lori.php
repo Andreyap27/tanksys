@@ -10,6 +10,7 @@ class Lori extends Model
     use HasUuids;
 
     protected $fillable = [
+        'mobil_id',
         'date',
         'customer_id',
         'from',

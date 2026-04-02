@@ -5,11 +5,11 @@
 @section('content')
 
 @php
-    $fmt    = fn($n) => number_format((float)$n, 0, ',', '.');
-    $fmtQty = fn($n) => number_format((float)$n, 2, ',', '.');
-    $isProfit = $profitAmt >= 0;
-    $profitClass = $isProfit ? 'ds-profit' : 'ds-loss';
-    $profitIcon  = $isProfit ? 'trending-up' : 'trending-down';
+$fmt = fn($n) => number_format((float)$n, 0, ',', '.');
+$fmtQty = fn($n) => number_format((float)$n, 2, ',', '.');
+$isProfit = $profitAmt >= 0;
+$profitClass = $isProfit ? 'ds-profit' : 'ds-loss';
+$profitIcon = $isProfit ? 'trending-up' : 'trending-down';
 @endphp
 
 {{-- ── Page Header ──────────────────────────────────────────────────────────── --}}
@@ -25,120 +25,126 @@
 
     {{-- Sales --}}
     <div class="dash-stat ds-sales">
-        <div class="dash-stat__row">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon">
+                <i data-lucide="arrow-up-from-line" style="width:20px;height:20px;"></i>
+            </div>
             <div>
                 <div class="dash-stat__label">Penjualan Bulan Ini</div>
                 <div class="dash-stat__value">Rp {{ $fmt($salesAmt) }}</div>
-            </div>
-            <div class="dash-stat__icon">
-                <i data-lucide="arrow-up-from-line" style="width:1.1rem;height:1.1rem;"></i>
+                <div class="dash-stat__trend {{ $salesTrend['dir'] === 'up' ? 'up' : ($salesTrend['dir'] === 'down' ? 'down' : 'flat') }}">
+                    @if($salesTrend['dir'] === 'up')
+                    <i data-lucide="trending-up"></i> +{{ $salesTrend['pct'] }}% vs bulan lalu
+                    @elseif($salesTrend['dir'] === 'down')
+                    <i data-lucide="trending-down"></i> -{{ $salesTrend['pct'] }}% vs bulan lalu
+                    @elseif($salesTrend['dir'] === 'new')
+                    <i data-lucide="star"></i> Baru bulan ini
+                    @else
+                    <i data-lucide="minus"></i> Sama seperti bulan lalu
+                    @endif
+                </div>
             </div>
         </div>
-        <div class="dash-stat__trend {{ $salesTrend['dir'] === 'up' ? 'up' : ($salesTrend['dir'] === 'down' ? 'down' : 'flat') }}">
-            @if($salesTrend['dir'] === 'up')
-                <i data-lucide="trending-up"></i> +{{ $salesTrend['pct'] }}% vs bulan lalu
-            @elseif($salesTrend['dir'] === 'down')
-                <i data-lucide="trending-down"></i> -{{ $salesTrend['pct'] }}% vs bulan lalu
-            @elseif($salesTrend['dir'] === 'new')
-                <i data-lucide="star"></i> Baru bulan ini
-            @else
-                <i data-lucide="minus"></i> Sama seperti bulan lalu
-            @endif
-        </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="arrow-up-from-line" style="width:110px;height:110px;"></i></div>
     </div>
 
     {{-- Purchase --}}
     <div class="dash-stat ds-purchase">
-        <div class="dash-stat__row">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon">
+                <i data-lucide="arrow-down-to-line" style="width:20px;height:20px;"></i>
+            </div>
             <div>
                 <div class="dash-stat__label">Pembelian Bulan Ini</div>
                 <div class="dash-stat__value">Rp {{ $fmt($purchaseAmt) }}</div>
-            </div>
-            <div class="dash-stat__icon">
-                <i data-lucide="arrow-down-to-line" style="width:1.1rem;height:1.1rem;"></i>
+                <div class="dash-stat__trend {{ $purchaseTrend['dir'] === 'up' ? 'up' : ($purchaseTrend['dir'] === 'down' ? 'down' : 'flat') }}">
+                    @if($purchaseTrend['dir'] === 'up')
+                    <i data-lucide="trending-up"></i> +{{ $purchaseTrend['pct'] }}% vs bulan lalu
+                    @elseif($purchaseTrend['dir'] === 'down')
+                    <i data-lucide="trending-down"></i> -{{ $purchaseTrend['pct'] }}% vs bulan lalu
+                    @elseif($purchaseTrend['dir'] === 'new')
+                    <i data-lucide="star"></i> Baru bulan ini
+                    @else
+                    <i data-lucide="minus"></i> Sama seperti bulan lalu
+                    @endif
+                </div>
             </div>
         </div>
-        <div class="dash-stat__trend {{ $purchaseTrend['dir'] === 'up' ? 'up' : ($purchaseTrend['dir'] === 'down' ? 'down' : 'flat') }}">
-            @if($purchaseTrend['dir'] === 'up')
-                <i data-lucide="trending-up"></i> +{{ $purchaseTrend['pct'] }}% vs bulan lalu
-            @elseif($purchaseTrend['dir'] === 'down')
-                <i data-lucide="trending-down"></i> -{{ $purchaseTrend['pct'] }}% vs bulan lalu
-            @elseif($purchaseTrend['dir'] === 'new')
-                <i data-lucide="star"></i> Baru bulan ini
-            @else
-                <i data-lucide="minus"></i> Sama seperti bulan lalu
-            @endif
-        </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="arrow-down-to-line" style="width:110px;height:110px;"></i></div>
     </div>
 
     {{-- Profit / Loss --}}
     <div class="dash-stat {{ $profitClass }}">
-        <div class="dash-stat__row">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon">
+                <i data-lucide="{{ $profitIcon }}" style="width:20px;height:20px;"></i>
+            </div>
             <div>
                 <div class="dash-stat__label">Profit / Loss Bulan Ini</div>
                 <div class="dash-stat__value" style="color:{{ $isProfit ? 'var(--success)' : 'var(--destructive)' }};">
                     {{ $profitAmt < 0 ? '-' : '' }}Rp {{ $fmt(abs($profitAmt)) }}
                 </div>
-            </div>
-            <div class="dash-stat__icon">
-                <i data-lucide="{{ $profitIcon }}" style="width:1.1rem;height:1.1rem;"></i>
+                <div class="dash-stat__trend flat">
+                    <i data-lucide="calculator"></i>
+                    Sales − Purchase − Expenses
+                </div>
             </div>
         </div>
-        <div class="dash-stat__trend flat">
-            <i data-lucide="calculator"></i>
-            Sales − Purchase − Expenses
-        </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="{{ $profitIcon }}" style="width:110px;height:110px;"></i></div>
     </div>
 
     {{-- Expenses --}}
     <div class="dash-stat ds-expense">
-        <div class="dash-stat__row">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon">
+                <i data-lucide="receipt" style="width:20px;height:20px;"></i>
+            </div>
             <div>
                 <div class="dash-stat__label">Pengeluaran Bulan Ini</div>
                 <div class="dash-stat__value">Rp {{ $fmt($expenseAmt) }}</div>
-            </div>
-            <div class="dash-stat__icon">
-                <i data-lucide="receipt" style="width:1.1rem;height:1.1rem;"></i>
+                <div class="dash-stat__trend flat">
+                    <i data-lucide="layers"></i>
+                    {{ $expByCategory->count() }} kategori pengeluaran
+                </div>
             </div>
         </div>
-        <div class="dash-stat__trend flat">
-            <i data-lucide="layers"></i>
-            {{ $expByCategory->count() }} kategori pengeluaran
-        </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="receipt" style="width:110px;height:110px;"></i></div>
     </div>
 
     {{-- Stock --}}
     <div class="dash-stat ds-stock">
-        <div class="dash-stat__row">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon">
+                <i data-lucide="fuel" style="width:20px;height:20px;"></i>
+            </div>
             <div>
                 <div class="dash-stat__label">Saldo Stok BBM</div>
                 <div class="dash-stat__value">{{ $fmtQty($stockBal) }} <span style="font-size:0.9rem;font-weight:500;color:var(--muted-foreground);">L</span></div>
-            </div>
-            <div class="dash-stat__icon">
-                <i data-lucide="fuel" style="width:1.1rem;height:1.1rem;"></i>
+                <div class="dash-stat__trend flat">
+                    <i data-lucide="clock"></i>
+                    Per {{ now()->translatedFormat('d M Y') }}
+                </div>
             </div>
         </div>
-        <div class="dash-stat__trend flat">
-            <i data-lucide="clock"></i>
-            Per {{ now()->translatedFormat('d M Y') }}
-        </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="fuel" style="width:110px;height:110px;"></i></div>
     </div>
 
     {{-- Lori --}}
     <div class="dash-stat ds-lori">
-        <div class="dash-stat__row">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon">
+                <i data-lucide="truck" style="width:20px;height:20px;"></i>
+            </div>
             <div>
                 <div class="dash-stat__label">Mobil Tangki Bulan Ini</div>
                 <div class="dash-stat__value">Rp {{ $fmt($loriAmt) }}</div>
-            </div>
-            <div class="dash-stat__icon">
-                <i data-lucide="truck" style="width:1.1rem;height:1.1rem;"></i>
+                <div class="dash-stat__trend flat">
+                    <i data-lucide="map-pin"></i>
+                    Pendapatan pengiriman
+                </div>
             </div>
         </div>
-        <div class="dash-stat__trend flat">
-            <i data-lucide="map-pin"></i>
-            Pendapatan pengiriman
-        </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="truck" style="width:110px;height:110px;"></i></div>
     </div>
 
 </div>
@@ -285,114 +291,144 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-const tickColor = '#78716c';
-const gridColor = 'rgba(0,0,0,0.05)';
+    const tickColor = '#78716c';
+    const gridColor = 'rgba(0,0,0,0.05)';
 
-// ── Sales vs Purchase Chart ───────────────────────────────────────────────────
-new Chart(document.getElementById('salesPurchaseChart').getContext('2d'), {
-    type: 'bar',
-    data: {
-        labels: @json($chartLabels),
-        datasets: [
-            {
-                label: 'Penjualan',
-                data: @json($chartSales),
-                backgroundColor: 'rgba(217,119,6,0.85)',
-                borderRadius: 5,
-                borderSkipped: false,
-            },
-            {
-                label: 'Pembelian',
-                data: @json($chartPurchase),
-                backgroundColor: 'rgba(37,99,235,0.75)',
-                borderRadius: 5,
-                borderSkipped: false,
-            },
-            {
-                label: 'Profit',
-                data: @json($chartProfit),
-                type: 'line',
-                borderColor: '#16a34a',
-                backgroundColor: 'rgba(22,163,74,0.08)',
-                borderWidth: 2,
-                pointBackgroundColor: '#16a34a',
-                pointRadius: 4,
-                fill: true,
-                tension: 0.4,
-                yAxisID: 'y',
-            }
-        ]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: { mode: 'index', intersect: false },
-        plugins: {
-            legend: {
-                position: 'bottom',
-                labels: { color: tickColor, font: { size: 11 }, padding: 14, boxWidth: 12 }
-            },
-            tooltip: {
-                callbacks: {
-                    label: ctx => ' Rp ' + new Intl.NumberFormat('id-ID').format(ctx.raw)
+    // ── Sales vs Purchase Chart ───────────────────────────────────────────────────
+    new Chart(document.getElementById('salesPurchaseChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: @json($chartLabels),
+            datasets: [{
+                    label: 'Penjualan',
+                    data: @json($chartSales),
+                    backgroundColor: 'rgba(217,119,6,0.85)',
+                    borderRadius: 5,
+                    borderSkipped: false,
+                },
+                {
+                    label: 'Pembelian',
+                    data: @json($chartPurchase),
+                    backgroundColor: 'rgba(37,99,235,0.75)',
+                    borderRadius: 5,
+                    borderSkipped: false,
+                },
+                {
+                    label: 'Profit',
+                    data: @json($chartProfit),
+                    type: 'line',
+                    borderColor: '#16a34a',
+                    backgroundColor: 'rgba(22,163,74,0.08)',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#16a34a',
+                    pointRadius: 4,
+                    fill: true,
+                    tension: 0.4,
+                    yAxisID: 'y',
                 }
-            }
+            ]
         },
-        scales: {
-            y: {
-                beginAtZero: true,
-                grid: { color: gridColor },
-                ticks: {
-                    color: tickColor,
-                    font: { size: 10 },
-                    callback: v => {
-                        if (v >= 1e9) return 'Rp ' + (v/1e9).toFixed(1) + 'M';
-                        if (v >= 1e6) return 'Rp ' + (v/1e6).toFixed(1) + 'jt';
-                        if (v >= 1e3) return 'Rp ' + (v/1e3).toFixed(0) + 'rb';
-                        return 'Rp ' + v;
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: tickColor,
+                        font: {
+                            size: 11
+                        },
+                        padding: 14,
+                        boxWidth: 12
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ' Rp ' + new Intl.NumberFormat('id-ID').format(ctx.raw)
                     }
                 }
             },
-            x: { grid: { display: false }, ticks: { color: tickColor, font: { size: 11 } } }
-        }
-    }
-});
-
-// ── Expense Category Doughnut ─────────────────────────────────────────────────
-@if($expByCategory->isNotEmpty())
-new Chart(document.getElementById('expenseCategoryChart').getContext('2d'), {
-    type: 'doughnut',
-    data: {
-        labels: @json($expByCategory->keys()),
-        datasets: [{
-            data: @json($expByCategory->values()),
-            backgroundColor: [
-                '#d97706','#2563eb','#16a34a','#dc2626',
-                '#7c3aed','#0891b2','#ea580c','#65a30d'
-            ],
-            borderWidth: 0,
-            hoverOffset: 6,
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: '65%',
-        plugins: {
-            legend: {
-                position: 'bottom',
-                labels: { color: tickColor, font: { size: 10 }, padding: 10, boxWidth: 10 }
-            },
-            tooltip: {
-                callbacks: {
-                    label: ctx => ' Rp ' + new Intl.NumberFormat('id-ID').format(ctx.raw)
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: gridColor
+                    },
+                    ticks: {
+                        color: tickColor,
+                        font: {
+                            size: 10
+                        },
+                        callback: v => {
+                            if (v >= 1e9) return 'Rp ' + (v / 1e9).toFixed(1) + 'M';
+                            if (v >= 1e6) return 'Rp ' + (v / 1e6).toFixed(1) + 'jt';
+                            if (v >= 1e3) return 'Rp ' + (v / 1e3).toFixed(0) + 'rb';
+                            return 'Rp ' + v;
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: tickColor,
+                        font: {
+                            size: 11
+                        }
+                    }
                 }
             }
         }
-    }
-});
-@endif
+    });
 
-lucide.createIcons();
+    // ── Expense Category Doughnut ─────────────────────────────────────────────────
+    @if($expByCategory - > isNotEmpty())
+    new Chart(document.getElementById('expenseCategoryChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: @json($expByCategory - > keys()),
+            datasets: [{
+                data: @json($expByCategory - > values()),
+                backgroundColor: [
+                    '#d97706', '#2563eb', '#16a34a', '#dc2626',
+                    '#7c3aed', '#0891b2', '#ea580c', '#65a30d'
+                ],
+                borderWidth: 0,
+                hoverOffset: 6,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: tickColor,
+                        font: {
+                            size: 10
+                        },
+                        padding: 10,
+                        boxWidth: 10
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ' Rp ' + new Intl.NumberFormat('id-ID').format(ctx.raw)
+                    }
+                }
+            }
+        }
+    });
+    @endif
+
+    lucide.createIcons();
 </script>
 @endpush

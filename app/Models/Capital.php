@@ -9,7 +9,10 @@ class Capital extends Model
 {
     use HasUuids;
 
+    const NAMES = ['PT ALDIVE', 'RUDI HARTONO'];
+
     protected $fillable = [
+        'kapal_id',
         'date',
         'name',
         'nominal',

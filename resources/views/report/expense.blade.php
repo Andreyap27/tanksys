@@ -145,6 +145,8 @@ function loadPrintPreview() {
 
     const params = new URLSearchParams();
     selected.forEach(cat => params.append('categories[]', cat));
+    const kapalId = new URLSearchParams(window.location.search).get('kapal_id');
+    if (kapalId) params.set('kapal_id', kapalId);
     const url = basePrintUrl + '&' + params.toString();
 
     closeCatPicker();

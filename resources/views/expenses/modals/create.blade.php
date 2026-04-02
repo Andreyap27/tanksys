@@ -8,6 +8,12 @@
             <form id="createForm" onsubmit="return false;">
                 <div class="form-grid">
                     <div class="form-group full">
+                        <label class="form-label">Kapal</label>
+                        <select name="kapal_id" id="createExpenseKapalSelect" class="form-select">
+                            <option value="">-- Pilih Kapal --</option>
+                        </select>
+                    </div>
+                    <div class="form-group full">
                         <label class="form-label">Tanggal <span class="text-danger">*</span></label>
                         <input type="date" name="date" class="form-input" required>
                     </div>

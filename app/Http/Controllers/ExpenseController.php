@@ -18,14 +18,11 @@ class ExpenseController extends Controller
     public function data()
     {
         $kapalId  = request('kapal_id');
-        $mobilId  = request('mobil_id');
         $query    = Expense::orderBy('date', 'desc');
         if ($kapalId) $query->where('kapal_id', $kapalId);
-        if ($mobilId) $query->where('mobil_id', $mobilId);
         $expenses = $query->get()->map(fn($e) => [
             'id'          => $e->id,
             'kapal_id'    => $e->kapal_id,
-            'mobil_id'    => $e->mobil_id,
             'date'        => $e->date->translatedFormat('d M Y'),
             'date_raw'    => $e->date->format('Y-m-d'),
             'description' => $e->description,
@@ -40,10 +37,8 @@ class ExpenseController extends Controller
     public function capitalTotal()
     {
         $kapalId = request('kapal_id');
-        $mobilId = request('mobil_id');
         $query   = \App\Models\Capital::where('status', 'approved');
         if ($kapalId) $query->where('kapal_id', $kapalId);
-        if ($mobilId) $query->where('mobil_id', $mobilId);
         return response()->json(['total' => (float) $query->sum('nominal')]);
     }
 
@@ -51,7 +46,6 @@ class ExpenseController extends Controller
     {
         $request->validate([
             'kapal_id'    => 'nullable|exists:kapals,id',
-            'mobil_id'    => 'nullable|exists:mobils,id',
             'date'        => 'required|date',
             'description' => 'required|string|max:255',
             'nominal'     => 'required|numeric|min:0',
@@ -61,7 +55,6 @@ class ExpenseController extends Controller
 
         Expense::create([
             'kapal_id'    => $request->kapal_id ?: null,
-            'mobil_id'    => $request->mobil_id ?: null,
             'date'        => $request->date,
             'description' => $request->description,
             'nominal'     => $request->nominal,
@@ -77,7 +70,6 @@ class ExpenseController extends Controller
     {
         $request->validate([
             'kapal_id'    => 'nullable|exists:kapals,id',
-            'mobil_id'    => 'nullable|exists:mobils,id',
             'date'        => 'required|date',
             'description' => 'required|string|max:255',
             'nominal'     => 'required|numeric|min:0',
@@ -87,7 +79,6 @@ class ExpenseController extends Controller
 
         $expense->update(array_merge(
             $request->only(['date', 'description', 'nominal', 'category', 'noted']),
-            ['kapal_id' => $request->kapal_id ?: null, 'mobil_id' => $request->mobil_id ?: null]
         ));
 
         return response()->json(['message' => 'Pengeluaran berhasil diupdate.']);

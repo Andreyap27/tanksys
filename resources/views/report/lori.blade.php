@@ -72,7 +72,8 @@
 
 @push('scripts')
 <script>
-const printUrl = '{{ route('report.print', ['section' => 'lori', 'year' => $year]) }}';
+@php $printRoute = ['section' => 'lori', 'year' => $year]; if (!empty($mobilId)) $printRoute['mobil_id'] = $mobilId; @endphp
+const printUrl = '{{ route('report.print', $printRoute) }}';
 function openPrintModal()  { document.getElementById('printFrame').src = printUrl; document.getElementById('printModal').classList.add('active'); }
 function closePrintModal() { document.getElementById('printModal').classList.remove('active'); document.getElementById('printFrame').src = ''; }
 lucide.createIcons();

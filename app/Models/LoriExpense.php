@@ -12,6 +12,7 @@ class LoriExpense extends Model
     const CATEGORIES = ['BBM', 'Gaji', 'Maintenance', 'Umum'];
 
     protected $fillable = [
+        'mobil_id',
         'date',
         'description',
         'category',

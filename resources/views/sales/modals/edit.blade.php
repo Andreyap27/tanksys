@@ -8,6 +8,12 @@
             <form id="editForm" onsubmit="return false;">
                 <div class="form-grid">
                     <div class="form-group full">
+                        <label class="form-label">Kapal</label>
+                        <select name="kapal_id" id="editSaleKapalSelect" class="form-select">
+                            <option value="">-- Pilih Kapal --</option>
+                        </select>
+                    </div>
+                    <div class="form-group full">
                         <label class="form-label">No Invoice</label>
                         <input type="text" name="invoice_number" class="form-input"
                             readonly style="background:#f5f5f4;cursor:not-allowed;">

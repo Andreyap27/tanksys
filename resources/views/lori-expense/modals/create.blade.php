@@ -7,6 +7,12 @@
         <form id="createForm" onsubmit="return false;">
             <div class="modal-body">
                 <div class="form-grid">
+                    <div class="form-group full">
+                        <label class="form-label">Mobil</label>
+                        <select name="mobil_id" id="createLoriExpenseMobilSelect" class="form-select">
+                            <option value="">-- Pilih Mobil --</option>
+                        </select>
+                    </div>
                     <div class="form-group">
                         <label class="form-label">Tanggal</label>
                         <input type="date" name="date" class="form-input" required>

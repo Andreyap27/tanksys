@@ -30,6 +30,14 @@
             <i data-lucide="users"></i>
             <span>User</span>
         </a>
+        <a href="{{ route('kapal.index') }}" class="nav-item {{ request()->routeIs('kapal.*') ? 'active' : '' }}">
+            <i data-lucide="ship"></i>
+            <span>Kapal</span>
+        </a>
+        <a href="{{ route('mobil-master.index') }}" class="nav-item {{ request()->routeIs('mobil-master.*') ? 'active' : '' }}">
+            <i data-lucide="car"></i>
+            <span>Mobil</span>
+        </a>
         @endif
         <a href="{{ route('customer.index') }}" class="nav-item {{ request()->routeIs('customer.*') ? 'active' : '' }}">
             <i data-lucide="building-2"></i>

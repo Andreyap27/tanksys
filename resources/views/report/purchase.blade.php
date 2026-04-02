@@ -62,8 +62,13 @@
 
 @push('scripts')
 <script>
-const printUrl = '{{ route('report.print', ['section' => 'purchase', 'year' => $year]) }}';
-function openPrintModal()  { document.getElementById('printFrame').src = printUrl; document.getElementById('printModal').classList.add('active'); }
+const basePrintUrl = '{{ route('report.print', ['section' => 'purchase', 'year' => $year]) }}';
+function openPrintModal() {
+    const kapalId = new URLSearchParams(window.location.search).get('kapal_id');
+    const url = basePrintUrl + (kapalId ? '&kapal_id=' + encodeURIComponent(kapalId) : '');
+    document.getElementById('printFrame').src = url;
+    document.getElementById('printModal').classList.add('active');
+}
 function closePrintModal() { document.getElementById('printModal').classList.remove('active'); document.getElementById('printFrame').src = ''; }
 lucide.createIcons();
 </script>

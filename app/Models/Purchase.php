@@ -10,6 +10,7 @@ class Purchase extends Model
     use HasUuids;
 
     protected $fillable = [
+        'kapal_id',
         'date',
         'vendor',
         'description',
@@ -31,6 +32,11 @@ class Purchase extends Model
             'price'    => 'decimal:2',
             'amount'   => 'decimal:2',
         ];
+    }
+
+    public function kapal()
+    {
+        return $this->belongsTo(Kapal::class);
     }
 
     public function creator()

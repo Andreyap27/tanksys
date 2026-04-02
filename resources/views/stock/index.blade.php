@@ -48,9 +48,9 @@
 
 {{-- Kapal Tabs --}}
 <div class="tab-bar" id="stockTabs">
-    <button class="tab active" data-kapal-id="" onclick="switchStockTab(this, '')">Semua</button>
+    <button class="tab active" data-kapal-id="" onclick="switchStockTab(this, '')"><i data-lucide="list" style="width:16px;height:16px;"></i> Semua</button>
     @foreach($kapals as $k)
-    <button class="tab" data-kapal-id="{{ $k->id }}" onclick="switchStockTab(this, '{{ $k->id }}')">{{ $k->name }}</button>
+    <button class="tab" data-kapal-id="{{ $k->id }}" onclick="switchStockTab(this, '{{ $k->id }}')"><i data-lucide="ship" style="width:16px;height:16px;"></i> {{ $k->name }}</button>
     @endforeach
 </div>
 

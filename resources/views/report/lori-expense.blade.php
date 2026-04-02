@@ -110,7 +110,8 @@
 
 @push('scripts')
 <script>
-const basePrintUrl = '{{ route('report.print', ['section' => 'lori-expense', 'year' => $year]) }}';
+@php $printRoute = ['section' => 'lori-expense', 'year' => $year]; if (!empty($mobilId)) $printRoute['mobil_id'] = $mobilId; @endphp
+const basePrintUrl = '{{ route('report.print', $printRoute) }}';
 
 function openPrintModal() {
     document.getElementById('catPickerModal').classList.add('active');

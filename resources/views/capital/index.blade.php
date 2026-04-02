@@ -19,39 +19,42 @@
 </div>
 
 {{-- Summary Cards --}}
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-bottom:1.25rem;">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.25rem;margin-bottom:1.5rem;">
     <div class="dash-stat ds-capital">
-        <div class="dash-stat__row">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon"><i data-lucide="building-2" style="width:20px;height:20px;"></i></div>
             <div>
                 <div class="dash-stat__label">PT Aldive</div>
                 <div class="dash-stat__value" id="capitalAldive">Rp 0</div>
             </div>
-            <div class="dash-stat__icon"><i data-lucide="building-2" style="width:1.1rem;height:1.1rem;"></i></div>
         </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="building-2" style="width:110px;height:110px;"></i></div>
     </div>
     <div class="dash-stat ds-capital">
-        <div class="dash-stat__row">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon"><i data-lucide="user" style="width:20px;height:20px;"></i></div>
             <div>
                 <div class="dash-stat__label">Rudi Hartono</div>
                 <div class="dash-stat__value" id="capitalRudi">Rp 0</div>
             </div>
-            <div class="dash-stat__icon"><i data-lucide="user" style="width:1.1rem;height:1.1rem;"></i></div>
         </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="user" style="width:110px;height:110px;"></i></div>
     </div>
     <div class="dash-stat ds-sale">
-        <div class="dash-stat__row">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon"><i data-lucide="wallet" style="width:20px;height:20px;"></i></div>
             <div>
                 <div class="dash-stat__label">Total Capital (Approved)</div>
                 <div class="dash-stat__value" id="capitalTotal">Rp 0</div>
             </div>
-            <div class="dash-stat__icon"><i data-lucide="wallet" style="width:1.1rem;height:1.1rem;"></i></div>
         </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="wallet" style="width:110px;height:110px;"></i></div>
     </div>
 </div>
 
 {{-- Kapal Tabs --}}
 <div class="tab-bar" id="capitalTabs">
-    <button class="tab active" onclick="switchCapitalTab(this, '')">Semua</button>
+    <button class="tab active" onclick="switchCapitalTab(this, '')"><i data-lucide="list" style="width:16px;height:16px;"></i> Semua</button>
 </div>
 
 <div class="card">
@@ -99,10 +102,11 @@ function loadCapitalKapals() {
             const btn = document.createElement('button');
             btn.className = 'tab';
             btn.dataset.kapalId = k.id;
-            btn.textContent = k.name;
+            btn.innerHTML = `<i data-lucide="ship" style="width:16px;height:16px;"></i> ${k.name}`;
             btn.onclick = function() { switchCapitalTab(this, k.id); };
             tabBar.appendChild(btn);
         });
+        lucide.createIcons();
         document.getElementById('createCapitalKapalSelect').innerHTML = '<option value="">-- Pilih Kapal --</option>' + opts;
         document.getElementById('editCapitalKapalSelect').innerHTML   = '<option value="">-- Pilih Kapal --</option>' + opts;
     });

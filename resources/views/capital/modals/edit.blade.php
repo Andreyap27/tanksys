@@ -8,12 +8,23 @@
             <form id="editForm" onsubmit="return false;">
                 <div class="form-grid">
                     <div class="form-group full">
+                        <label class="form-label">Kapal</label>
+                        <select name="kapal_id" id="editCapitalKapalSelect" class="form-select">
+                            <option value="">-- Pilih Kapal --</option>
+                        </select>
+                    </div>
+                    <div class="form-group full">
                         <label class="form-label">Tanggal <span class="text-danger">*</span></label>
                         <input type="date" name="date" class="form-input" required>
                     </div>
                     <div class="form-group full">
                         <label class="form-label">Nama <span class="text-danger">*</span></label>
-                        <input type="text" name="name" class="form-input" placeholder="Nama sumber modal" required>
+                        <select name="name" class="form-select" required>
+                            <option value="" disabled hidden>-- Pilih Nama --</option>
+                            @foreach(\App\Models\Capital::NAMES as $n)
+                                <option value="{{ $n }}">{{ $n }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="form-group full">
                         <label class="form-label">Nominal <span class="text-danger">*</span></label>

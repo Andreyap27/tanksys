@@ -39,6 +39,7 @@ class Expense extends Model
     ];
 
     protected $fillable = [
+        'kapal_id',
         'date',
         'description',
         'nominal',
