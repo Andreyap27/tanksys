@@ -1498,9 +1498,12 @@ table.dataTable thead .sorting_desc::after {
     display: flex;
     flex-wrap: wrap;
     gap: -0.25rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0;
     padding-left: 0;
     align-items: flex-end;
+    position: relative;
+    z-index: 2;
+    background: var(--background);
 }
 
 .tab {
@@ -1522,6 +1525,7 @@ table.dataTable thead .sorting_desc::after {
     white-space: nowrap;
     clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 100%, 0 100%);
     z-index: 1;
+    border-bottom: none;
 }
 
 .tab::after {
@@ -1549,11 +1553,24 @@ table.dataTable thead .sorting_desc::after {
     background-color: var(--primary);
     color: #ffffff;
     font-weight: 600;
-    z-index: 2;
+    z-index: 3;
+    border-bottom: 1px solid var(--border);
 }
 
 .tab.active::after {
     border-color: var(--primary) transparent var(--primary) var(--primary);
+}
+
+/* Connect tabs to card */
+.tab-bar + .card {
+    margin-top: -1px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.card:has(+ .tab-bar) {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
 /* =============================================================================
