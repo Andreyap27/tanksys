@@ -19,7 +19,6 @@
 </div>
 {{-- Tabs --}}
 <div class="tab-bar" id="loriExpenseMobilTabs">
-    <button class="tab active" onclick="switchLoriExpenseTab(this, '')">Semua</button>
 </div>
 
 <div class="card">

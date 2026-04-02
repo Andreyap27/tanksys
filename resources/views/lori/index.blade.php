@@ -24,7 +24,6 @@
 </div>
 {{-- Tabs --}}
 <div class="tab-bar" id="loriMobilTabs">
-    <button class="tab active" onclick="switchLoriTab(this, '')">Semua</button>
 </div>
 
 <div class="card">
@@ -141,8 +140,7 @@
 
     // ── Load customer options ─────────────────────────────────────────────────────
     function loadCustomerOptions(selectedId = '', callback = null) {
-        axios.get('{{ route('
-            customer.data ') }}').then(res => {
+        axios.get('{{ route('customer.data') }}').then(res => {
             const customers = res.data.data || res.data;
             const options = customers.map(c =>
                 `<option value="${c.id}">${c.customer_id ? c.customer_id + ' — ' : ''}${c.name}</option>`
