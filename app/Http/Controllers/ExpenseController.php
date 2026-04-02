@@ -17,7 +17,7 @@ class ExpenseController extends Controller
 
     public function data()
     {
-        $expenses = Expense::latest()->get()->map(fn($e) => [
+        $expenses = Expense::orderBy('date', 'desc')->get()->map(fn($e) => [
             'id'          => $e->id,
             'date'        => $e->date->translatedFormat('d M Y'),
             'date_raw'    => $e->date->format('Y-m-d'),
