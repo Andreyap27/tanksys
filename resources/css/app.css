@@ -2018,6 +2018,10 @@ table.dataTable thead .sorting_desc::after {
     background: var(--background);
     box-shadow: 0 1px 4px rgba(0,0,0,0.05);
 }
+/* colored backgrounds for each stock card type */
+.stock-card--balance { background: rgba(26, 92, 184, 0.08); }
+.stock-card--in      { background: rgba(22, 163, 74, 0.08); }
+.stock-card--out     { background: rgba(220, 38, 38, 0.08); }
 /* coloured top accent bar */
 .stock-card::before {
     content: '';
@@ -2177,6 +2181,15 @@ table.dataTable thead .sorting_desc::after {
     background: var(--background);
     box-shadow: 0 1px 4px rgba(0,0,0,0.05);
 }
+/* colored backgrounds for each category */
+.ds-sales    { background: rgba(217, 119, 6, 0.08); }
+.ds-purchase { background: rgba(37, 99, 235, 0.08); }
+.ds-expense  { background: rgba(220, 38, 38, 0.08); }
+.ds-profit   { background: rgba(22, 163, 74, 0.08); }
+.ds-loss     { background: rgba(220, 38, 38, 0.08); }
+.ds-stock    { background: rgba(124, 58, 237, 0.08); }
+.ds-lori     { background: rgba(8, 145, 178, 0.08); }
+.ds-capital  { background: rgba(99, 102, 241, 0.08); }
 /* colored top accent bar */
 .dash-stat::before {
     content: '';
