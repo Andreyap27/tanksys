@@ -109,6 +109,7 @@ $(document).ready(function () {
                 if (activeStockKapalId) d.kapal_id = activeStockKapalId;
             }
         },
+        processing: true,
         columns: [
             { data: 'date' },
             { data: 'party' },

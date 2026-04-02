@@ -159,6 +159,7 @@ $(document).ready(function () {
                 if (activeCapitalKapalId) d.kapal_id = activeCapitalKapalId;
             }
         },
+        processing: true,
         columns: [
             { data: 'date' },
             { data: 'name' },

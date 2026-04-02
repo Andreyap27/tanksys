@@ -287,6 +287,7 @@ $(document).ready(function () {
                 if (activeSaleKapalId) d.kapal_id = activeSaleKapalId;
             }
         },
+        processing: true,
         columns: [
             { data: 'date' },
             { data: 'invoice_number' },

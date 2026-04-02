@@ -256,6 +256,7 @@ $(document).ready(function () {
                 if (activeKapalId) d.kapal_id = activeKapalId;
             }
         },
+        processing: true,
         columns: [
             { data: 'date' },
             { data: 'vendor' },

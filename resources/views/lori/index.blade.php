@@ -195,13 +195,13 @@
 
         table = $('#loriTable').DataTable({
             ajax: {
-                url: '{{ route('
-                lori.data ') }}',
+                url: '{{ route('lori.data') }}',
                 type: 'GET',
                 data: function(d) {
                     if (activeLoriMobilId) d.mobil_id = activeLoriMobilId;
                 }
             },
+            processing: true,
             columns: [{
                     data: 'date'
                 },

@@ -130,6 +130,7 @@ $(document).ready(function () {
             type: 'GET',
             data: function(d) { if (activeLoriExpenseMobilId) d.mobil_id = activeLoriExpenseMobilId; }
         },
+        processing: true,
         columns: [
             { data: 'date' },
             { data: 'description' },

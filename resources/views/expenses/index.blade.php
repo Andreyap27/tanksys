@@ -180,6 +180,7 @@ $(document).ready(function () {
                 if (activeExpenseKapalId) d.kapal_id = activeExpenseKapalId;
             }
         },
+        processing: true,
         columns: [
             {
                 data: 'date',
