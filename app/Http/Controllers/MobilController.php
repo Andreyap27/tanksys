@@ -17,7 +17,7 @@ class MobilController extends Controller
 
     public function list()
     {
-        return response()->json(Mobil::orderBy('name')->get(['id', 'name']));
+        return response()->json(Mobil::orderBy('name')->get(['id', 'name', 'plat_nomer']));
     }
 
     public function data()

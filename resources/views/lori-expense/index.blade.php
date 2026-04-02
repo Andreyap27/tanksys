@@ -17,6 +17,11 @@
         @endif
     </div>
 </div>
+{{-- Tabs --}}
+<div class="tab-bar" id="loriExpenseMobilTabs">
+    <button class="tab active" onclick="switchLoriExpenseTab(this, '')">Semua</button>
+</div>
+
 <div class="card">
     <div class="card-toolbar"><div class="dt-search-slot"></div></div>
     <div class="card-content" style="padding:0;">
@@ -45,6 +50,7 @@
 <script>
 let table;
 let editId = null;
+let activeLoriExpenseMobilId = '';
 const canManage   = @json($canManage);
 const canDelete   = @json($canDelete);
 const createForm  = document.getElementById('createForm');
@@ -58,6 +64,31 @@ const categoryBadge = {
     'Maintenance': 'badge-warning',
     'Umum':        'badge-success',
 };
+
+// ── Mobil Tabs ────────────────────────────────────────────────────────────────
+function loadLoriExpenseMobils() {
+    axios.get('{{ route('mobil-master.list') }}').then(res => {
+        const tabBar = document.getElementById('loriExpenseMobilTabs');
+        const opts = res.data.map(m => `<option value="${m.id}">${m.name}${m.plat_nomer ? ' — '+m.plat_nomer : ''}</option>`).join('');
+        res.data.forEach(m => {
+            const btn = document.createElement('button');
+            btn.className = 'tab';
+            btn.dataset.mobilId = m.id;
+            btn.textContent = m.plat_nomer || m.name;
+            btn.onclick = function() { switchLoriExpenseTab(this, m.id); };
+            tabBar.appendChild(btn);
+        });
+        document.getElementById('createLoriExpenseMobilSelect').innerHTML = '<option value="">-- Pilih Mobil --</option>' + opts;
+        document.getElementById('editLoriExpenseMobilSelect').innerHTML   = '<option value="">-- Pilih Mobil --</option>' + opts;
+    });
+}
+
+function switchLoriExpenseTab(btn, mobilId) {
+    document.querySelectorAll('#loriExpenseMobilTabs .tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    activeLoriExpenseMobilId = mobilId;
+    table.ajax.reload(null, false);
+}
 
 // ── Input formatter ───────────────────────────────────────────────────────────
 function setRaw(el, raw) { el.dataset.raw = raw; }
@@ -81,8 +112,14 @@ document.querySelectorAll('.fmt-price').forEach(el => {
 
 // ── DataTable ─────────────────────────────────────────────────────────────────
 $(document).ready(function () {
+    loadLoriExpenseMobils();
+
     table = $('#loriExpenseTable').DataTable({
-        ajax: { url: '{{ route('lori-expense.data') }}', type: 'GET' },
+        ajax: {
+            url: '{{ route('lori-expense.data') }}',
+            type: 'GET',
+            data: function(d) { if (activeLoriExpenseMobilId) d.mobil_id = activeLoriExpenseMobilId; }
+        },
         columns: [
             { data: 'date' },
             { data: 'description' },
@@ -109,7 +146,7 @@ $(document).ready(function () {
                     return `
                         <div class="table-actions">
                             ${canManage ? `<button class="icon-btn primary" title="Edit"
-                                onclick="openEditModal('${row.id}','${row.date_raw}','${escHtml(row.description)}','${escHtml(row.category)}','${row.nominal_raw}','${escHtml(row.noted)}')">
+                                onclick="openEditModal('${row.id}','${row.date_raw}','${escHtml(row.description)}','${escHtml(row.category)}','${row.nominal_raw}','${escHtml(row.noted)}','${row.mobil_id || ''}')">
                                 <i data-lucide="pencil" style="width:14px;height:14px;"></i>
                             </button>` : ''}
                             ${canDelete ? `<button class="icon-btn danger" title="Hapus"
@@ -135,12 +172,14 @@ function escHtml(str) {
 function openCreateModal() {
     createForm.reset();
     setRaw(createForm.nominal, 0);
+    if (activeLoriExpenseMobilId) document.getElementById('createLoriExpenseMobilSelect').value = activeLoriExpenseMobilId;
     createModal.classList.add('active');
 }
 function closeCreateModal() { createModal.classList.remove('active'); }
 
 function storeExpense() {
     const payload = {
+        mobil_id:    document.getElementById('createLoriExpenseMobilSelect').value || null,
         date:        createForm.date.value,
         description: createForm.description.value,
         category:    createForm.category.value,
@@ -156,7 +195,7 @@ function storeExpense() {
 }
 
 // ── Edit ──────────────────────────────────────────────────────────────────────
-function openEditModal(id, date, description, category, nominal, noted) {
+function openEditModal(id, date, description, category, nominal, noted, mobilId) {
     editId = id;
     editForm.date.value        = date;
     editForm.description.value = description;
@@ -164,12 +203,14 @@ function openEditModal(id, date, description, category, nominal, noted) {
     editForm.noted.value       = noted !== '-' ? noted : '';
     setRaw(editForm.nominal, nominal);
     editForm.nominal.value = parseInt(nominal) ? Currency.format(nominal) : '';
+    document.getElementById('editLoriExpenseMobilSelect').value = mobilId || '';
     editModal.classList.add('active');
 }
 function closeEditModal() { editModal.classList.remove('active'); editId = null; }
 
 function updateExpense() {
     const payload = {
+        mobil_id:    document.getElementById('editLoriExpenseMobilSelect').value || null,
         date:        editForm.date.value,
         description: editForm.description.value,
         category:    editForm.category.value,
