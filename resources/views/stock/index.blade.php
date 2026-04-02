@@ -133,7 +133,7 @@ $(document).ready(function () {
                 render: function (data) { return `<span style="font-weight:600;">${data}</span>`; }
             },
         ],
-        order: [[0, 'asc']],
+        order: [[0, 'desc']],
         drawCallback: function () { lucide.createIcons(); }
     });
 });
