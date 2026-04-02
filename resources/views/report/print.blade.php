@@ -216,7 +216,7 @@
     {{-- Report Label --}}
     <div class="rpt-label">
         <span class="rpt-label-title">Laporan {{ $title }}</span>
-        <span class="rpt-label-year">Tahun {{ $year }}</span>
+        <span class="rpt-label-year">Tahun {{ $year }}{{ !empty($kapalName) ? ' — ' . $kapalName : '' }}{{ !empty($mobilName) ? ' — ' . $mobilName : '' }}</span>
     </div>
 
     {{-- Report Content --}}
