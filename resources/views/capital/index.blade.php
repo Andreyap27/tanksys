@@ -181,7 +181,7 @@ $(document).ready(function () {
                 searchable: false,
                 render: function (data, type, row) {
                     const editBtn = canManage
-                        ? `<button class="icon-btn primary" title="Edit" onclick="openEditModal('${row.id}', '${row.date_raw}', '${escHtml(row.name)}', '${row.nominal_raw}', '${escHtml(row.note)}')">
+                        ? `<button class="icon-btn primary" title="Edit" onclick="openEditModal('${row.id}', '${row.date_raw}', '${escHtml(row.name)}', '${row.nominal_raw}', '${escHtml(row.note)}', '${row.kapal_id || ''}')">
                                <i data-lucide="pencil" style="width:14px;height:14px;"></i>
                            </button>`
                         : '';

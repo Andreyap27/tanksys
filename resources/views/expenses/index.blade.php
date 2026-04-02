@@ -211,7 +211,7 @@ $(document).ready(function () {
                     return `
                         <div class="table-actions">
                             ${canManage ? `<button class="icon-btn primary" title="Edit"
-                                onclick="openEditModal('${row.id}', '${row.date_raw}', '${escHtml(row.description)}', '${row.category}', '${row.nominal_raw}', '${escHtml(row.noted)}')">
+                                onclick="openEditModal('${row.id}', '${row.date_raw}', '${escHtml(row.description)}', '${row.category}', '${row.nominal_raw}', '${escHtml(row.noted)}', '${row.kapal_id || ''}')">
                                 <i data-lucide="pencil" style="width:14px;height:14px;"></i>
                             </button>` : ''}
                             ${canDelete ? `<button class="icon-btn danger" title="Hapus"
