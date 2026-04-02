@@ -10,6 +10,7 @@ class Stock extends Model
     use HasUuids;
 
     protected $fillable = [
+        'kapal_id',
         'date',
         'type',
         'reference_id',
@@ -35,8 +36,10 @@ class Stock extends Model
         return $this->morphTo();
     }
 
-    public static function currentBalance(): float
+    public static function currentBalance(?string $kapalId = null): float
     {
-        return (float) (static::sum('qty_in') - static::sum('qty_out'));
+        $query = static::query();
+        if ($kapalId) $query->where('kapal_id', $kapalId);
+        return (float) ($query->sum('qty_in') - $query->sum('qty_out'));
     }
 }

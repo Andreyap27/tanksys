@@ -22,6 +22,34 @@
         @endif
     </div>
 </div>
+
+{{-- Summary Cards --}}
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.25rem;">
+    <div class="dash-stat ds-purchase">
+        <div class="dash-stat__row">
+            <div>
+                <div class="dash-stat__label">Total Amount (Approved)</div>
+                <div class="dash-stat__value" id="purchaseTotalAmount">Rp 0</div>
+            </div>
+            <div class="dash-stat__icon"><i data-lucide="wallet" style="width:1.1rem;height:1.1rem;"></i></div>
+        </div>
+    </div>
+    <div class="dash-stat ds-sale">
+        <div class="dash-stat__row">
+            <div>
+                <div class="dash-stat__label">Total Qty (Approved)</div>
+                <div class="dash-stat__value" id="purchaseTotalQty">0 L</div>
+            </div>
+            <div class="dash-stat__icon"><i data-lucide="fuel" style="width:1.1rem;height:1.1rem;"></i></div>
+        </div>
+    </div>
+</div>
+
+{{-- Kapal Tabs --}}
+<div class="tab-bar" id="purchaseTabs">
+    <button class="tab active" data-kapal-id="" onclick="switchTab(this, '')">Semua</button>
+</div>
+
 <div class="card">
     <div class="card-toolbar"><div class="dt-search-slot"></div></div>
     <div class="card-content" style="padding:0;">
@@ -67,6 +95,8 @@ const canManage  = @json($canManage);
 const canDelete  = @json($canDelete);
 let table;
 let editId = null;
+let activeKapalId = '';
+let activePurchaseMobilId = ''; // Removed from usage
 let quickVendorContext = 'create';
 const createForm       = document.getElementById('createForm');
 const editForm         = document.getElementById('editForm');
@@ -80,6 +110,33 @@ const itiQuickVendor = window.intlTelInput(document.getElementById('quickVendorC
     separateDialCode: true,
     utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@23.1.0/build/js/utils.js',
 });
+
+// ── Kapal tabs ───────────────────────────────────────────────────────────────
+let kapalList = [];
+function loadKapals() {
+    axios.get('{{ route('kapal.list') }}').then(res => {
+        kapalList = res.data;
+        const tabBar = document.getElementById('purchaseTabs');
+        kapalList.forEach(k => {
+            const btn = document.createElement('button');
+            btn.className = 'tab';
+            btn.dataset.kapalId = k.id;
+            btn.textContent = k.name;
+            btn.onclick = function() { switchTab(this, k.id); };
+            tabBar.appendChild(btn);
+        });
+        const opts = kapalList.map(k => `<option value="${k.id}">${k.code} — ${k.name}</option>`).join('');
+        document.getElementById('createKapalSelect').innerHTML = '<option value="">-- Pilih Kapal --</option>' + opts;
+        document.getElementById('editKapalSelect').innerHTML   = '<option value="">-- Pilih Kapal --</option>' + opts;
+    });
+}
+
+function switchTab(btn, kapalId) {
+    document.querySelectorAll('#purchaseTabs .tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    activeKapalId = kapalId;
+    table.ajax.reload(null, false);
+}
 
 // ── Select2 init ─────────────────────────────────────────────────────────────
 function initSelect2() {
@@ -128,7 +185,6 @@ function getRaw(el) {
     return parseFloat(el.dataset.raw) || 0;
 }
 
-// Qty: thousand-separator, allow decimals
 document.querySelectorAll('.fmt-qty').forEach(el => {
     el.addEventListener('input', function () {
         let val = this.value.replace(/[^0-9.]/g, '');
@@ -148,7 +204,6 @@ document.querySelectorAll('.fmt-qty').forEach(el => {
     });
 });
 
-// Price: integer rupiah, currency format
 document.querySelectorAll('.fmt-price').forEach(el => {
     el.addEventListener('input', function () {
         const raw = this.value.replace(/[^0-9]/g, '');
@@ -174,12 +229,33 @@ function triggerAmountCalc(el) {
     if (form.id === 'editForm')   calcEditAmount();
 }
 
+// ── Summary card ─────────────────────────────────────────────────────────────
+function updatePurchaseSummary(api) {
+    const rows = api.rows({ search: 'applied' }).data();
+    let totalAmount = 0, totalQty = 0;
+    for (let i = 0; i < rows.length; i++) {
+        if (rows[i].status === 'approved') {
+            totalAmount += parseFloat(rows[i].amount_raw) || 0;
+            totalQty    += parseFloat(rows[i].quantity_raw) || 0;
+        }
+    }
+    document.getElementById('purchaseTotalAmount').textContent = 'Rp ' + Currency.number(totalAmount);
+    document.getElementById('purchaseTotalQty').textContent    = Currency.number(totalQty) + ' L';
+}
+
 // ── DataTable ────────────────────────────────────────────────────────────────
 $(document).ready(function () {
     initSelect2();
+    loadKapals();
 
     table = $('#purchaseTable').DataTable({
-        ajax: { url: '{{ route('purchase.data') }}', type: 'GET' },
+        ajax: {
+            url: '{{ route('purchase.data') }}',
+            type: 'GET',
+            data: function(d) {
+                if (activeKapalId) d.kapal_id = activeKapalId;
+            }
+        },
         columns: [
             { data: 'date' },
             { data: 'vendor' },
@@ -228,8 +304,8 @@ $(document).ready(function () {
                                     '${escHtml(row.description)}',
                                     '${row.quantity_raw}',
                                     '${row.price_raw}',
-                                    '${escHtml(row.noted)}'
-                                )">
+                                    '${escHtml(row.noted)}',
+                                    '${row.kapal_id || ''}'
                                 <i data-lucide="pencil" style="width:14px;height:14px;"></i>
                             </button>`;
                     }
@@ -259,7 +335,10 @@ $(document).ready(function () {
             }
         ],
         order: [[0, 'desc']],
-        drawCallback: function () { lucide.createIcons(); }
+        drawCallback: function () {
+            lucide.createIcons();
+            updatePurchaseSummary(this.api());
+        }
     });
 });
 
@@ -279,6 +358,7 @@ function calcCreateAmount() {
 function openCreateModal() {
     createForm.reset();
     document.getElementById('createAmountDisplay').value = '';
+    if (activeKapalId) document.getElementById('createKapalSelect').value = activeKapalId;
     loadVendorOptions();
     createModal.classList.add('active');
 }
@@ -292,6 +372,7 @@ function storePurchase() {
     if (!vendor) { showError('Validasi', 'Vendor wajib dipilih.'); return; }
 
     const payload = {
+        kapal_id:    document.getElementById('createKapalSelect').value || null,
         date:        createForm.date.value,
         vendor:      vendor,
         description: createForm.description.value,
@@ -324,19 +405,18 @@ function calcEditAmount() {
     document.getElementById('editAmountDisplay').value = Currency.format(qty * price);
 }
 
-function openEditModal(id, date, vendor, description, quantity, price, noted) {
+function openEditModal(id, date, vendor, description, quantity, price, noted, kapalId) {
     editId = id;
     editForm.date.value        = date;
     editForm.description.value = description;
     editForm.noted.value       = noted;
+    document.getElementById('editKapalSelect').value = kapalId || '';
 
-    // Set qty with formatting
     setRaw(editForm.quantity, quantity);
     editForm.quantity.value = parseFloat(quantity)
         ? parseFloat(quantity).toLocaleString('id-ID', { maximumFractionDigits: 3 })
         : '';
 
-    // Set price with formatting
     setRaw(editForm.price, price);
     editForm.price.value = parseInt(price) ? Currency.format(price) : '';
 
@@ -355,6 +435,7 @@ function updatePurchase() {
     if (!vendor) { showError('Validasi', 'Vendor wajib dipilih.'); return; }
 
     const payload = {
+        kapal_id:    document.getElementById('editKapalSelect').value || null,
         date:        editForm.date.value,
         vendor:      vendor,
         description: editForm.description.value,
@@ -463,7 +544,6 @@ function storeQuickVendor() {
             const newName = quickVendorForm.name.value;
             showSuccess('Berhasil', res.data.message || 'Vendor berhasil ditambahkan');
             closeQuickVendorModal();
-            // Reload vendor options and auto-select the new vendor in the right modal
             loadVendorOptions(newName, () => {
                 if (quickVendorContext === 'create') {
                     $('#createVendorSelect').val(newName).trigger('change');

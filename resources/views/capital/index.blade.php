@@ -17,6 +17,43 @@
         @endif
     </div>
 </div>
+
+{{-- Summary Cards --}}
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-bottom:1.25rem;">
+    <div class="dash-stat ds-capital">
+        <div class="dash-stat__row">
+            <div>
+                <div class="dash-stat__label">PT Aldive</div>
+                <div class="dash-stat__value" id="capitalAldive">Rp 0</div>
+            </div>
+            <div class="dash-stat__icon"><i data-lucide="building-2" style="width:1.1rem;height:1.1rem;"></i></div>
+        </div>
+    </div>
+    <div class="dash-stat ds-capital">
+        <div class="dash-stat__row">
+            <div>
+                <div class="dash-stat__label">Rudi Hartono</div>
+                <div class="dash-stat__value" id="capitalRudi">Rp 0</div>
+            </div>
+            <div class="dash-stat__icon"><i data-lucide="user" style="width:1.1rem;height:1.1rem;"></i></div>
+        </div>
+    </div>
+    <div class="dash-stat ds-sale">
+        <div class="dash-stat__row">
+            <div>
+                <div class="dash-stat__label">Total Capital (Approved)</div>
+                <div class="dash-stat__value" id="capitalTotal">Rp 0</div>
+            </div>
+            <div class="dash-stat__icon"><i data-lucide="wallet" style="width:1.1rem;height:1.1rem;"></i></div>
+        </div>
+    </div>
+</div>
+
+{{-- Kapal Tabs --}}
+<div class="tab-bar" id="capitalTabs">
+    <button class="tab active" onclick="switchCapitalTab(this, '')">Semua</button>
+</div>
+
 <div class="card">
     <div class="card-toolbar"><div class="dt-search-slot"></div></div>
     <div class="card-content" style="padding:0;">
@@ -45,6 +82,7 @@
 <script>
 let table;
 let editId = null;
+let activeCapitalKapalId = '';
 const createForm  = document.getElementById('createForm');
 const editForm    = document.getElementById('editForm');
 const createModal = document.getElementById('createModal');
@@ -52,6 +90,41 @@ const editModal   = document.getElementById('editModal');
 const canApprove  = @json($canApprove);
 const canManage   = @json($canManage);
 const canDelete   = @json($canDelete);
+
+function loadCapitalKapals() {
+    axios.get('{{ route('kapal.list') }}').then(res => {
+        const tabBar = document.getElementById('capitalTabs');
+        const opts = res.data.map(k => `<option value="${k.id}">${k.code} — ${k.name}</option>`).join('');
+        res.data.forEach(k => {
+            const btn = document.createElement('button');
+            btn.className = 'tab';
+            btn.dataset.kapalId = k.id;
+            btn.textContent = k.name;
+            btn.onclick = function() { switchCapitalTab(this, k.id); };
+            tabBar.appendChild(btn);
+        });
+        document.getElementById('createCapitalKapalSelect').innerHTML = '<option value="">-- Pilih Kapal --</option>' + opts;
+        document.getElementById('editCapitalKapalSelect').innerHTML   = '<option value="">-- Pilih Kapal --</option>' + opts;
+    });
+}
+
+function switchCapitalTab(btn, kapalId) {
+    document.querySelectorAll('#capitalTabs .tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    activeCapitalKapalId = kapalId;
+    refreshCapitalSummary(kapalId);
+    table.ajax.reload(null, false);
+}
+
+function refreshCapitalSummary(kapalId) {
+    const params = {};
+    if (kapalId) params.kapal_id = kapalId;
+    axios.get('{{ route('capital.summary') }}', { params }).then(res => {
+        document.getElementById('capitalAldive').textContent = 'Rp ' + Currency.number(res.data.pt_aldive);
+        document.getElementById('capitalRudi').textContent   = 'Rp ' + Currency.number(res.data.rudi_hartono);
+        document.getElementById('capitalTotal').textContent  = 'Rp ' + Currency.number(res.data.total);
+    });
+}
 
 // ── Input formatter ───────────────────────────────────────────────────────────
 function setRaw(el, raw) { el.dataset.raw = raw; }
@@ -75,8 +148,17 @@ document.querySelectorAll('.fmt-price').forEach(el => {
 
 // ── DataTable ─────────────────────────────────────────────────────────────────
 $(document).ready(function () {
+    loadCapitalKapals();
+    refreshCapitalSummary('');
+
     table = $('#capitalTable').DataTable({
-        ajax: { url: '{{ route('capital.data') }}', type: 'GET' },
+        ajax: {
+            url: '{{ route('capital.data') }}',
+            type: 'GET',
+            data: function(d) {
+                if (activeCapitalKapalId) d.kapal_id = activeCapitalKapalId;
+            }
+        },
         columns: [
             { data: 'date' },
             { data: 'name' },
@@ -100,7 +182,6 @@ $(document).ready(function () {
                 render: function (data, type, row) {
                     const editBtn = canManage
                         ? `<button class="icon-btn primary" title="Edit"
-                               onclick="openEditModal('${row.id}','${row.date_raw}','${escHtml(row.name)}','${row.nominal_raw}','${escHtml(row.note)}')">
                                <i data-lucide="pencil" style="width:14px;height:14px;"></i>
                            </button>`
                         : '';
@@ -140,16 +221,18 @@ function escHtml(str) {
 // ── Create ────────────────────────────────────────────────────────────────────
 function openCreateModal() {
     createForm.reset();
+    if (activeCapitalKapalId) document.getElementById('createCapitalKapalSelect').value = activeCapitalKapalId;
     createModal.classList.add('active');
 }
 function closeCreateModal() { createModal.classList.remove('active'); }
 
 function storeCapital() {
     const payload = {
-        date:    createForm.date.value,
-        name:    createForm.name.value,
-        nominal: getRaw(createForm.nominal),
-        note:    createForm.note.value,
+        kapal_id: document.getElementById('createCapitalKapalSelect').value || null,
+        date:     createForm.date.value,
+        name:     createForm.name.value,
+        nominal:  getRaw(createForm.nominal),
+        note:     createForm.note.value,
     };
     axios.post('{{ route('capital.store') }}', payload)
         .then(res => { showSuccess('Berhasil', res.data.message); closeCreateModal(); table.ajax.reload(null, false); })
@@ -160,23 +243,25 @@ function storeCapital() {
 }
 
 // ── Edit ──────────────────────────────────────────────────────────────────────
-function openEditModal(id, date, name, nominal, note) {
+function openEditModal(id, date, name, nominal, note, kapalId) {
     editId = id;
     editForm.date.value  = date;
     editForm.name.value  = name;
     setRaw(editForm.nominal, nominal);
     editForm.nominal.value = parseInt(nominal) ? Currency.format(nominal) : '';
     editForm.note.value  = note || '';
+    document.getElementById('editCapitalKapalSelect').value = kapalId || '';
     editModal.classList.add('active');
 }
 function closeEditModal() { editModal.classList.remove('active'); editId = null; }
 
 function updateCapital() {
     const payload = {
-        date:    editForm.date.value,
-        name:    editForm.name.value,
-        nominal: getRaw(editForm.nominal),
-        note:    editForm.note.value,
+        kapal_id: document.getElementById('editCapitalKapalSelect').value || null,
+        date:     editForm.date.value,
+        name:     editForm.name.value,
+        nominal:  getRaw(editForm.nominal),
+        note:     editForm.note.value,
     };
     axios.put(`/capital/${editId}`, payload)
         .then(res => { showSuccess('Berhasil', res.data.message); closeEditModal(); table.ajax.reload(null, false); })

@@ -17,19 +17,44 @@
         @endif
     </div>
 </div>
-<div class="dash-stat ds-expense" style="margin-bottom:1.25rem;max-width:320px;">
-    <div class="dash-stat__row">
-        <div>
-            <div class="dash-stat__label">Total Pengeluaran</div>
-            <div class="dash-stat__value" id="expensesTotalCard">Rp 0</div>
-        </div>
-        <div class="dash-stat__icon">
-            <i data-lucide="receipt" style="width:1.1rem;height:1.1rem;"></i>
+
+{{-- Summary Cards --}}
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-bottom:1.25rem;">
+    <div class="dash-stat ds-capital">
+        <div class="dash-stat__row">
+            <div>
+                <div class="dash-stat__label">Capital</div>
+                <div class="dash-stat__value" id="expensesCapitalCard">Rp 0</div>
+            </div>
+            <div class="dash-stat__icon"><i data-lucide="wallet" style="width:1.1rem;height:1.1rem;"></i></div>
         </div>
     </div>
-    <div class="dash-stat__trend flat">
-        <i data-lucide="clipboard-list"></i> <span id="expensesCountCard">0</span> transaksi
+    <div class="dash-stat ds-expense">
+        <div class="dash-stat__row">
+            <div>
+                <div class="dash-stat__label">Total Pengeluaran</div>
+                <div class="dash-stat__value" id="expensesTotalCard">Rp 0</div>
+            </div>
+            <div class="dash-stat__icon"><i data-lucide="receipt" style="width:1.1rem;height:1.1rem;"></i></div>
+        </div>
+        <div class="dash-stat__trend flat">
+            <i data-lucide="clipboard-list"></i> <span id="expensesCountCard">0</span> transaksi
+        </div>
     </div>
+    <div class="dash-stat ds-sale">
+        <div class="dash-stat__row">
+            <div>
+                <div class="dash-stat__label">Balance</div>
+                <div class="dash-stat__value" id="expensesBalanceCard">Rp 0</div>
+            </div>
+            <div class="dash-stat__icon"><i data-lucide="trending-up" style="width:1.1rem;height:1.1rem;"></i></div>
+        </div>
+    </div>
+</div>
+
+{{-- Tabs --}}
+<div class="tab-bar" id="expenseTabs">
+    <button class="tab active" onclick="switchExpenseTab(this, '')">Semua</button>
 </div>
 
 <div class="card">
@@ -60,6 +85,8 @@
 <script>
 let table;
 let editId = null;
+let activeExpenseKapalId = '';
+let expensesCapital = 0;
 const canManage   = @json($canManage);
 const canDelete   = @json($canDelete);
 const createForm  = document.getElementById('createForm');
@@ -77,6 +104,48 @@ const categoryBadge = {
     'Fee':        'badge-warning',
     'Lori':       'badge-info',
 };
+
+// ── Kapal ─────────────────────────────────────────────────────────────────────
+function loadExpenseKapals() {
+    axios.get('{{ route('kapal.list') }}').then(res => {
+        const tabBar = document.getElementById('expenseTabs');
+        const opts = res.data.map(k => `<option value="${k.id}">${k.code} — ${k.name}</option>`).join('');
+        res.data.forEach(k => {
+            const btn = document.createElement('button');
+            btn.className = 'tab';
+            btn.dataset.kapalId = k.id;
+            btn.textContent = k.name;
+            btn.onclick = function() { switchExpenseTab(this, k.id); };
+            tabBar.appendChild(btn);
+        });
+        document.getElementById('createExpenseKapalSelect').innerHTML = '<option value="">-- Pilih Kapal --</option>' + opts;
+        document.getElementById('editExpenseKapalSelect').innerHTML   = '<option value="">-- Pilih Kapal --</option>' + opts;
+    });
+}
+
+function switchExpenseTab(btn, kapalId) {
+    document.querySelectorAll('#expenseTabs .tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    activeExpenseKapalId = kapalId;
+    refreshExpenseSummary(kapalId);
+    table.ajax.reload(null, false);
+}
+
+// ── Input formatter ───────────────────────────────────────────────────────────
+    const params = {};
+    if (kapalId) params.kapal_id = kapalId;
+    axios.get('{{ route('expenses.capital-total') }}', { params }).then(res => {
+        expensesCapital = res.data.total || 0;
+        document.getElementById('expensesCapitalCard').textContent = 'Rp ' + Currency.number(expensesCapital);
+        updateBalance();
+    });
+}
+
+function updateBalance() {
+    const totalText = document.getElementById('expensesTotalCard').textContent.replace(/[^0-9]/g, '');
+    const balance = expensesCapital - (parseFloat(totalText) || 0);
+    document.getElementById('expensesBalanceCard').textContent = 'Rp ' + Currency.number(balance);
+}
 
 // ── Input formatter ───────────────────────────────────────────────────────────
 function setRaw(el, raw) { el.dataset.raw = raw; }
@@ -100,8 +169,17 @@ document.querySelectorAll('.fmt-price').forEach(el => {
 
 // ── DataTable ─────────────────────────────────────────────────────────────────
 $(document).ready(function () {
+    loadExpenseKapals();
+    refreshExpenseSummary('');
+
     table = $('#expensesTable').DataTable({
-        ajax: { url: '{{ route('expenses.data') }}', type: 'GET' },
+        ajax: {
+            url: '{{ route('expenses.data') }}',
+            type: 'GET',
+            data: function(d) {
+                if (activeExpenseKapalId) d.kapal_id = activeExpenseKapalId;
+            }
+        },
         columns: [
             {
                 data: 'date',
@@ -133,7 +211,6 @@ $(document).ready(function () {
                     return `
                         <div class="table-actions">
                             ${canManage ? `<button class="icon-btn primary" title="Edit"
-                                onclick="openEditModal('${row.id}', '${row.date_raw}', '${escHtml(row.description)}', '${escHtml(row.category)}', '${row.nominal_raw}', '${escHtml(row.noted)}')">
                                 <i data-lucide="pencil" style="width:14px;height:14px;"></i>
                             </button>` : ''}
                             ${canDelete ? `<button class="icon-btn danger" title="Hapus"
@@ -159,6 +236,7 @@ function updateExpensesTotal(api) {
     for (let i = 0; i < rows.length; i++) total += parseFloat(rows[i].nominal_raw) || 0;
     document.getElementById('expensesTotalCard').textContent = 'Rp ' + Currency.number(total);
     document.getElementById('expensesCountCard').textContent = rows.length;
+    updateBalance();
 }
 
 function escHtml(str) {
@@ -167,9 +245,9 @@ function escHtml(str) {
 }
 
 // ── Create ────────────────────────────────────────────────────────────────────
-
 function openCreateModal() {
     createForm.reset();
+    if (activeExpenseKapalId) document.getElementById('createExpenseKapalSelect').value = activeExpenseKapalId;
     createModal.classList.add('active');
 }
 
@@ -179,6 +257,7 @@ function closeCreateModal() {
 
 function storeExpense() {
     const payload = {
+        kapal_id:    document.getElementById('createExpenseKapalSelect').value || null,
         date:        createForm.date.value,
         category:    createForm.category.value,
         description: createForm.description.value,
@@ -203,8 +282,7 @@ function storeExpense() {
 }
 
 // ── Edit ──────────────────────────────────────────────────────────────────────
-
-function openEditModal(id, date, description, category, nominal, noted) {
+function openEditModal(id, date, description, category, nominal, noted, kapalId) {
     editId = id;
     editForm.date.value        = date;
     editForm.description.value = description;
@@ -212,6 +290,7 @@ function openEditModal(id, date, description, category, nominal, noted) {
     editForm.noted.value       = noted !== '-' ? noted : '';
     setRaw(editForm.nominal, nominal);
     editForm.nominal.value = parseInt(nominal) ? Currency.format(nominal) : '';
+    document.getElementById('editExpenseKapalSelect').value = kapalId || '';
     editModal.classList.add('active');
 }
 
@@ -222,6 +301,7 @@ function closeEditModal() {
 
 function updateExpense() {
     const payload = {
+        kapal_id:    document.getElementById('editExpenseKapalSelect').value || null,
         date:        editForm.date.value,
         category:    editForm.category.value,
         description: editForm.description.value,

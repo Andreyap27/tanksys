@@ -3,21 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Models\Stock;
+use App\Models\Kapal;
+use App\Models\Mobil;
 
 class StockController extends Controller
 {
     public function index()
     {
+        $kapals   = Kapal::orderBy('code')->get();
+        $mobils   = Mobil::orderBy('name')->get();
         $balance  = Stock::currentBalance();
         $totalIn  = Stock::sum('qty_in');
         $totalOut = Stock::sum('qty_out');
-        return view('stock.index', compact('balance', 'totalIn', 'totalOut'));
+        return view('stock.index', compact('balance', 'totalIn', 'totalOut', 'kapals', 'mobils'));
     }
 
     public function data()
     {
+        $kapalId = request('kapal_id');
+        $query   = Stock::orderBy('date')->orderBy('created_at');
+        if ($kapalId) $query->where('kapal_id', $kapalId);
         $running = 0;
-        $stocks  = Stock::orderBy('date')->orderBy('created_at')->get()
+        $stocks  = $query->get()
             ->map(function ($s) use (&$running) {
                 $running += (float) $s->qty_in - (float) $s->qty_out;
                 return [
@@ -31,5 +38,16 @@ class StockController extends Controller
             });
 
         return response()->json(['data' => $stocks]);
+    }
+
+    public function summary()
+    {
+        $kapalId  = request('kapal_id');
+        $balance  = Stock::currentBalance($kapalId ?: null);
+        $query    = Stock::query();
+        if ($kapalId) $query->where('kapal_id', $kapalId);
+        $totalIn  = (float) $query->sum('qty_in');
+        $totalOut = (float) $query->sum('qty_out');
+        return response()->json(compact('balance', 'totalIn', 'totalOut'));
     }
 }
