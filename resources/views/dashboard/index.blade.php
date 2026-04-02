@@ -395,13 +395,13 @@ $profitIcon = $isProfit ? 'trending-up' : 'trending-down';
     });
 
     // ── Expense Category Doughnut ─────────────────────────────────────────────────
-    @if($expByCategory - > isNotEmpty())
+    @if($expByCategory->isNotEmpty())
     new Chart(document.getElementById('expenseCategoryChart').getContext('2d'), {
         type: 'doughnut',
         data: {
-            labels: @json($expByCategory - > keys()),
+            labels: @json($expByCategory->keys()),
             datasets: [{
-                data: @json($expByCategory - > values()),
+                data: @json($expByCategory->values()),
                 backgroundColor: [
                     '#d97706', '#2563eb', '#16a34a', '#dc2626',
                     '#7c3aed', '#0891b2', '#ea580c', '#65a30d'
