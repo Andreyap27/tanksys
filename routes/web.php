@@ -15,6 +15,8 @@ use App\Http\Controllers\LoriController;
 use App\Http\Controllers\LoriExpenseController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\KapalController;
+use App\Http\Controllers\MobilController;
 
 // Guest routes
 Route::middleware('guest.jwt')->group(function () {
@@ -57,9 +59,20 @@ Route::middleware('auth.jwt')->group(function () {
     Route::post('/purchase/{purchase}/reject', [PurchaseController::class, 'reject'])->name('purchase.reject');
     Route::resource('purchase', PurchaseController::class)->names('purchase')->except(['create', 'edit', 'show']);
 
+    // Kapal
+    Route::get('/kapal/list', [KapalController::class, 'list'])->name('kapal.list');
+    Route::get('/kapal/data', [KapalController::class, 'data'])->name('kapal.data');
+    Route::resource('kapal', KapalController::class)->names('kapal')->except(['create', 'edit', 'show']);
+
+    // Mobil (Master)
+    Route::get('/mobil-master/list', [MobilController::class, 'list'])->name('mobil-master.list');
+    Route::get('/mobil-master/data', [MobilController::class, 'data'])->name('mobil-master.data');
+    Route::resource('mobil-master', MobilController::class)->names('mobil-master')->except(['create', 'edit', 'show']);
+
     // Stock (read only, auto)
     Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
     Route::get('/stock/data', [StockController::class, 'data'])->name('stock.data');
+    Route::get('/stock/summary', [StockController::class, 'summary'])->name('stock.summary');
 
     // Sales
     Route::get('/sales/data', [SaleController::class, 'data'])->name('sales.data');
@@ -71,12 +84,14 @@ Route::middleware('auth.jwt')->group(function () {
     Route::resource('sales', SaleController::class)->names('sales')->except(['create', 'edit', 'show']);
 
     // Capital
+    Route::get('/capital/summary', [CapitalController::class, 'summary'])->name('capital.summary');
     Route::get('/capital/data', [CapitalController::class, 'data'])->name('capital.data');
     Route::post('/capital/{capital}/approve', [CapitalController::class, 'approve'])->name('capital.approve');
     Route::post('/capital/{capital}/reject', [CapitalController::class, 'reject'])->name('capital.reject');
     Route::resource('capital', CapitalController::class)->names('capital')->except(['create', 'edit', 'show']);
 
     // Expenses
+    Route::get('/expenses/capital-total', [ExpenseController::class, 'capitalTotal'])->name('expenses.capital-total');
     Route::get('/expenses/data', [ExpenseController::class, 'data'])->name('expenses.data');
     Route::resource('expenses', ExpenseController::class)->names('expenses')->except(['create', 'edit', 'show']);
 
