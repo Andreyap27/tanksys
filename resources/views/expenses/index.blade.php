@@ -9,6 +9,10 @@
         <p class="page-subtitle">Kelola data pengeluaran operasional</p>
     </div>
     <div class="page-actions">
+        <a href="{{ route('expenses.trash') }}" class="btn btn-secondary">
+            <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
+            Trash
+        </a>
         @if($canManage)
         <button class="btn btn-primary" onclick="openCreateModal()">
             <i data-lucide="plus" style="width:16px;height:16px;"></i>
