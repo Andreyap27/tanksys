@@ -18,6 +18,7 @@ class Lori extends Model
         'to',
         'price',
         'created_by',
+        'deleted_by',
     ];
 
     protected function casts(): array

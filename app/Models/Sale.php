@@ -24,6 +24,7 @@ class Sale extends Model
         'status',
         'approved_by',
         'approved_at',
+        'deleted_by',
     ];
 
     protected function casts(): array

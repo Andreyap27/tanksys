@@ -22,6 +22,7 @@ class Capital extends Model
         'approved_by',
         'approved_at',
         'created_by',
+        'deleted_by',
     ];
 
     protected function casts(): array

@@ -20,6 +20,7 @@ class LoriExpense extends Model
         'nominal',
         'noted',
         'created_by',
+        'deleted_by',
     ];
 
     protected function casts(): array

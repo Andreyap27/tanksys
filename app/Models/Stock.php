@@ -20,6 +20,7 @@ class Stock extends Model
         'qty_in',
         'qty_out',
         'balance',
+        'deleted_by',
     ];
 
     protected function casts(): array

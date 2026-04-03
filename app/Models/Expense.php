@@ -47,6 +47,7 @@ class Expense extends Model
         'category',
         'noted',
         'created_by',
+        'deleted_by',
     ];
 
     protected function casts(): array
