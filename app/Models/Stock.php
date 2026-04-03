@@ -54,7 +54,7 @@ class Stock extends Model
     {
         static::deleting(function ($model) {
             if ($model->isForceDeleting()) return;
-            $model->deleted_by = auth()->id();
+            $model->update(['deleted_by' => auth()->id()]);
         });
     }
 }
