@@ -2,11 +2,7 @@
     <!-- Company Logo -->
     <div class="sidebar-logo">
         <div class="company-logo-wrap">
-            <img src="/images/logo.png" alt="Logo Perusahaan" class="company-logo-img">
-        </div>
-        <div class="logo-info">
-            <div class="logo-text">TankSys Pro</div>
-            <div class="logo-sub">Manajemen Bisnis</div>
+            <img src="/images/logo.png" alt="Logo Perusahaan" class="company-logo-img" style="width:100%;height:auto;">
         </div>
         <button class="sidebar-close-btn" onclick="toggleSidebar()">
             <i data-lucide="x" style="width:1.1rem;height:1.1rem;"></i>
