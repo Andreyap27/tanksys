@@ -104,8 +104,7 @@
     }
 
     function loadExpenseKapals() {
-        axios.get('{{ route('
-            kapal.list ') }}').then(res => {
+        axios.get('{{ route('kapal.list') }}').then(res => {
             const tabBar = document.getElementById('expenseTabs');
             res.data.forEach(k => {
                 const btn = document.createElement('button');
@@ -189,7 +188,7 @@
 
     function updateSummaryCards() {
         if (!table || typeof table.rows !== 'function') return;
-        
+
         const data = table.rows({order: 'current'}).data();
         let totalNominal = 0;
 
@@ -235,41 +234,4 @@
             });
     }
 </script>
-
-<style>
-    .icon-btn {
-        width: 2rem;
-        height: 2rem;
-        border-radius: 0.375rem;
-        border: none;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s;
-    }
-
-    .icon-btn.success {
-        background: rgba(22, 163, 74, 0.1);
-        color: #16a34a;
-    }
-
-    .icon-btn.success:hover {
-        background: rgba(22, 163, 74, 0.2);
-    }
-
-    .icon-btn.danger {
-        background: rgba(220, 38, 38, 0.1);
-        color: #dc2626;
-    }
-
-    .icon-btn.danger:hover {
-        background: rgba(220, 38, 38, 0.2);
-    }
-
-    .table-actions {
-        display: flex;
-        gap: 0.5rem;
-    }
-</style>
 @endpush
