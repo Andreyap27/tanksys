@@ -196,6 +196,8 @@
     });
 
     function updateSummaryCards() {
+        if (!table || typeof table.rows !== 'function') return;
+        
         const data = table.rows({order: 'current'}).data();
         let totalQty = 0;
         let totalAmount = 0;
@@ -205,9 +207,13 @@
             totalAmount += parseFloat(row.amount_raw || 0);
         });
 
-        document.getElementById('totalDeleted').textContent = data.length;
-        document.getElementById('totalQtyDeleted').textContent = number_format(totalQty, 2) + ' L';
-        document.getElementById('totalAmountDeleted').textContent = 'Rp ' + formatCurrency(totalAmount);
+        const totalDeletedEl = document.getElementById('totalDeleted');
+        const totalQtyDeletedEl = document.getElementById('totalQtyDeleted');
+        const totalAmountDeletedEl = document.getElementById('totalAmountDeleted');
+
+        if (totalDeletedEl) totalDeletedEl.textContent = data.length;
+        if (totalQtyDeletedEl) totalQtyDeletedEl.textContent = number_format(totalQty, 2) + ' L';
+        if (totalAmountDeletedEl) totalAmountDeletedEl.textContent = 'Rp ' + formatCurrency(totalAmount);
     }
 
     function number_format(number, decimals) {

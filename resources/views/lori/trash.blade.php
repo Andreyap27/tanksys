@@ -171,6 +171,8 @@
     });
 
     function updateSummaryCards() {
+        if (!table || typeof table.rows !== 'function') return;
+        
         const data = table.rows({order: 'current'}).data();
         let totalPrice = 0;
 
@@ -178,8 +180,11 @@
             totalPrice += parseFloat(row.price_raw || 0);
         });
 
-        document.getElementById('totalDeleted').textContent = data.length;
-        document.getElementById('totalPriceDeleted').textContent = 'Rp ' + formatCurrency(totalPrice);
+        const totalDeletedEl = document.getElementById('totalDeleted');
+        const totalPriceDeletedEl = document.getElementById('totalPriceDeleted');
+
+        if (totalDeletedEl) totalDeletedEl.textContent = data.length;
+        if (totalPriceDeletedEl) totalPriceDeletedEl.textContent = 'Rp ' + formatCurrency(totalPrice);
     }
 
     function formatCurrency(value) {

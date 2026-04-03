@@ -181,6 +181,8 @@
     });
 
     function updateSummaryCards() {
+        if (!table || typeof table.rows !== 'function') return;
+        
         const data = table.rows({order: 'current'}).data();
         let totalNominal = 0;
 
@@ -188,8 +190,11 @@
             totalNominal += parseFloat(row.nominal_raw || 0);
         });
 
-        document.getElementById('totalDeleted').textContent = data.length;
-        document.getElementById('totalNominalDeleted').textContent = 'Rp ' + formatCurrency(totalNominal);
+        const totalDeletedEl = document.getElementById('totalDeleted');
+        const totalNominalDeletedEl = document.getElementById('totalNominalDeleted');
+
+        if (totalDeletedEl) totalDeletedEl.textContent = data.length;
+        if (totalNominalDeletedEl) totalNominalDeletedEl.textContent = 'Rp ' + formatCurrency(totalNominal);
     }
 
     function formatCurrency(value) {
