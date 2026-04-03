@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'TankSys Pro') }} - @yield('title', 'Login')</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,8 +21,15 @@
 
     <!-- Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <style>html, body { height: 100%; overflow: hidden; }</style>
+    <style>
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+        }
+    </style>
 </head>
+
 <body>
     <div class="login-container">
         <!-- Left Panel - Image -->
@@ -40,4 +51,5 @@
 
     @stack('scripts')
 </body>
+
 </html>
