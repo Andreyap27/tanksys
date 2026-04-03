@@ -198,6 +198,132 @@ class ReportController extends Controller
         return view('report.lori', compact('year', 'years', 'loris', 'loriExpenses', 'mobils', 'mobilId'));
     }
 
+    public function purchaseTrash()
+    {
+        $year     = $this->getYear();
+        $years    = $this->getYears();
+        $kapalId  = request('kapal_id') ?: null;
+        $kapals   = Kapal::orderBy('code')->get();
+
+        $purchases = Purchase::onlyTrashed()
+            ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(amount) as total_amount')
+            ->whereYear('date', $year)
+            ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
+            ->groupBy('month')
+            ->get()->keyBy('month');
+
+        return view('report.purchase-trash', compact('year', 'years', 'purchases', 'kapals', 'kapalId'));
+    }
+
+    public function saleTrash()
+    {
+        $year    = $this->getYear();
+        $years   = $this->getYears();
+        $kapalId = request('kapal_id') ?: null;
+        $kapals  = Kapal::orderBy('code')->get();
+
+        $sales = Sale::onlyTrashed()
+            ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(amount) as total_amount')
+            ->whereYear('date', $year)
+            ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
+            ->groupBy('month')
+            ->get()->keyBy('month');
+
+        return view('report.sale-trash', compact('year', 'years', 'sales', 'kapals', 'kapalId'));
+    }
+
+    public function expenseTrash()
+    {
+        $year    = $this->getYear();
+        $years   = $this->getYears();
+        $kapalId = request('kapal_id') ?: null;
+        $kapals  = Kapal::orderBy('code')->get();
+
+        $expensesByCategory = Expense::onlyTrashed()
+            ->selectRaw('MONTH(date) as month, category, SUM(nominal) as total')
+            ->whereYear('date', $year)
+            ->where('category', '!=', 'Lori')
+            ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
+            ->groupBy('month', 'category')
+            ->get()->groupBy('month');
+
+        $expensesTotal = Expense::onlyTrashed()
+            ->selectRaw('MONTH(date) as month, SUM(nominal) as total')
+            ->whereYear('date', $year)
+            ->where('category', '!=', 'Lori')
+            ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
+            ->groupBy('month')
+            ->pluck('total', 'month');
+
+        return view('report.expense-trash', compact('year', 'years', 'expensesByCategory', 'expensesTotal', 'kapals', 'kapalId'));
+    }
+
+    public function capitalTrash()
+    {
+        $year    = $this->getYear();
+        $years   = $this->getYears();
+        $kapalId = request('kapal_id') ?: null;
+        $kapals  = Kapal::orderBy('code')->get();
+
+        $capitals = Capital::onlyTrashed()
+            ->selectRaw('MONTH(date) as month, COUNT(*) as total_count, SUM(nominal) as total_nominal')
+            ->whereYear('date', $year)
+            ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
+            ->groupBy('month')
+            ->get()->keyBy('month');
+
+        return view('report.capital-trash', compact('year', 'years', 'capitals', 'kapals', 'kapalId'));
+    }
+
+    public function loriTrash()
+    {
+        $year    = $this->getYear();
+        $years   = $this->getYears();
+        $mobilId = request('mobil_id') ?: null;
+        $mobils  = Mobil::orderBy('name')->get();
+
+        $loris = Lori::onlyTrashed()
+            ->selectRaw('MONTH(date) as month, SUM(price) as total_income')
+            ->whereYear('date', $year)
+            ->when($mobilId, fn($q) => $q->where('mobil_id', $mobilId))
+            ->groupBy('month')
+            ->pluck('total_income', 'month');
+
+        $loriExpenses = LoriExpense::onlyTrashed()
+            ->selectRaw('MONTH(date) as month, SUM(nominal) as total')
+            ->whereYear('date', $year)
+            ->when($mobilId, fn($q) => $q->where('mobil_id', $mobilId))
+            ->groupBy('month')
+            ->pluck('total', 'month');
+
+        return view('report.lori-trash', compact('year', 'years', 'loris', 'loriExpenses', 'mobils', 'mobilId'));
+    }
+
+    public function loriExpenseTrash()
+    {
+        $year    = $this->getYear();
+        $years   = $this->getYears();
+        $mobilId = request('mobil_id') ?: null;
+        $mobils  = Mobil::orderBy('name')->get();
+        $cats    = LoriExpense::CATEGORIES;
+
+        $loriExpensesByCategory = LoriExpense::onlyTrashed()
+            ->selectRaw('MONTH(date) as month, category, SUM(nominal) as total')
+            ->whereYear('date', $year)
+            ->when($mobilId, fn($q) => $q->where('mobil_id', $mobilId))
+            ->groupBy('month', 'category')
+            ->get()->groupBy('month');
+
+        $loriExpensesTotal = LoriExpense::onlyTrashed()
+            ->selectRaw('MONTH(date) as month, SUM(nominal) as total')
+            ->whereYear('date', $year)
+            ->when($mobilId, fn($q) => $q->where('mobil_id', $mobilId))
+            ->groupBy('month')
+            ->pluck('total', 'month');
+
+        return view('report.lori-expense-trash', compact('year', 'years', 'loriExpensesByCategory', 'loriExpensesTotal', 'cats', 'mobils', 'mobilId'));
+    }
+
     public function printReport()
     {
         $year      = $this->getYear();

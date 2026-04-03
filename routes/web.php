@@ -136,11 +136,17 @@ Route::middleware('auth.jwt')->group(function () {
     Route::get('/report', fn() => redirect()->route('report.purchase'))->name('report.index');
     Route::get('/report/print',         [ReportController::class, 'printReport'])->name('report.print');
     Route::get('/report/purchase',      [ReportController::class, 'purchase'])->name('report.purchase');
+    Route::get('/report/purchase/trash', [ReportController::class, 'purchaseTrash'])->name('report.purchase.trash');
     Route::get('/report/sale',          [ReportController::class, 'sale'])->name('report.sale');
+    Route::get('/report/sale/trash',    [ReportController::class, 'saleTrash'])->name('report.sale.trash');
     Route::get('/report/expense',       [ReportController::class, 'expense'])->name('report.expense');
+    Route::get('/report/expense/trash', [ReportController::class, 'expenseTrash'])->name('report.expense.trash');
     Route::get('/report/capital',       [ReportController::class, 'capital'])->name('report.capital');
+    Route::get('/report/capital/trash', [ReportController::class, 'capitalTrash'])->name('report.capital.trash');
     Route::get('/report/lori-omset',    [ReportController::class, 'loriOmset'])->name('report.lori-omset');
     Route::get('/report/lori-expense',  [ReportController::class, 'loriExpense'])->name('report.lori-expense');
+    Route::get('/report/lori-expense/trash', [ReportController::class, 'loriExpenseTrash'])->name('report.lori-expense.trash');
     Route::get('/report/lori',          [ReportController::class, 'lori'])->name('report.lori');
+    Route::get('/report/lori/trash',    [ReportController::class, 'loriTrash'])->name('report.lori.trash');
     Route::get('/report/profit-loss',   [ReportController::class, 'profitLoss'])->name('report.profit-loss');
 });
