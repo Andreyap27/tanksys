@@ -77,11 +77,7 @@ $fmt = fn($n) => number_format((float)$n, 0, ',', '.');
 
 @push('scripts')
 <script>
-    const basePrintUrl = '{{ route('
-    report.print ', ['
-    section ' => '
-    lori - expense ', '
-    year ' => $year]) }}';
+    const basePrintUrl = '{{ route('report.print', ['section' => 'lori-expense','year' => $year]) }}&trash=1';
 
     function openPrintModal() {
         const mobilId = new URLSearchParams(window.location.search).get('mobil_id');

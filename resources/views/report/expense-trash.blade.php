@@ -80,11 +80,7 @@ $categories = \App\Models\Expense::CATEGORIES;
 
 @push('scripts')
 <script>
-    const basePrintUrl = '{{ route('
-    report.print ', ['
-    section ' => '
-    expense ', '
-    year ' => $year]) }}';
+    const basePrintUrl = '{{ route('report.print', ['section' => 'expense','year' => $year]) }}&trash=1';
 
     function openPrintModal() {
         const kapalId = new URLSearchParams(window.location.search).get('kapal_id');

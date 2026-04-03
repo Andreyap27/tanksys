@@ -332,6 +332,7 @@ class ReportController extends Controller
         $kapalName = $kapalId ? optional(Kapal::find($kapalId))->name : null;
         $mobilId   = request('mobil_id') ?: null;
         $mobilName = $mobilId ? optional(Mobil::find($mobilId))->name : null;
+        $isTrash   = request('trash', false);
 
         $months = [
             1=>'Januari', 2=>'Februari', 3=>'Maret',    4=>'April',
@@ -339,24 +340,26 @@ class ReportController extends Controller
             9=>'September', 10=>'Oktober', 11=>'November', 12=>'Desember',
         ];
 
-        $data = compact('year', 'section', 'months', 'kapalId', 'kapalName', 'mobilId', 'mobilName');
+        $data = compact('year', 'section', 'months', 'kapalId', 'kapalName', 'mobilId', 'mobilName', 'isTrash');
 
         switch ($section) {
             case 'purchase':
-                $data['purchases'] = Purchase::where('status', 'approved')
+                $query = $isTrash ? Purchase::onlyTrashed() : Purchase::where('status', 'approved');
+                $data['purchases'] = $query
                     ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(amount) as total_amount')
                     ->whereYear('date', $year)
                     ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
                     ->groupBy('month')->get()->keyBy('month');
-                $data['title'] = 'Total Purchase';
+                $data['title'] = $isTrash ? 'Total Purchase (Trash)' : 'Total Purchase';
                 break;
             case 'sale':
-                $data['sales'] = Sale::where('status', 'approved')
+                $query = $isTrash ? Sale::onlyTrashed() : Sale::where('status', 'approved');
+                $data['sales'] = $query
                     ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(amount) as total_amount')
                     ->whereYear('date', $year)
                     ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
                     ->groupBy('month')->get()->keyBy('month');
-                $data['title'] = 'Total Sale';
+                $data['title'] = $isTrash ? 'Total Sale (Trash)' : 'Total Sale';
                 break;
             case 'expense':
                 $allExpCats    = \App\Models\Expense::EXPENSE_CATEGORIES;
@@ -365,15 +368,17 @@ class ReportController extends Controller
                     : $allExpCats;
                 if (empty($selectedCats)) $selectedCats = $allExpCats;
                 $data['categories'] = $selectedCats;
-                $data['expensesByCategory'] = Expense::selectRaw('MONTH(date) as month, category, SUM(nominal) as total')
+                $query = $isTrash ? Expense::onlyTrashed() : Expense::query();
+                $data['expensesByCategory'] = $query->selectRaw('MONTH(date) as month, category, SUM(nominal) as total')
                     ->whereYear('date', $year)->whereIn('category', $selectedCats)
                     ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
                     ->groupBy('month', 'category')->get()->groupBy('month');
-                $data['expensesTotal'] = Expense::selectRaw('MONTH(date) as month, SUM(nominal) as total')
+                $query = $isTrash ? Expense::onlyTrashed() : Expense::query();
+                $data['expensesTotal'] = $query->selectRaw('MONTH(date) as month, SUM(nominal) as total')
                     ->whereYear('date', $year)->whereIn('category', $selectedCats)
                     ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
                     ->groupBy('month')->pluck('total', 'month');
-                $data['title'] = 'Total Expense';
+                $data['title'] = $isTrash ? 'Total Expense (Trash)' : 'Total Expense';
                 break;
             case 'profit-loss':
                 $data['purchases'] = Purchase::where('status', 'approved')
@@ -393,12 +398,13 @@ class ReportController extends Controller
                 $data['title'] = 'Profit / Loss';
                 break;
             case 'capital':
-                $data['capitals'] = Capital::where('status', 'approved')
+                $query = $isTrash ? Capital::onlyTrashed() : Capital::where('status', 'approved');
+                $data['capitals'] = $query
                     ->selectRaw('MONTH(date) as month, COUNT(*) as total_count, SUM(nominal) as total_nominal')
                     ->whereYear('date', $year)
                     ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
                     ->groupBy('month')->get()->keyBy('month');
-                $data['title'] = 'Total Capital';
+                $data['title'] = $isTrash ? 'Total Capital (Trash)' : 'Total Capital';
                 break;
             case 'lori-omset':
                 $data['loris'] = Lori::selectRaw('MONTH(date) as month, SUM(price) as total_income')
@@ -415,26 +421,30 @@ class ReportController extends Controller
                 if (empty($selectedCats)) $selectedCats = $allLoriCats;
                 $cats = $selectedCats;
                 $data['cats'] = $cats;
-                $data['loriExpensesByCategory'] = LoriExpense::selectRaw('MONTH(date) as month, category, SUM(nominal) as total')
+                $query = $isTrash ? LoriExpense::onlyTrashed() : LoriExpense::query();
+                $data['loriExpensesByCategory'] = $query->selectRaw('MONTH(date) as month, category, SUM(nominal) as total')
                     ->whereYear('date', $year)->whereIn('category', $cats)
                     ->when($mobilId, fn($q) => $q->where('mobil_id', $mobilId))
                     ->groupBy('month', 'category')->get()->groupBy('month');
-                $data['loriExpensesTotal'] = LoriExpense::selectRaw('MONTH(date) as month, SUM(nominal) as total')
+                $query = $isTrash ? LoriExpense::onlyTrashed() : LoriExpense::query();
+                $data['loriExpensesTotal'] = $query->selectRaw('MONTH(date) as month, SUM(nominal) as total')
                     ->whereYear('date', $year)->whereIn('category', $cats)
                     ->when($mobilId, fn($q) => $q->where('mobil_id', $mobilId))
                     ->groupBy('month')->pluck('total', 'month');
-                $data['title'] = 'Expenses Mobil Tangki';
+                $data['title'] = $isTrash ? 'Expenses Mobil Tangki (Trash)' : 'Expenses Mobil Tangki';
                 break;
             case 'lori':
-                $data['loris'] = Lori::selectRaw('MONTH(date) as month, SUM(price) as total_income')
+                $query = $isTrash ? Lori::onlyTrashed() : Lori::query();
+                $data['loris'] = $query->selectRaw('MONTH(date) as month, SUM(price) as total_income')
                     ->whereYear('date', $year)
                     ->when($mobilId, fn($q) => $q->where('mobil_id', $mobilId))
                     ->groupBy('month')->pluck('total_income', 'month');
-                $data['loriExpenses'] = LoriExpense::selectRaw('MONTH(date) as month, SUM(nominal) as total')
+                $query = $isTrash ? LoriExpense::onlyTrashed() : LoriExpense::query();
+                $data['loriExpenses'] = $query->selectRaw('MONTH(date) as month, SUM(nominal) as total')
                     ->whereYear('date', $year)
                     ->when($mobilId, fn($q) => $q->where('mobil_id', $mobilId))
                     ->groupBy('month')->pluck('total', 'month');
-                $data['title'] = 'Profit / Loss Mobil Tangki';
+                $data['title'] = $isTrash ? 'Profit / Loss Mobil Tangki (Trash)' : 'Profit / Loss Mobil Tangki';
                 break;
             default:
                 abort(404);

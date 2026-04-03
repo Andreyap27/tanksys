@@ -64,11 +64,7 @@ $gAmt += (float)($purchases->get($m)->total_amount ?? 0);
 
 @push('scripts')
 <script>
-    const basePrintUrl = '{{ route('
-    report.print ', ['
-    section ' => '
-    purchase ', '
-    year ' => $year]) }}';
+    const basePrintUrl = '{{ route('report.print', ['section' => 'purchase','year' => $year]) }}&trash=1';
 
     function openPrintModal() {
         const kapalId = new URLSearchParams(window.location.search).get('kapal_id');

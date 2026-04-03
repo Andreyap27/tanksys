@@ -75,23 +75,19 @@ $gProfit += $profit;
 
 @push('scripts')
 <script>
-    const basePrintUrl = '{{ route('
-    report.print ', ['
-    section ' => '
-    lori ', '
-    year ' => $year]) }}';
+const basePrintUrl = '{{ route('report.print', ['section' => 'lori','year' => $year]) }}&trash=1';
 
-    function openPrintModal() {
-        const mobilId = new URLSearchParams(window.location.search).get('mobil_id');
-        const url = basePrintUrl + (mobilId ? '&mobil_id=' + encodeURIComponent(mobilId) : '');
-        document.getElementById('printFrame').src = url;
-        document.getElementById('printModal').classList.add('active');
-    }
+function openPrintModal() {
+    const mobilId = new URLSearchParams(window.location.search).get('mobil_id');
+    const url = basePrintUrl + (mobilId ? '&mobil_id=' + encodeURIComponent(mobilId) : '');
+    document.getElementById('printFrame').src = url;
+    document.getElementById('printModal').classList.add('active');
+}
 
-    function closePrintModal() {
-        document.getElementById('printModal').classList.remove('active');
-        document.getElementById('printFrame').src = '';
-    }
-    lucide.createIcons();
+function closePrintModal() {
+    document.getElementById('printModal').classList.remove('active');
+    document.getElementById('printFrame').src = '';
+}
+lucide.createIcons();
 </script>
 @endpush
