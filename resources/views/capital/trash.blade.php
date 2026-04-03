@@ -88,8 +88,7 @@
         loadCapitalKapals();
         table = $('#capitalTable').DataTable({
             ajax: {
-                url: '{{ route('
-                capital.trash - data ') }}',
+                url: '{{ route('capital.trash-data') }}',
                 type: 'GET',
                 data: function(d) {
                     if (activeCapitalKapalId) d.kapal_id = activeCapitalKapalId;

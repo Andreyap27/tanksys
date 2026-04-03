@@ -88,8 +88,7 @@
         loadLoriMobils();
         table = $('#loriTable').DataTable({
             ajax: {
-                url: '{{ route('
-                lori.trash - data ') }}',
+                url: '{{ route('lori.trash-data') }}',
                 type: 'GET',
                 data: function(d) {
                     if (activeLoriMobilId) d.mobil_id = activeLoriMobilId;

@@ -101,8 +101,7 @@
         loadExpenseKapals();
         table = $('#expenseTable').DataTable({
             ajax: {
-                url: '{{ route('
-                expenses.trash - data ') }}',
+                url: '{{ route('expenses.trash-data') }}',
                 type: 'GET',
                 data: function(d) {
                     if (activeExpenseKapalId) d.kapal_id = activeExpenseKapalId;

@@ -74,8 +74,7 @@
     }
 
     function loadLoriExpenseMobils() {
-        axios.get('{{ route('
-            mobil - master.list ') }}').then(res => {
+        axios.get('{{ route('mobil-master.list') }}').then(res => {
             const tabBar = document.getElementById('loriExpenseTabs');
             res.data.forEach(m => {
                 const btn = document.createElement('button');
@@ -95,8 +94,7 @@
         loadLoriExpenseMobils();
         table = $('#loriExpenseTable').DataTable({
             ajax: {
-                url: '{{ route('
-                lori - expense.trash - data ') }}',
+                url: '{{ route('lori-expense.trash-data') }}',
                 type: 'GET',
                 data: function(d) {
                     if (activeLoriExpenseMobilId) d.mobil_id = activeLoriExpenseMobilId;

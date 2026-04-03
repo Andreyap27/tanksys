@@ -69,8 +69,7 @@
     }
 
     function loadPurchaseKapals() {
-        axios.get('{{ route('
-            kapal.list ') }}').then(res => {
+        axios.get('{{ route('kapal.list') }}').then(res => {
             const tabBar = document.getElementById('purchaseTabs');
             res.data.forEach(k => {
                 const btn = document.createElement('button');
@@ -90,8 +89,7 @@
         loadPurchaseKapals();
         table = $('#purchaseTable').DataTable({
             ajax: {
-                url: '{{ route('
-                purchase.trash - data ') }}',
+                url: '{{ route('purchase.trash-data') }}',
                 type: 'GET',
                 data: function(d) {
                     if (activePurchaseKapalId) d.kapal_id = activePurchaseKapalId;
