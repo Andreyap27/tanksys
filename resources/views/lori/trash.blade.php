@@ -1,0 +1,210 @@
+@extends('layouts.app')
+
+@section('title', 'Data Lori Terhapus (Trash)')
+
+@section('content')
+<div class="page-header">
+    <div>
+        <h1 class="page-title-text">Data Lori Terhapus</h1>
+        <p class="page-subtitle">Kelola data lori yang telah dihapus</p>
+    </div>
+    <div class="page-actions">
+        <a href="{{ route('lori.index') }}" class="btn btn-secondary">
+            <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
+            Kembali
+        </a>
+    </div>
+</div>
+
+{{-- Mobil Tabs --}}
+<div class="tab-bar" id="loriTabs">
+    <button class="tab active" data-mobil-id="" onclick="switchTab(this, '')"><i data-lucide="list" style="width:16px;height:16px;"></i> Semua</button>
+</div>
+
+<div class="card">
+    <div class="card-toolbar">
+        <div class="dt-search-slot"></div>
+    </div>
+    <div class="card-content" style="padding:0;">
+        <div class="table-wrap">
+            <table id="loriTable" class="w-full">
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Customer</th>
+                        <th>Dari</th>
+                        <th>Ke</th>
+                        <th>Harga</th>
+                        <th>Dihapus</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+@endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    });
+
+    let table;
+    let activeLoriMobilId = '';
+    const canRestore = @json($canRestore);
+    const canDelete = @json($canDelete);
+
+    function switchTab(btn, mobilId) {
+        document.querySelectorAll('#loriTabs .tab').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        activeLoriMobilId = mobilId;
+        table.ajax.reload(null, false);
+    }
+
+    function loadLoriMobils() {
+        axios.get('{{ route('
+            mobil - master.list ') }}').then(res => {
+            const tabBar = document.getElementById('loriTabs');
+            res.data.forEach(m => {
+                const btn = document.createElement('button');
+                btn.className = 'tab';
+                btn.dataset.mobilId = m.id;
+                btn.innerHTML = '<i data-lucide="truck" style="width:16px;height:16px;"></i> ' + m.plate_number;
+                btn.onclick = function() {
+                    switchTab(this, m.id);
+                };
+                tabBar.appendChild(btn);
+            });
+            lucide.createIcons();
+        });
+    }
+
+    $(document).ready(function() {
+        loadLoriMobils();
+        table = $('#loriTable').DataTable({
+            ajax: {
+                url: '{{ route('
+                lori.trash - data ') }}',
+                type: 'GET',
+                data: function(d) {
+                    if (activeLoriMobilId) d.mobil_id = activeLoriMobilId;
+                }
+            },
+            processing: true,
+            columns: [{
+                    data: 'date',
+                    render: function(data, type, row) {
+                        return (type === 'sort' || type === 'type') ? row.date_raw : data;
+                    }
+                },
+                {
+                    data: 'customer'
+                },
+                {
+                    data: 'from'
+                },
+                {
+                    data: 'to'
+                },
+                {
+                    data: 'price'
+                },
+                {
+                    data: 'deleted_at'
+                },
+                {
+                    data: null,
+                    orderable: false,
+                    searchable: false,
+                    render: function(data, type, row) {
+                        let actions = '';
+                        if (canRestore) {
+                            actions += `<button class="icon-btn success" title="Restore" onclick="restoreLori('${row.id}')">
+                            <i data-lucide="undo-2" style="width:14px;height:14px;"></i>
+                        </button>`;
+                        }
+                        if (canDelete) {
+                            actions += `<button class="icon-btn danger" title="Hapus Permanen" onclick="forceDeleteLori('${row.id}')">
+                            <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
+                        </button>`;
+                        }
+                        return `<div class="table-actions">${actions}</div>`;
+                    }
+                }
+            ],
+            order: [
+                [0, 'desc']
+            ],
+            drawCallback: function() {
+                lucide.createIcons();
+            }
+        });
+    });
+
+    function restoreLori(id) {
+        if (!confirm('Restore data lori ini?')) return;
+        axios.post(`{{ route('lori.restore', '') }}/${id}`)
+            .then(res => {
+                showSuccess('Berhasil', res.data.message);
+                table.ajax.reload(null, false);
+            })
+            .catch(err => {
+                showError('Gagal', err.response?.data?.message || 'Terjadi kesalahan');
+            });
+    }
+
+    function forceDeleteLori(id) {
+        if (!confirm('Hapus data lori ini secara PERMANEN? Tindakan ini tidak dapat dibatalkan!')) return;
+        axios.post(`{{ route('lori.force-delete', '') }}/${id}`)
+            .then(res => {
+                showSuccess('Berhasil', res.data.message);
+                table.ajax.reload(null, false);
+            })
+            .catch(err => {
+                showError('Gagal', err.response?.data?.message || 'Terjadi kesalahan');
+            });
+    }
+</script>
+
+<style>
+    .icon-btn {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 0.375rem;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .icon-btn.success {
+        background: rgba(22, 163, 74, 0.1);
+        color: #16a34a;
+    }
+
+    .icon-btn.success:hover {
+        background: rgba(22, 163, 74, 0.2);
+    }
+
+    .icon-btn.danger {
+        background: rgba(220, 38, 38, 0.1);
+        color: #dc2626;
+    }
+
+    .icon-btn.danger:hover {
+        background: rgba(220, 38, 38, 0.2);
+    }
+
+    .table-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+</style>
+@endpush

@@ -241,4 +241,70 @@ class SaleController extends Controller
         $sale->load('customer', 'creator');
         return view('sales.invoice', compact('sale'));
     }
+
+    public function trash()
+    {
+        return view('sales.trash', [
+            'canRestore' => auth()->user()->canManage(),
+            'canDelete'  => auth()->user()->canDelete(),
+        ]);
+    }
+
+    public function trashData()
+    {
+        $kapalId = request('kapal_id');
+        $query   = Sale::onlyTrashed()->with('creator', 'customer')->orderBy('date', 'desc');
+        if ($kapalId) $query->where('kapal_id', $kapalId);
+        $sales   = $query->get()->map(fn($s) => [
+            'id'              => $s->id,
+            'kapal_id'        => $s->kapal_id,
+            'date'            => $s->date->translatedFormat('d M Y'),
+            'date_raw'        => $s->date->format('Y-m-d'),
+            'invoice_number'  => $s->invoice_number,
+            'customer_name'   => $s->customer->name ?? '-',
+            'description'     => $s->description ?? '',
+            'quantity'        => number_format($s->quantity, 2, ',', '.'),
+            'quantity_raw'    => $s->quantity,
+            'price'           => number_format($s->price, 0, ',', '.'),
+            'price_raw'       => $s->price,
+            'amount'          => number_format($s->amount, 0, ',', '.'),
+            'amount_raw'      => $s->amount,
+            'noted'           => $s->noted ?? '',
+            'status'          => $s->status,
+            'deleted_at'      => $s->deleted_at->translatedFormat('d M Y H:i'),
+        ]);
+        return response()->json(['data' => $sales]);
+    }
+
+    public function restore($id)
+    {
+        if (!auth()->user()->canManage()) {
+            return response()->json(['message' => 'Anda tidak memiliki izin untuk restore data.'], 403);
+        }
+
+        $sale = Sale::onlyTrashed()->find($id);
+        if (!$sale) {
+            return response()->json(['message' => 'Penjualan tidak ditemukan.'], 404);
+        }
+
+        $sale->restore();
+
+        return response()->json(['message' => 'Penjualan berhasil di-restore.']);
+    }
+
+    public function forceDelete($id)
+    {
+        if (!auth()->user()->canDelete()) {
+            return response()->json(['message' => 'Anda tidak memiliki izin untuk menghapus data.'], 403);
+        }
+
+        $sale = Sale::onlyTrashed()->find($id);
+        if (!$sale) {
+            return response()->json(['message' => 'Penjualan tidak ditemukan.'], 404);
+        }
+
+        $sale->forceDelete();
+
+        return response()->json(['message' => 'Penjualan berhasil dihapus permanen.']);
+    }
 }

@@ -187,4 +187,69 @@ class PurchaseController extends Controller
 
         return response()->json(['message' => 'Purchase berhasil ditolak.']);
     }
+
+    public function trash()
+    {
+        return view('purchase.trash', [
+            'canRestore' => auth()->user()->canManage(),
+            'canDelete'  => auth()->user()->canDelete(),
+        ]);
+    }
+
+    public function trashData()
+    {
+        $kapalId   = request('kapal_id');
+        $query     = Purchase::onlyTrashed()->with('creator')->orderBy('date', 'desc');
+        if ($kapalId) $query->where('kapal_id', $kapalId);
+        $purchases = $query->get()->map(fn($p) => [
+            'id'            => $p->id,
+            'kapal_id'      => $p->kapal_id,
+            'date'          => $p->date->translatedFormat('d M Y'),
+            'date_raw'      => $p->date->format('Y-m-d'),
+            'vendor'        => $p->vendor,
+            'description'   => $p->description ?? '',
+            'quantity'      => number_format($p->quantity, 2, ',', '.'),
+            'quantity_raw'  => $p->quantity,
+            'price'         => number_format($p->price, 0, ',', '.'),
+            'price_raw'     => $p->price,
+            'amount'        => number_format($p->amount, 0, ',', '.'),
+            'amount_raw'    => $p->amount,
+            'noted'         => $p->noted ?? '',
+            'status'        => $p->status,
+            'deleted_at'    => $p->deleted_at->translatedFormat('d M Y H:i'),
+        ]);
+        return response()->json(['data' => $purchases]);
+    }
+
+    public function restore($id)
+    {
+        if (!auth()->user()->canManage()) {
+            return response()->json(['message' => 'Anda tidak memiliki izin untuk restore data.'], 403);
+        }
+
+        $purchase = Purchase::onlyTrashed()->find($id);
+        if (!$purchase) {
+            return response()->json(['message' => 'Purchase tidak ditemukan.'], 404);
+        }
+
+        $purchase->restore();
+
+        return response()->json(['message' => 'Purchase berhasil di-restore.']);
+    }
+
+    public function forceDelete($id)
+    {
+        if (!auth()->user()->canDelete()) {
+            return response()->json(['message' => 'Anda tidak memiliki izin untuk menghapus data.'], 403);
+        }
+
+        $purchase = Purchase::onlyTrashed()->find($id);
+        if (!$purchase) {
+            return response()->json(['message' => 'Purchase tidak ditemukan.'], 404);
+        }
+
+        $purchase->forceDelete();
+
+        return response()->json(['message' => 'Purchase berhasil dihapus permanen.']);
+    }
 }

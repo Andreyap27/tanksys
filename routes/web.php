@@ -55,6 +55,10 @@ Route::middleware('auth.jwt')->group(function () {
 
     // Purchase
     Route::get('/purchase/data', [PurchaseController::class, 'data'])->name('purchase.data');
+    Route::get('/purchase/trash', [PurchaseController::class, 'trash'])->name('purchase.trash');
+    Route::get('/purchase/trash-data', [PurchaseController::class, 'trashData'])->name('purchase.trash-data');
+    Route::post('/purchase/{purchase}/restore', [PurchaseController::class, 'restore'])->name('purchase.restore');
+    Route::post('/purchase/{id}/force-delete', [PurchaseController::class, 'forceDelete'])->name('purchase.force-delete');
     Route::post('/purchase/{purchase}/approve', [PurchaseController::class, 'approve'])->name('purchase.approve');
     Route::post('/purchase/{purchase}/reject', [PurchaseController::class, 'reject'])->name('purchase.reject');
     Route::resource('purchase', PurchaseController::class)->names('purchase')->except(['create', 'edit', 'show']);
@@ -76,6 +80,10 @@ Route::middleware('auth.jwt')->group(function () {
 
     // Sales
     Route::get('/sales/data', [SaleController::class, 'data'])->name('sales.data');
+    Route::get('/sales/trash', [SaleController::class, 'trash'])->name('sales.trash');
+    Route::get('/sales/trash-data', [SaleController::class, 'trashData'])->name('sales.trash-data');
+    Route::post('/sales/{id}/restore', [SaleController::class, 'restore'])->name('sales.restore');
+    Route::post('/sales/{id}/force-delete', [SaleController::class, 'forceDelete'])->name('sales.force-delete');
     Route::get('/sales/next-invoice', [SaleController::class, 'nextInvoice'])->name('sales.next-invoice');
     Route::get('/sales/{sale}/invoice', [SaleController::class, 'invoice'])->name('sales.invoice');
     Route::get('/sales/{sale}', [SaleController::class, 'show'])->name('sales.show');
@@ -86,6 +94,10 @@ Route::middleware('auth.jwt')->group(function () {
     // Capital
     Route::get('/capital/summary', [CapitalController::class, 'summary'])->name('capital.summary');
     Route::get('/capital/data', [CapitalController::class, 'data'])->name('capital.data');
+    Route::get('/capital/trash', [CapitalController::class, 'trash'])->name('capital.trash');
+    Route::get('/capital/trash-data', [CapitalController::class, 'trashData'])->name('capital.trash-data');
+    Route::post('/capital/{id}/restore', [CapitalController::class, 'restore'])->name('capital.restore');
+    Route::post('/capital/{id}/force-delete', [CapitalController::class, 'forceDelete'])->name('capital.force-delete');
     Route::post('/capital/{capital}/approve', [CapitalController::class, 'approve'])->name('capital.approve');
     Route::post('/capital/{capital}/reject', [CapitalController::class, 'reject'])->name('capital.reject');
     Route::resource('capital', CapitalController::class)->names('capital')->except(['create', 'edit', 'show']);
@@ -93,14 +105,26 @@ Route::middleware('auth.jwt')->group(function () {
     // Expenses
     Route::get('/expenses/capital-total', [ExpenseController::class, 'capitalTotal'])->name('expenses.capital-total');
     Route::get('/expenses/data', [ExpenseController::class, 'data'])->name('expenses.data');
+    Route::get('/expenses/trash', [ExpenseController::class, 'trash'])->name('expenses.trash');
+    Route::get('/expenses/trash-data', [ExpenseController::class, 'trashData'])->name('expenses.trash-data');
+    Route::post('/expenses/{id}/restore', [ExpenseController::class, 'restore'])->name('expenses.restore');
+    Route::post('/expenses/{id}/force-delete', [ExpenseController::class, 'forceDelete'])->name('expenses.force-delete');
     Route::resource('expenses', ExpenseController::class)->names('expenses')->except(['create', 'edit', 'show']);
 
     // Mobil Tangki / Lori Sale
     Route::get('/lori/data', [LoriController::class, 'data'])->name('lori.data');
+    Route::get('/lori/trash', [LoriController::class, 'trash'])->name('lori.trash');
+    Route::get('/lori/trash-data', [LoriController::class, 'trashData'])->name('lori.trash-data');
+    Route::post('/lori/{id}/restore', [LoriController::class, 'restore'])->name('lori.restore');
+    Route::post('/lori/{id}/force-delete', [LoriController::class, 'forceDelete'])->name('lori.force-delete');
     Route::resource('lori', LoriController::class)->names('lori')->except(['create', 'edit', 'show']);
 
     // Mobil Tangki / Lori Expense
     Route::get('/lori-expense/data', [LoriExpenseController::class, 'data'])->name('lori-expense.data');
+    Route::get('/lori-expense/trash', [LoriExpenseController::class, 'trash'])->name('lori-expense.trash');
+    Route::get('/lori-expense/trash-data', [LoriExpenseController::class, 'trashData'])->name('lori-expense.trash-data');
+    Route::post('/lori-expense/{id}/restore', [LoriExpenseController::class, 'restore'])->name('lori-expense.restore');
+    Route::post('/lori-expense/{id}/force-delete', [LoriExpenseController::class, 'forceDelete'])->name('lori-expense.force-delete');
     Route::resource('lori-expense', LoriExpenseController::class)->names('lori-expense')->except(['create', 'edit', 'show']);
 
     // Notifications

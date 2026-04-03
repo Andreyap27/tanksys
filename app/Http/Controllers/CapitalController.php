@@ -147,4 +147,64 @@ class CapitalController extends Controller
 
         return response()->json(['message' => 'Modal berhasil ditolak.']);
     }
+
+    public function trash()
+    {
+        return view('capital.trash', [
+            'canRestore' => auth()->user()->canManage(),
+            'canDelete'  => auth()->user()->canDelete(),
+        ]);
+    }
+
+    public function trashData()
+    {
+        $kapalId = request('kapal_id');
+        $query   = Capital::onlyTrashed()->with('creator')->orderBy('date', 'desc');
+        if ($kapalId) $query->where('kapal_id', $kapalId);
+        $capitals = $query->get()->map(fn($c) => [
+            'id'         => $c->id,
+            'kapal_id'   => $c->kapal_id,
+            'date'       => $c->date->translatedFormat('d M Y'),
+            'date_raw'   => $c->date->format('Y-m-d'),
+            'name'       => $c->name,
+            'nominal'    => number_format($c->nominal, 0, ',', '.'),
+            'nominal_raw'=> $c->nominal,
+            'note'       => $c->note ?? '',
+            'status'     => $c->status,
+            'deleted_at' => $c->deleted_at->translatedFormat('d M Y H:i'),
+        ]);
+        return response()->json(['data' => $capitals]);
+    }
+
+    public function restore($id)
+    {
+        if (!auth()->user()->canManage()) {
+            return response()->json(['message' => 'Anda tidak memiliki izin untuk restore data.'], 403);
+        }
+
+        $capital = Capital::onlyTrashed()->find($id);
+        if (!$capital) {
+            return response()->json(['message' => 'Modal tidak ditemukan.'], 404);
+        }
+
+        $capital->restore();
+
+        return response()->json(['message' => 'Modal berhasil di-restore.']);
+    }
+
+    public function forceDelete($id)
+    {
+        if (!auth()->user()->canDelete()) {
+            return response()->json(['message' => 'Anda tidak memiliki izin untuk menghapus data.'], 403);
+        }
+
+        $capital = Capital::onlyTrashed()->find($id);
+        if (!$capital) {
+            return response()->json(['message' => 'Modal tidak ditemukan.'], 404);
+        }
+
+        $capital->forceDelete();
+
+        return response()->json(['message' => 'Modal berhasil dihapus permanen.']);
+    }
 }

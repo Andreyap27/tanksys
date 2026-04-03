@@ -4,16 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Expense extends Model
 {
-    use HasUuids;
+    use HasUuids, SoftDeletes;
 
     const CATEGORIES = [
         'Gaji',
         'Spare Part',
         'Jasa',
-        'Maintenance',
+        'Pinjaman',
         'BBM ME',
         'BBM AE',
         'Umum',
@@ -24,7 +25,7 @@ class Expense extends Model
         'Gaji',
         'Spare Part',
         'Jasa',
-        'Maintenance',
+        'Pinjaman',
         'BBM ME',
         'BBM AE',
         'Umum',

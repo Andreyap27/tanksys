@@ -93,4 +93,64 @@ class ExpenseController extends Controller
         $expense->delete();
         return response()->json(['message' => 'Pengeluaran berhasil dihapus.']);
     }
+
+    public function trash()
+    {
+        return view('expenses.trash', [
+            'canRestore' => auth()->user()->canManage(),
+            'canDelete'  => auth()->user()->canDelete(),
+        ]);
+    }
+
+    public function trashData()
+    {
+        $kapalId  = request('kapal_id');
+        $query    = Expense::onlyTrashed()->with('creator')->orderBy('date', 'desc');
+        if ($kapalId) $query->where('kapal_id', $kapalId);
+        $expenses = $query->get()->map(fn($e) => [
+            'id'         => $e->id,
+            'kapal_id'   => $e->kapal_id,
+            'date'       => $e->date->translatedFormat('d M Y'),
+            'date_raw'   => $e->date->format('Y-m-d'),
+            'description'=> $e->description,
+            'category'   => $e->category,
+            'nominal'    => number_format($e->nominal, 0, ',', '.'),
+            'nominal_raw'=> $e->nominal,
+            'noted'      => $e->noted ?? '',
+            'deleted_at' => $e->deleted_at->translatedFormat('d M Y H:i'),
+        ]);
+        return response()->json(['data' => $expenses]);
+    }
+
+    public function restore($id)
+    {
+        if (!auth()->user()->canManage()) {
+            return response()->json(['message' => 'Anda tidak memiliki izin untuk restore data.'], 403);
+        }
+
+        $expense = Expense::onlyTrashed()->find($id);
+        if (!$expense) {
+            return response()->json(['message' => 'Pengeluaran tidak ditemukan.'], 404);
+        }
+
+        $expense->restore();
+
+        return response()->json(['message' => 'Pengeluaran berhasil di-restore.']);
+    }
+
+    public function forceDelete($id)
+    {
+        if (!auth()->user()->canDelete()) {
+            return response()->json(['message' => 'Anda tidak memiliki izin untuk menghapus data.'], 403);
+        }
+
+        $expense = Expense::onlyTrashed()->find($id);
+        if (!$expense) {
+            return response()->json(['message' => 'Pengeluaran tidak ditemukan.'], 404);
+        }
+
+        $expense->forceDelete();
+
+        return response()->json(['message' => 'Pengeluaran berhasil dihapus permanen.']);
+    }
 }

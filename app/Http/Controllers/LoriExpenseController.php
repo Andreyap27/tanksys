@@ -90,4 +90,64 @@ class LoriExpenseController extends Controller
         $loriExpense->delete();
         return response()->json(['message' => 'Expense berhasil dihapus.']);
     }
+
+    public function trash()
+    {
+        return view('lori-expense.trash', [
+            'canRestore' => auth()->user()->canManage(),
+            'canDelete'  => auth()->user()->canDelete(),
+        ]);
+    }
+
+    public function trashData()
+    {
+        $mobilId      = request('mobil_id');
+        $query        = LoriExpense::onlyTrashed()->with('creator')->orderBy('date', 'desc');
+        if ($mobilId) $query->where('mobil_id', $mobilId);
+        $loriExpenses = $query->get()->map(fn($le) => [
+            'id'         => $le->id,
+            'mobil_id'   => $le->mobil_id,
+            'date'       => $le->date->translatedFormat('d M Y'),
+            'date_raw'   => $le->date->format('Y-m-d'),
+            'description'=> $le->description,
+            'category'   => $le->category,
+            'nominal'    => number_format($le->nominal, 0, ',', '.'),
+            'nominal_raw'=> $le->nominal,
+            'noted'      => $le->noted ?? '',
+            'deleted_at' => $le->deleted_at->translatedFormat('d M Y H:i'),
+        ]);
+        return response()->json(['data' => $loriExpenses]);
+    }
+
+    public function restore($id)
+    {
+        if (!auth()->user()->canManage()) {
+            return response()->json(['message' => 'Anda tidak memiliki izin untuk restore data.'], 403);
+        }
+
+        $loriExpense = LoriExpense::onlyTrashed()->find($id);
+        if (!$loriExpense) {
+            return response()->json(['message' => 'Expense tidak ditemukan.'], 404);
+        }
+
+        $loriExpense->restore();
+
+        return response()->json(['message' => 'Expense berhasil di-restore.']);
+    }
+
+    public function forceDelete($id)
+    {
+        if (!auth()->user()->canDelete()) {
+            return response()->json(['message' => 'Anda tidak memiliki izin untuk menghapus data.'], 403);
+        }
+
+        $loriExpense = LoriExpense::onlyTrashed()->find($id);
+        if (!$loriExpense) {
+            return response()->json(['message' => 'Expense tidak ditemukan.'], 404);
+        }
+
+        $loriExpense->forceDelete();
+
+        return response()->json(['message' => 'Expense berhasil dihapus permanen.']);
+    }
 }
