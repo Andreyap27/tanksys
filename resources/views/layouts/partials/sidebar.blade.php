@@ -2,11 +2,7 @@
     <!-- Company Logo -->
     <div class="sidebar-logo">
         <div class="company-logo-wrap">
-            <img src="/images/logo-company.png" alt="Logo Perusahaan" class="company-logo-img"
-                onerror="this.style.display='none';document.getElementById('logoFallback').style.display='flex';">
-            <div class="logo-fallback" id="logoFallback">
-                <i data-lucide="fuel" style="width:1.5rem;height:1.5rem;"></i>
-            </div>
+            <img src="/images/logo.png" alt="Logo Perusahaan" class="company-logo-img">
         </div>
         <div class="logo-info">
             <div class="logo-text">TankSys Pro</div>
@@ -78,8 +74,8 @@
         <!-- Laporan -->
         <div class="nav-section">Laporan</div>
         @php
-            $laporanActive = request()->routeIs('report.purchase') || request()->routeIs('report.sale') || request()->routeIs('report.expense') || request()->routeIs('report.capital');
-            $loriActive    = request()->routeIs('lori.index') || request()->routeIs('lori-expense.*') || request()->routeIs('report.lori-omset') || request()->routeIs('report.lori-expense') || request()->routeIs('report.lori');
+        $laporanActive = request()->routeIs('report.purchase') || request()->routeIs('report.sale') || request()->routeIs('report.expense') || request()->routeIs('report.capital');
+        $loriActive = request()->routeIs('lori.index') || request()->routeIs('lori-expense.*') || request()->routeIs('report.lori-omset') || request()->routeIs('report.lori-expense') || request()->routeIs('report.lori');
         @endphp
         <div class="nav-group">
             <div class="nav-group-header {{ $laporanActive ? 'open' : '' }}" onclick="toggleNavGroup(this)">
@@ -149,8 +145,8 @@
 </aside>
 
 <script>
-function toggleNavGroup(header) {
-    header.classList.toggle('open');
-    header.nextElementSibling.classList.toggle('open');
-}
+    function toggleNavGroup(header) {
+        header.classList.toggle('open');
+        header.nextElementSibling.classList.toggle('open');
+    }
 </script>
