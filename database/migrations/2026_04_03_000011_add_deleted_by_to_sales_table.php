@@ -9,8 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('sales', function (Blueprint $table) {
-            $table->uuid('deleted_by')->nullable()->after('deleted_at');
-            $table->foreign('deleted_by')->references('id')->on('users')->nullOnDelete();
+            $table->foreignUuid('deleted_by')->nullable()->constrained('users')->nullOnDelete();
         });
     }
 
