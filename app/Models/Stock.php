@@ -37,10 +37,23 @@ class Stock extends Model
         return $this->morphTo();
     }
 
+    public function deleter()
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
+    }
+
     public static function currentBalance(?string $kapalId = null): float
     {
         $query = static::query();
         if ($kapalId) $query->where('kapal_id', $kapalId);
         return (float) ($query->sum('qty_in') - $query->sum('qty_out'));
+    }
+
+    protected static function booted()
+    {
+        static::deleting(function ($model) {
+            if ($model->isForceDeleting()) return;
+            $model->deleted_by = auth()->id();
+        });
     }
 }

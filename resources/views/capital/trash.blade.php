@@ -16,6 +16,30 @@
     </div>
 </div>
 
+{{-- Summary Cards --}}
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.25rem;margin-bottom:1.5rem;">
+    <div class="dash-stat ds-purchase">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon"><i data-lucide="trash-2" style="width:20px;height:20px;"></i></div>
+            <div>
+                <div class="dash-stat__label">Total Dihapus</div>
+                <div class="dash-stat__value" id="totalDeleted">0</div>
+            </div>
+        </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="trash-2" style="width:110px;height:110px;"></i></div>
+    </div>
+    <div class="dash-stat ds-purchase">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon"><i data-lucide="wallet" style="width:20px;height:20px;"></i></div>
+            <div>
+                <div class="dash-stat__label">Total Modal Dihapus</div>
+                <div class="dash-stat__value" id="totalNominalDeleted">Rp 0</div>
+            </div>
+        </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="wallet" style="width:110px;height:110px;"></i></div>
+    </div>
+</div>
+
 {{-- Kapal Tabs --}}
 <div class="tab-bar" id="capitalTabs">
     <button class="tab active" data-kapal-id="" onclick="switchTab(this, '')"><i data-lucide="list" style="width:16px;height:16px;"></i> Semua</button>
@@ -35,7 +59,7 @@
                         <th>Nominal</th>
                         <th>Status</th>
                         <th>Catatan</th>
-                        <th>Dihapus</th>
+                        <th>Dihapus Oleh</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -122,7 +146,7 @@
                     data: 'note'
                 },
                 {
-                    data: 'deleted_at'
+                    data: 'deleted_by'
                 },
                 {
                     data: null,
@@ -149,13 +173,33 @@
             ],
             drawCallback: function() {
                 lucide.createIcons();
+                updateSummaryCards();
             }
         });
     });
 
+    function updateSummaryCards() {
+        const data = table.rows({order: 'current'}).data();
+        let totalNominal = 0;
+
+        data.each(function(row) {
+            totalNominal += parseFloat(row.nominal_raw || 0);
+        });
+
+        document.getElementById('totalDeleted').textContent = data.length;
+        document.getElementById('totalNominalDeleted').textContent = 'Rp ' + formatCurrency(totalNominal);
+    }
+
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('id-ID', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(value);
+    }
+
     function restoreCapital(id) {
         if (!confirm('Restore modal ini?')) return;
-        axios.post(`{{ route('capital.restore', '') }}/${id}`)
+        axios.post(`/capital/${id}/restore`)
             .then(res => {
                 showSuccess('Berhasil', res.data.message);
                 table.ajax.reload(null, false);
@@ -167,7 +211,7 @@
 
     function forceDeleteCapital(id) {
         if (!confirm('Hapus modal ini secara PERMANEN? Tindakan ini tidak dapat dibatalkan!')) return;
-        axios.post(`{{ route('capital.force-delete', '') }}/${id}`)
+        axios.post(`/capital/${id}/force-delete`)
             .then(res => {
                 showSuccess('Berhasil', res.data.message);
                 table.ajax.reload(null, false);

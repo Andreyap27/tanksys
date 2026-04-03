@@ -102,7 +102,7 @@ class LoriExpenseController extends Controller
     public function trashData()
     {
         $mobilId      = request('mobil_id');
-        $query        = LoriExpense::onlyTrashed()->with('creator')->orderBy('date', 'desc');
+        $query        = LoriExpense::onlyTrashed()->with(['creator', 'deleter'])->orderBy('date', 'desc');
         if ($mobilId) $query->where('mobil_id', $mobilId);
         $loriExpenses = $query->get()->map(fn($le) => [
             'id'         => $le->id,
@@ -115,6 +115,7 @@ class LoriExpenseController extends Controller
             'nominal_raw'=> $le->nominal,
             'noted'      => $le->noted ?? '',
             'deleted_at' => $le->deleted_at->translatedFormat('d M Y H:i'),
+            'deleted_by' => $le->deleter?->name ?? 'N/A',
         ]);
         return response()->json(['data' => $loriExpenses]);
     }

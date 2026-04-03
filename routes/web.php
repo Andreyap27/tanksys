@@ -57,7 +57,7 @@ Route::middleware('auth.jwt')->group(function () {
     Route::get('/purchase/data', [PurchaseController::class, 'data'])->name('purchase.data');
     Route::get('/purchase/trash', [PurchaseController::class, 'trash'])->name('purchase.trash');
     Route::get('/purchase/trash-data', [PurchaseController::class, 'trashData'])->name('purchase.trash-data');
-    Route::post('/purchase/{purchase}/restore', [PurchaseController::class, 'restore'])->name('purchase.restore');
+    Route::post('/purchase/{id}/restore', [PurchaseController::class, 'restore'])->name('purchase.restore');
     Route::post('/purchase/{id}/force-delete', [PurchaseController::class, 'forceDelete'])->name('purchase.force-delete');
     Route::post('/purchase/{purchase}/approve', [PurchaseController::class, 'approve'])->name('purchase.approve');
     Route::post('/purchase/{purchase}/reject', [PurchaseController::class, 'reject'])->name('purchase.reject');

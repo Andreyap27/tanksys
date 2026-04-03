@@ -100,7 +100,7 @@ class LoriController extends Controller
     public function trashData()
     {
         $mobilId = request('mobil_id');
-        $query   = Lori::onlyTrashed()->with('creator', 'customer')->orderBy('date', 'desc');
+        $query   = Lori::onlyTrashed()->with(['creator', 'customer', 'deleter'])->orderBy('date', 'desc');
         if ($mobilId) $query->where('mobil_id', $mobilId);
         $loris   = $query->get()->map(fn($l) => [
             'id'         => $l->id,
@@ -113,6 +113,7 @@ class LoriController extends Controller
             'price'      => number_format($l->price, 0, ',', '.'),
             'price_raw'  => $l->price,
             'deleted_at' => $l->deleted_at->translatedFormat('d M Y H:i'),
+            'deleted_by' => $l->deleter?->name ?? 'N/A',
         ]);
         return response()->json(['data' => $loris]);
     }

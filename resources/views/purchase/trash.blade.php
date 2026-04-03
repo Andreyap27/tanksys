@@ -16,6 +16,40 @@
     </div>
 </div>
 
+{{-- Summary Cards --}}
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.25rem;margin-bottom:1.5rem;">
+    <div class="dash-stat ds-purchase">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon"><i data-lucide="trash-2" style="width:20px;height:20px;"></i></div>
+            <div>
+                <div class="dash-stat__label">Total Dihapus</div>
+                <div class="dash-stat__value" id="totalDeleted">0</div>
+            </div>
+        </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="trash-2" style="width:110px;height:110px;"></i></div>
+    </div>
+    <div class="dash-stat ds-purchase">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon"><i data-lucide="fuel" style="width:20px;height:20px;"></i></div>
+            <div>
+                <div class="dash-stat__label">Total Qty Dihapus</div>
+                <div class="dash-stat__value" id="totalQtyDeleted">0 L</div>
+            </div>
+        </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="fuel" style="width:110px;height:110px;"></i></div>
+    </div>
+    <div class="dash-stat ds-purchase">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon"><i data-lucide="wallet" style="width:20px;height:20px;"></i></div>
+            <div>
+                <div class="dash-stat__label">Total Amount Dihapus</div>
+                <div class="dash-stat__value" id="totalAmountDeleted">Rp 0</div>
+            </div>
+        </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="wallet" style="width:110px;height:110px;"></i></div>
+    </div>
+</div>
+
 {{-- Kapal Tabs --}}
 <div class="tab-bar" id="purchaseTabs">
     <button class="tab active" data-kapal-id="" onclick="switchTab(this, '')"><i data-lucide="list" style="width:16px;height:16px;"></i> Semua</button>
@@ -37,7 +71,7 @@
                         <th>Harga/L</th>
                         <th>Amount</th>
                         <th>Status</th>
-                        <th>Dihapus</th>
+                        <th>Dihapus Oleh</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -129,7 +163,7 @@
                     }
                 },
                 {
-                    data: 'deleted_at'
+                    data: 'deleted_by'
                 },
                 {
                     data: null,
@@ -156,13 +190,43 @@
             ],
             drawCallback: function() {
                 lucide.createIcons();
+                updateSummaryCards();
             }
         });
     });
 
+    function updateSummaryCards() {
+        const data = table.rows({order: 'current'}).data();
+        let totalQty = 0;
+        let totalAmount = 0;
+
+        data.each(function(row) {
+            totalQty += parseFloat(row.quantity_raw || 0);
+            totalAmount += parseFloat(row.amount_raw || 0);
+        });
+
+        document.getElementById('totalDeleted').textContent = data.length;
+        document.getElementById('totalQtyDeleted').textContent = number_format(totalQty, 2) + ' L';
+        document.getElementById('totalAmountDeleted').textContent = 'Rp ' + formatCurrency(totalAmount);
+    }
+
+    function number_format(number, decimals) {
+        return new Intl.NumberFormat('id-ID', {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals
+        }).format(number);
+    }
+
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('id-ID', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(value);
+    }
+
     function restorePurchase(id) {
         if (!confirm('Restore purchase ini?')) return;
-        axios.post(`{{ route('purchase.restore', '') }}/${id}`)
+        axios.post(`/purchase/${id}/restore`)
             .then(res => {
                 showSuccess('Berhasil', res.data.message);
                 table.ajax.reload(null, false);
@@ -174,7 +238,7 @@
 
     function forceDeletePurchase(id) {
         if (!confirm('Hapus purchase ini secara PERMANEN? Tindakan ini tidak dapat dibatalkan!')) return;
-        axios.post(`{{ route('purchase.force-delete', '') }}/${id}`)
+        axios.post(`/purchase/${id}/force-delete`)
             .then(res => {
                 showSuccess('Berhasil', res.data.message);
                 table.ajax.reload(null, false);

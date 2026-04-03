@@ -105,7 +105,7 @@ class ExpenseController extends Controller
     public function trashData()
     {
         $kapalId  = request('kapal_id');
-        $query    = Expense::onlyTrashed()->with('creator')->orderBy('date', 'desc');
+        $query    = Expense::onlyTrashed()->with(['creator', 'deleter'])->orderBy('date', 'desc');
         if ($kapalId) $query->where('kapal_id', $kapalId);
         $expenses = $query->get()->map(fn($e) => [
             'id'         => $e->id,
@@ -118,6 +118,7 @@ class ExpenseController extends Controller
             'nominal_raw'=> $e->nominal,
             'noted'      => $e->noted ?? '',
             'deleted_at' => $e->deleted_at->translatedFormat('d M Y H:i'),
+            'deleted_by' => $e->deleter?->name ?? 'N/A',
         ]);
         return response()->json(['data' => $expenses]);
     }

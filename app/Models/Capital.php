@@ -41,4 +41,17 @@ class Capital extends Model
     {
         return $this->belongsTo(User::class, 'approved_by');
     }
+
+    public function deleter()
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
+    }
+
+    protected static function booted()
+    {
+        static::deleting(function ($model) {
+            if ($model->isForceDeleting()) return;
+            $model->deleted_by = auth()->id();
+        });
+    }
 }

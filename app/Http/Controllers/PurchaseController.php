@@ -199,7 +199,7 @@ class PurchaseController extends Controller
     public function trashData()
     {
         $kapalId   = request('kapal_id');
-        $query     = Purchase::onlyTrashed()->with('creator')->orderBy('date', 'desc');
+        $query     = Purchase::onlyTrashed()->with(['creator', 'deleter'])->orderBy('date', 'desc');
         if ($kapalId) $query->where('kapal_id', $kapalId);
         $purchases = $query->get()->map(fn($p) => [
             'id'            => $p->id,
@@ -217,6 +217,7 @@ class PurchaseController extends Controller
             'noted'         => $p->noted ?? '',
             'status'        => $p->status,
             'deleted_at'    => $p->deleted_at->translatedFormat('d M Y H:i'),
+            'deleted_by'    => $p->deleter?->name ?? 'N/A',
         ]);
         return response()->json(['data' => $purchases]);
     }

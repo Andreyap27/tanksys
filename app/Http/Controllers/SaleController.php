@@ -253,7 +253,7 @@ class SaleController extends Controller
     public function trashData()
     {
         $kapalId = request('kapal_id');
-        $query   = Sale::onlyTrashed()->with('creator', 'customer')->orderBy('date', 'desc');
+        $query   = Sale::onlyTrashed()->with(['creator', 'customer', 'deleter'])->orderBy('date', 'desc');
         if ($kapalId) $query->where('kapal_id', $kapalId);
         $sales   = $query->get()->map(fn($s) => [
             'id'              => $s->id,
@@ -272,6 +272,7 @@ class SaleController extends Controller
             'noted'           => $s->noted ?? '',
             'status'          => $s->status,
             'deleted_at'      => $s->deleted_at->translatedFormat('d M Y H:i'),
+            'deleted_by'      => $s->deleter?->name ?? 'N/A',
         ]);
         return response()->json(['data' => $sales]);
     }

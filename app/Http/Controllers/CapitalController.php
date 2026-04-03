@@ -159,7 +159,7 @@ class CapitalController extends Controller
     public function trashData()
     {
         $kapalId = request('kapal_id');
-        $query   = Capital::onlyTrashed()->with('creator')->orderBy('date', 'desc');
+        $query   = Capital::onlyTrashed()->with(['creator', 'deleter'])->orderBy('date', 'desc');
         if ($kapalId) $query->where('kapal_id', $kapalId);
         $capitals = $query->get()->map(fn($c) => [
             'id'         => $c->id,
@@ -172,6 +172,7 @@ class CapitalController extends Controller
             'note'       => $c->note ?? '',
             'status'     => $c->status,
             'deleted_at' => $c->deleted_at->translatedFormat('d M Y H:i'),
+            'deleted_by' => $c->deleter?->name ?? 'N/A',
         ]);
         return response()->json(['data' => $capitals]);
     }

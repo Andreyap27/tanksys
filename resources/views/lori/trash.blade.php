@@ -16,6 +16,30 @@
     </div>
 </div>
 
+{{-- Summary Cards --}}
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.25rem;margin-bottom:1.5rem;">
+    <div class="dash-stat ds-purchase">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon"><i data-lucide="trash-2" style="width:20px;height:20px;"></i></div>
+            <div>
+                <div class="dash-stat__label">Total Dihapus</div>
+                <div class="dash-stat__value" id="totalDeleted">0</div>
+            </div>
+        </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="trash-2" style="width:110px;height:110px;"></i></div>
+    </div>
+    <div class="dash-stat ds-purchase">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon"><i data-lucide="wallet" style="width:20px;height:20px;"></i></div>
+            <div>
+                <div class="dash-stat__label">Total Harga Dihapus</div>
+                <div class="dash-stat__value" id="totalPriceDeleted">Rp 0</div>
+            </div>
+        </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="wallet" style="width:110px;height:110px;"></i></div>
+    </div>
+</div>
+
 {{-- Mobil Tabs --}}
 <div class="tab-bar" id="loriTabs">
     <button class="tab active" data-mobil-id="" onclick="switchTab(this, '')"><i data-lucide="list" style="width:16px;height:16px;"></i> Semua</button>
@@ -35,7 +59,7 @@
                         <th>Dari</th>
                         <th>Ke</th>
                         <th>Harga</th>
-                        <th>Dihapus</th>
+                        <th>Dihapus Oleh</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -114,7 +138,7 @@
                     data: 'price'
                 },
                 {
-                    data: 'deleted_at'
+                    data: 'deleted_by'
                 },
                 {
                     data: null,
@@ -141,13 +165,33 @@
             ],
             drawCallback: function() {
                 lucide.createIcons();
+                updateSummaryCards();
             }
         });
     });
 
+    function updateSummaryCards() {
+        const data = table.rows({order: 'current'}).data();
+        let totalPrice = 0;
+
+        data.each(function(row) {
+            totalPrice += parseFloat(row.price_raw || 0);
+        });
+
+        document.getElementById('totalDeleted').textContent = data.length;
+        document.getElementById('totalPriceDeleted').textContent = 'Rp ' + formatCurrency(totalPrice);
+    }
+
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('id-ID', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(value);
+    }
+
     function restoreLori(id) {
         if (!confirm('Restore data lori ini?')) return;
-        axios.post(`{{ route('lori.restore', '') }}/${id}`)
+        axios.post(`/lori/${id}/restore`)
             .then(res => {
                 showSuccess('Berhasil', res.data.message);
                 table.ajax.reload(null, false);
@@ -159,7 +203,7 @@
 
     function forceDeleteLori(id) {
         if (!confirm('Hapus data lori ini secara PERMANEN? Tindakan ini tidak dapat dibatalkan!')) return;
-        axios.post(`{{ route('lori.force-delete', '') }}/${id}`)
+        axios.post(`/lori/${id}/force-delete`)
             .then(res => {
                 showSuccess('Berhasil', res.data.message);
                 table.ajax.reload(null, false);
