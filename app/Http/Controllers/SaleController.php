@@ -33,7 +33,8 @@ class SaleController extends Controller
             $prefix = "INV-{$date}-";
         }
 
-        $latest = Sale::where('invoice_number', 'like', $prefix . '%')
+        $latest = Sale::withTrashed()
+            ->where('invoice_number', 'like', $prefix . '%')
             ->orderByRaw('LENGTH(invoice_number) DESC, invoice_number DESC')
             ->value('invoice_number');
         $num = $latest ? (int) substr($latest, strlen($prefix)) : 0;
@@ -86,7 +87,7 @@ class SaleController extends Controller
         $request->validate([
             'kapal_id'       => 'nullable|exists:kapals,id',
             'date'           => 'required|date',
-            'invoice_number' => 'required|string|unique:sales',
+            'invoice_number' => 'required|string|unique:sales,invoice_number,NULL,id,deleted_at,NULL',
             'customer_id'    => 'required|exists:customers,id',
             'description'    => 'nullable|string|max:255',
             'quantity'       => 'required|numeric|min:0.01',
@@ -126,7 +127,7 @@ class SaleController extends Controller
         $request->validate([
             'kapal_id'       => 'nullable|exists:kapals,id',
             'date'           => 'required|date',
-            'invoice_number' => 'required|string|unique:sales,invoice_number,' . $sale->id,
+            'invoice_number' => 'required|string|unique:sales,invoice_number,' . $sale->id . ',id,deleted_at,NULL',
             'customer_id'    => 'required|exists:customers,id',
             'description'    => 'nullable|string|max:255',
             'quantity'       => 'required|numeric|min:0.01',
