@@ -65,15 +65,13 @@ class CapitalController extends Controller
             'name'       => $request->name,
             'nominal'    => $request->nominal,
             'note'       => $request->note,
-            'status'     => 'pending',
+            'status'     => 'approved',
+            'approved_by'=> auth()->id(),
+            'approved_at'=> now(),
             'created_by' => auth()->id(),
         ]);
 
-        Notification::sendToApprovers('approval', 'Modal Baru',
-            auth()->user()->name . ' menambahkan modal "' . $request->name . '" menunggu persetujuan.',
-            route('capital.index'));
-
-        return response()->json(['message' => 'Modal berhasil disimpan dan menunggu persetujuan.']);
+        return response()->json(['message' => 'Modal berhasil disimpan.']);
     }
 
     public function update(Request $request, Capital $capital)
@@ -94,6 +92,10 @@ class CapitalController extends Controller
             $request->only(['kapal_id', 'date', 'name', 'nominal', 'note']),
             ['status' => 'pending', 'approved_by' => null, 'approved_at' => null],
         ));
+
+        Notification::sendToApprovers('approval', 'Modal Diupdate',
+            auth()->user()->name . ' mengubah modal "' . $request->name . '" dan menunggu persetujuan.',
+            route('capital.index'));
 
         return response()->json(['message' => 'Modal berhasil diupdate dan menunggu persetujuan ulang.']);
     }

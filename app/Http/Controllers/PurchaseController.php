@@ -51,26 +51,35 @@ class PurchaseController extends Controller
             'noted'       => 'nullable|string',
         ]);
 
-        Purchase::create([
-            'kapal_id'    => $request->kapal_id ?: null,
-            'date'        => $request->date,
-            'vendor'      => $request->vendor,
-            'description' => $request->description,
-            'quantity'    => $request->quantity,
-            'price'       => $request->price,
-            'amount'      => $request->quantity * $request->price,
-            'noted'       => $request->noted,
-            'created_by'  => auth()->id(),
-            'status'      => 'pending',
-        ]);
+        DB::transaction(function () use ($request) {
+            $purchase = Purchase::create([
+                'kapal_id'    => $request->kapal_id ?: null,
+                'date'        => $request->date,
+                'vendor'      => $request->vendor,
+                'description' => $request->description,
+                'quantity'    => $request->quantity,
+                'price'       => $request->price,
+                'amount'      => $request->quantity * $request->price,
+                'noted'       => $request->noted,
+                'created_by'  => auth()->id(),
+                'status'      => 'approved',
+                'approved_by' => auth()->id(),
+                'approved_at' => now(),
+            ]);
 
-        Notification::sendToApprovers('approval', 'Purchase Baru',
-            auth()->user()->name . ' menambahkan purchase dari ' . $request->vendor . ' menunggu persetujuan.',
-            route('purchase.index'));
+            Stock::create([
+                'kapal_id'       => $purchase->kapal_id,
+                'date'           => $purchase->date,
+                'type'           => 'purchase',
+                'reference_id'   => $purchase->id,
+                'reference_type' => Purchase::class,
+                'party'          => $purchase->vendor,
+                'qty_in'         => $purchase->quantity,
+                'qty_out'        => 0,
+            ]);
+        });
 
-        $message = 'Purchase berhasil disimpan dan menunggu persetujuan SPV.';
-
-        return response()->json(['message' => $message]);
+        return response()->json(['message' => 'Purchase berhasil disimpan.']);
     }
 
     public function update(Request $request, Purchase $purchase)
@@ -90,8 +99,8 @@ class PurchaseController extends Controller
         ]);
 
         DB::transaction(function () use ($request, $purchase) {
-            if ($purchase->status === 'approved' && $purchase->stock) {
-                $purchase->stock->delete();
+            if ($purchase->status === 'approved') {
+                $purchase->stock?->delete();
             }
 
             $purchase->update([
@@ -108,6 +117,10 @@ class PurchaseController extends Controller
                 'approved_at' => null,
             ]);
         });
+
+        Notification::sendToApprovers('approval', 'Purchase Diupdate',
+            auth()->user()->name . ' mengubah purchase dari ' . $request->vendor . ' dan menunggu persetujuan.',
+            route('purchase.index'));
 
         return response()->json(['message' => 'Purchase berhasil diupdate dan menunggu persetujuan ulang.']);
     }

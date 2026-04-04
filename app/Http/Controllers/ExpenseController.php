@@ -59,15 +59,13 @@ class ExpenseController extends Controller
             'nominal'     => $request->nominal,
             'category'    => $request->category,
             'noted'       => $request->noted,
-            'status'      => 'pending',
+            'status'      => 'approved',
+            'approved_by' => auth()->id(),
+            'approved_at' => now(),
             'created_by'  => auth()->id(),
         ]);
 
-        Notification::sendToApprovers('approval', 'Pengeluaran Baru',
-            auth()->user()->name . ' menambahkan pengeluaran "' . $request->description . '" menunggu persetujuan.',
-            route('expenses.index'));
-
-        return response()->json(['message' => 'Pengeluaran berhasil disimpan dan menunggu persetujuan.']);
+        return response()->json(['message' => 'Pengeluaran berhasil disimpan.']);
     }
 
     public function update(Request $request, Expense $expense)
@@ -85,6 +83,10 @@ class ExpenseController extends Controller
             $request->only(['kapal_id', 'date', 'description', 'nominal', 'category', 'noted']),
             ['status' => 'pending', 'approved_by' => null, 'approved_at' => null],
         ));
+
+        Notification::sendToApprovers('approval', 'Pengeluaran Diupdate',
+            auth()->user()->name . ' mengubah pengeluaran "' . $request->description . '" dan menunggu persetujuan.',
+            route('expenses.index'));
 
         return response()->json(['message' => 'Pengeluaran berhasil diupdate dan menunggu persetujuan ulang.']);
     }

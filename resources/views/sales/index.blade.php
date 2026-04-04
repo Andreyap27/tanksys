@@ -337,7 +337,7 @@ $(document).ready(function () {
                     if (canManage) {
                         actions += `
                             <button class="icon-btn primary" title="Edit"
-                                onclick="openEditModal('${row.id}', '${row.date_raw}', '${escHtml(row.invoice_number)}', '${escHtml(row.description)}', '${row.quantity_raw}', '${row.price_raw}', '${escHtml(row.noted)}', '${row.kapal_id || ''}')">
+                                onclick="openEditModal('${row.id}', '${row.date_raw}', '${escHtml(row.invoice_number)}', '${row.customer_id}', '${escHtml(row.description)}', '${row.quantity_raw}', '${row.price_raw}', '${escHtml(row.noted)}', '${row.kapal_id || ''}')">
                                 <i data-lucide="pencil" style="width:14px;height:14px;"></i>
                             </button>`;
                     }
