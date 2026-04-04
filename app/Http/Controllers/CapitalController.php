@@ -10,10 +10,7 @@ class CapitalController extends Controller
 {
     public function index()
     {
-        $canApprove = auth()->user()->canApprove();
-        $canManage  = auth()->user()->canManage();
-        $canDelete  = auth()->user()->canDelete();
-        return view('capital.index', compact('canApprove', 'canManage', 'canDelete'));
+        return view('capital.index');
     }
 
     public function data()
@@ -95,6 +92,7 @@ class CapitalController extends Controller
 
         $capital->update(array_merge(
             $request->only(['kapal_id', 'date', 'name', 'nominal', 'note']),
+            ['status' => 'pending', 'approved_by' => null, 'approved_at' => null],
         ));
 
         return response()->json(['message' => 'Modal berhasil diupdate dan menunggu persetujuan ulang.']);
@@ -150,10 +148,7 @@ class CapitalController extends Controller
 
     public function trash()
     {
-        return view('capital.trash', [
-            'canRestore' => auth()->user()->canManage(),
-            'canDelete'  => auth()->user()->canDelete(),
-        ]);
+        return view('capital.trash');
     }
 
     public function trashData()
@@ -179,7 +174,7 @@ class CapitalController extends Controller
 
     public function restore($id)
     {
-        if (!auth()->user()->canManage()) {
+        if (!auth()->user()->canRestore()) {
             return response()->json(['message' => 'Anda tidak memiliki izin untuk restore data.'], 403);
         }
 

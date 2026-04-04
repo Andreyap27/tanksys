@@ -107,11 +107,9 @@
             <div class="nav-sub {{ $loriActive ? 'open' : '' }}">
                 <a href="{{ route('lori.index') }}" class="nav-sub-item {{ request()->routeIs('lori.index') || (request()->routeIs('lori.*') && !request()->routeIs('lori-expense.*')) ? 'active' : '' }}">
                     Sale
-                    <span class="sidebar-notif-badge" id="sidebarBadge-lori" style="display:none;"></span>
                 </a>
                 <a href="{{ route('lori-expense.index') }}" class="nav-sub-item {{ request()->routeIs('lori-expense.*') ? 'active' : '' }}">
                     Expenses
-                    <span class="sidebar-notif-badge" id="sidebarBadge-lori-expense" style="display:none;"></span>
                 </a>
                 <a href="{{ route('report.lori-omset') }}" class="nav-sub-item {{ request()->routeIs('report.lori-omset') ? 'active' : '' }}">
                     Laporan Omset

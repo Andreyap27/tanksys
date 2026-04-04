@@ -80,8 +80,6 @@
 
     let table;
     let activeExpenseKapalId = '';
-    const canRestore = @json($canRestore);
-    const canDelete = @json($canDelete);
 
     const categoryBadge = {
         'Gaji': 'badge-info',

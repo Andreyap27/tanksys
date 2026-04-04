@@ -13,11 +13,7 @@ class SaleController extends Controller
 {
     public function index()
     {
-        return view('sales.index', [
-            'canApprove' => auth()->user()->canApprove(),
-            'canManage'  => auth()->user()->canManage(),
-            'canDelete'  => auth()->user()->canDelete(),
-        ]);
+        return view('sales.index');
     }
 
     public function nextInvoice()
@@ -245,10 +241,7 @@ class SaleController extends Controller
 
     public function trash()
     {
-        return view('sales.trash', [
-            'canRestore' => auth()->user()->canManage(),
-            'canDelete'  => auth()->user()->canDelete(),
-        ]);
+        return view('sales.trash');
     }
 
     public function trashData()
@@ -280,7 +273,7 @@ class SaleController extends Controller
 
     public function restore($id)
     {
-        if (!auth()->user()->canManage()) {
+        if (!auth()->user()->canRestore()) {
             return response()->json(['message' => 'Anda tidak memiliki izin untuk restore data.'], 403);
         }
 

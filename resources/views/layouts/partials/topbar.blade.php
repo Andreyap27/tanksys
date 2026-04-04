@@ -172,7 +172,6 @@ function handleNotifClick(id, url) {
 function markAllRead() {
     axios.post('/notifications/read-all').then(() => {
         loadNotifications();
-        updateBadge(0);
     });
 }
 
@@ -188,13 +187,12 @@ function updateBadge(count) {
 }
 
 // Map URL pathname → sidebar badge element ID
+// Only modules with approve flow generate notifications
 const _sidebarBadgeMap = {
-    '/purchase':      'sidebarBadge-purchase',
-    '/sales':         'sidebarBadge-sales',
-    '/capital':       'sidebarBadge-capital',
-    '/expenses':      'sidebarBadge-expenses',
-    '/lori':          'sidebarBadge-lori',
-    '/lori-expense':  'sidebarBadge-lori-expense',
+    '/purchase': 'sidebarBadge-purchase',
+    '/sales':    'sidebarBadge-sales',
+    '/capital':  'sidebarBadge-capital',
+    '/expenses': 'sidebarBadge-expenses',
 };
 
 function updateSidebarBadges(items) {

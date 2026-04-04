@@ -80,8 +80,6 @@
 
     let table;
     let activeLoriMobilId = '';
-    const canRestore = @json($canRestore);
-    const canDelete = @json($canDelete);
 
     function switchTab(btn, mobilId) {
         document.querySelectorAll('#loriTabs .tab').forEach(t => t.classList.remove('active'));

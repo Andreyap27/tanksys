@@ -14,10 +14,7 @@ class TrashController extends Controller
 {
     public function index()
     {
-        return view('trash.index', [
-            'canRestore' => auth()->user()->canManage(),
-            'canDelete'  => auth()->user()->canDelete(),
-        ]);
+        return view('trash.index');
     }
 
     public function data(Request $request)
@@ -141,7 +138,7 @@ class TrashController extends Controller
 
     public function restore(Request $request)
     {
-        if (!auth()->user()->canManage()) {
+        if (!auth()->user()->canRestore()) {
             return response()->json(['message' => 'Anda tidak memiliki izin untuk restore data.'], 403);
         }
 

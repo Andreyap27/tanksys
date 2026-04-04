@@ -80,8 +80,6 @@
 
     let table;
     let activeLoriExpenseMobilId = '';
-    const canRestore = @json($canRestore);
-    const canDelete = @json($canDelete);
 
     const categoryBadge = {
         'BBM': 'badge-danger',

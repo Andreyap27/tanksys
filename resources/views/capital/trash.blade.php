@@ -80,8 +80,6 @@
 
     let table;
     let activeCapitalKapalId = '';
-    const canRestore = @json($canRestore);
-    const canDelete = @json($canDelete);
 
     function switchTab(btn, kapalId) {
         document.querySelectorAll('#capitalTabs .tab').forEach(t => t.classList.remove('active'));

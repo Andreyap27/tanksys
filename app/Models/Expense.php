@@ -46,6 +46,9 @@ class Expense extends Model
         'nominal',
         'category',
         'noted',
+        'status',
+        'approved_by',
+        'approved_at',
         'created_by',
         'deleted_by',
     ];
@@ -61,6 +64,11 @@ class Expense extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
     public function deleter()

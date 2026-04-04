@@ -9,10 +9,7 @@ class VendorController extends Controller
 {
     public function index()
     {
-        return view('vendor.index', [
-            'canManage' => auth()->user()->canManage(),
-            'canDelete' => auth()->user()->canDelete(),
-        ]);
+        return view('vendor.index');
     }
 
     public function nextId()

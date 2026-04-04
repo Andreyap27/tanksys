@@ -32,10 +32,14 @@ class Notification extends Model
 
     /**
      * Send notification to specific user IDs.
+     * Skips null IDs and the currently authenticated user (no self-notifications).
      */
     public static function send(array $userIds, string $type, string $title, string $message, ?string $url = null): void
     {
-        foreach (array_unique($userIds) as $userId) {
+        $currentId = auth()->id();
+        $targets   = array_unique(array_filter($userIds, fn($id) => $id && $id !== $currentId));
+
+        foreach ($targets as $userId) {
             static::create([
                 'user_id' => $userId,
                 'type'    => $type,

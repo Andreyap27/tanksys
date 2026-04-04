@@ -56,6 +56,11 @@ class User extends Authenticatable implements JWTSubject
         return in_array($this->role, ['SPV', 'Super Admin']);
     }
 
+    public function canRestore(): bool
+    {
+        return true;
+    }
+
     public function canManage(): bool
     {
         return $this->role !== 'SPV';

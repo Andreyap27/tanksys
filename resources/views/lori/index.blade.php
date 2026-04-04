@@ -18,7 +18,7 @@
             <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
             Trash
         </a>
-        @if($canManage)
+        @if(auth()->user()->canManage())
         <button class="btn btn-primary" onclick="openCreateModal()">
             <i data-lucide="plus" style="width:16px;height:16px;"></i>
             Tambah Lori
@@ -68,8 +68,6 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@23.1.0/build/js/intlTelInput.min.js"></script>
 <script>
-    const canManage = @json($canManage);
-    const canDelete = @json($canDelete);
     let table;
     let editId = null;
     let activeLoriMobilId = '';

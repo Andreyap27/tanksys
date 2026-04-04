@@ -13,7 +13,7 @@
             <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
             Trash
         </a>
-        @if($canManage)
+        @if(auth()->user()->canManage())
         <button class="btn btn-primary" onclick="openCreateModal()">
             <i data-lucide="plus" style="width:16px;height:16px;"></i>
             Tambah Expense
@@ -54,8 +54,6 @@
 let table;
 let editId = null;
 let activeLoriExpenseMobilId = '';
-const canManage   = @json($canManage);
-const canDelete   = @json($canDelete);
 const createForm  = document.getElementById('createForm');
 const editForm    = document.getElementById('editForm');
 const createModal = document.getElementById('createModal');

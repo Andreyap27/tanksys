@@ -3,16 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Expense;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 
 class ExpenseController extends Controller
 {
     public function index()
     {
-        return view('expenses.index', [
-            'canManage' => auth()->user()->canManage(),
-            'canDelete' => auth()->user()->canDelete(),
-        ]);
+        return view('expenses.index');
     }
 
     public function data()
@@ -30,6 +28,7 @@ class ExpenseController extends Controller
             'nominal'     => number_format($e->nominal, 0, ',', '.'),
             'nominal_raw' => $e->nominal,
             'noted'       => $e->noted ?? '-',
+            'status'      => $e->status ?? 'pending',
         ]);
         return response()->json(['data' => $expenses]);
     }
@@ -60,10 +59,15 @@ class ExpenseController extends Controller
             'nominal'     => $request->nominal,
             'category'    => $request->category,
             'noted'       => $request->noted,
+            'status'      => 'pending',
             'created_by'  => auth()->id(),
         ]);
 
-        return response()->json(['message' => 'Pengeluaran berhasil disimpan.']);
+        Notification::sendToApprovers('approval', 'Pengeluaran Baru',
+            auth()->user()->name . ' menambahkan pengeluaran "' . $request->description . '" menunggu persetujuan.',
+            route('expenses.index'));
+
+        return response()->json(['message' => 'Pengeluaran berhasil disimpan dan menunggu persetujuan.']);
     }
 
     public function update(Request $request, Expense $expense)
@@ -78,10 +82,49 @@ class ExpenseController extends Controller
         ]);
 
         $expense->update(array_merge(
-            $request->only(['date', 'description', 'nominal', 'category', 'noted']),
+            $request->only(['kapal_id', 'date', 'description', 'nominal', 'category', 'noted']),
+            ['status' => 'pending', 'approved_by' => null, 'approved_at' => null],
         ));
 
-        return response()->json(['message' => 'Pengeluaran berhasil diupdate.']);
+        return response()->json(['message' => 'Pengeluaran berhasil diupdate dan menunggu persetujuan ulang.']);
+    }
+
+    public function approve(Expense $expense)
+    {
+        if (!auth()->user()->canApprove()) {
+            return response()->json(['message' => 'Anda tidak memiliki izin untuk menyetujui.'], 403);
+        }
+
+        $expense->update([
+            'status'      => 'approved',
+            'approved_by' => auth()->id(),
+            'approved_at' => now(),
+        ]);
+
+        Notification::send([$expense->created_by], 'info', 'Pengeluaran Disetujui',
+            'Pengeluaran "' . $expense->description . '" telah disetujui.',
+            route('expenses.index'));
+
+        return response()->json(['message' => 'Pengeluaran berhasil disetujui.']);
+    }
+
+    public function reject(Expense $expense)
+    {
+        if (!auth()->user()->canApprove()) {
+            return response()->json(['message' => 'Anda tidak memiliki izin untuk menolak.'], 403);
+        }
+
+        $expense->update([
+            'status'      => 'rejected',
+            'approved_by' => auth()->id(),
+            'approved_at' => now(),
+        ]);
+
+        Notification::send([$expense->created_by], 'info', 'Pengeluaran Ditolak',
+            'Pengeluaran "' . $expense->description . '" telah ditolak.',
+            route('expenses.index'));
+
+        return response()->json(['message' => 'Pengeluaran berhasil ditolak.']);
     }
 
     public function destroy(Expense $expense)
@@ -96,10 +139,7 @@ class ExpenseController extends Controller
 
     public function trash()
     {
-        return view('expenses.trash', [
-            'canRestore' => auth()->user()->canManage(),
-            'canDelete'  => auth()->user()->canDelete(),
-        ]);
+        return view('expenses.trash');
     }
 
     public function trashData()
@@ -125,7 +165,7 @@ class ExpenseController extends Controller
 
     public function restore($id)
     {
-        if (!auth()->user()->canManage()) {
+        if (!auth()->user()->canRestore()) {
             return response()->json(['message' => 'Anda tidak memiliki izin untuk restore data.'], 403);
         }
 

@@ -109,6 +109,8 @@ Route::middleware('auth.jwt')->group(function () {
     Route::get('/expenses/trash-data', [ExpenseController::class, 'trashData'])->name('expenses.trash-data');
     Route::post('/expenses/{id}/restore', [ExpenseController::class, 'restore'])->name('expenses.restore');
     Route::post('/expenses/{id}/force-delete', [ExpenseController::class, 'forceDelete'])->name('expenses.force-delete');
+    Route::post('/expenses/{expense}/approve', [ExpenseController::class, 'approve'])->name('expenses.approve');
+    Route::post('/expenses/{expense}/reject', [ExpenseController::class, 'reject'])->name('expenses.reject');
     Route::resource('expenses', ExpenseController::class)->names('expenses')->except(['create', 'edit', 'show']);
 
     // Mobil Tangki / Lori Sale

@@ -9,7 +9,7 @@
         <p class="page-subtitle">Kelola data pengguna sistem</p>
     </div>
     <div class="page-actions">
-        @if($canManage)
+        @if(auth()->user()->canManage())
         <button class="btn btn-primary" onclick="openCreateModal()">
             <i data-lucide="plus" style="width:16px;height:16px;"></i>
             Tambah User
@@ -46,8 +46,6 @@
 let table;
 let editId = null;
 let resetId = null;
-const canManage          = @json($canManage);
-const canDelete          = @json($canDelete);
 const createForm         = document.getElementById('createForm');
 const editForm           = document.getElementById('editForm');
 const resetPasswordForm  = document.getElementById('resetPasswordForm');

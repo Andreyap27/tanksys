@@ -92,8 +92,6 @@
 
     let table;
     let activePurchaseKapalId = '';
-    const canRestore = @json($canRestore);
-    const canDelete = @json($canDelete);
 
     function switchTab(btn, kapalId) {
         document.querySelectorAll('#purchaseTabs .tab').forEach(t => t.classList.remove('active'));

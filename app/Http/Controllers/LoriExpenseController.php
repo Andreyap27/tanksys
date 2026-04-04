@@ -9,10 +9,7 @@ class LoriExpenseController extends Controller
 {
     public function index()
     {
-        return view('lori-expense.index', [
-            'canManage' => auth()->user()->canManage(),
-            'canDelete' => auth()->user()->canDelete(),
-        ]);
+        return view('lori-expense.index');
     }
 
     public function data()
@@ -93,10 +90,7 @@ class LoriExpenseController extends Controller
 
     public function trash()
     {
-        return view('lori-expense.trash', [
-            'canRestore' => auth()->user()->canManage(),
-            'canDelete'  => auth()->user()->canDelete(),
-        ]);
+        return view('lori-expense.trash');
     }
 
     public function trashData()
@@ -122,7 +116,7 @@ class LoriExpenseController extends Controller
 
     public function restore($id)
     {
-        if (!auth()->user()->canManage()) {
+        if (!auth()->user()->canRestore()) {
             return response()->json(['message' => 'Anda tidak memiliki izin untuk restore data.'], 403);
         }
 

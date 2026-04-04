@@ -16,6 +16,11 @@
         </div>
     </div>
 
+    <!-- Company Brand -->
+    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.75rem;justify-content: center;">
+        <img src="/images/logo.png" alt="Logo" style="width: 70%;">
+    </div>
+
     <!-- Header -->
     <div class="form-header">
         <h1 class="form-title">Selamat Datang</h1>

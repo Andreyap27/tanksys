@@ -13,7 +13,7 @@
             <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
             Trash
         </a>
-        @if($canManage)
+        @if(auth()->user()->canManage())
         <button class="btn btn-primary" onclick="openCreateModal()">
             <i data-lucide="plus" style="width:16px;height:16px;"></i>
             Tambah Pengeluaran
@@ -76,6 +76,7 @@
                         <th>Kategori</th>
                         <th>Nominal</th>
                         <th>Noted</th>
+                        <th>Status</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -101,8 +102,6 @@ let table;
 let editId = null;
 let activeExpenseKapalId = '';
 let expensesCapital = 0;
-const canManage   = @json($canManage);
-const canDelete   = @json($canDelete);
 const createForm  = document.getElementById('createForm');
 const editForm    = document.getElementById('editForm');
 const createModal = document.getElementById('createModal');
@@ -225,22 +224,47 @@ $(document).ready(function () {
                 render: (data) => data && data !== '-' ? data : '<span class="text-muted">-</span>'
             },
             {
+                data: 'status',
+                render: function (data) {
+                    const map = {
+                        pending:  '<span class="badge badge-warning">Pending</span>',
+                        approved: '<span class="badge badge-success">Approved</span>',
+                        rejected: '<span class="badge badge-danger">Rejected</span>',
+                    };
+                    return map[data] || data;
+                }
+            },
+            {
                 data: null,
                 orderable: false,
                 searchable: false,
                 render: function (data, type, row) {
-                    return `
-                        <div class="table-actions">
-                            ${canManage ? `<button class="icon-btn primary" title="Edit"
-                                onclick="openEditModal('${row.id}', '${row.date_raw}', '${escHtml(row.description)}', '${row.category}', '${row.nominal_raw}', '${escHtml(row.noted)}', '${row.kapal_id || ''}')">
-                                <i data-lucide="pencil" style="width:14px;height:14px;"></i>
-                            </button>` : ''}
-                            ${canDelete ? `<button class="icon-btn danger" title="Hapus"
-                                onclick="deleteExpense('${row.id}', '${escHtml(row.description)}')">
-                                <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
-                            </button>` : ''}
-                        </div>
-                    `;
+                    const editBtn = canManage
+                        ? `<button class="icon-btn primary" title="Edit"
+                               onclick="openEditModal('${row.id}', '${row.date_raw}', '${escHtml(row.description)}', '${row.category}', '${row.nominal_raw}', '${escHtml(row.noted)}', '${row.kapal_id || ''}')">
+                               <i data-lucide="pencil" style="width:14px;height:14px;"></i>
+                           </button>`
+                        : '';
+
+                    const approveBtn = canApprove && row.status === 'pending'
+                        ? `<button class="icon-btn success" title="Approve"
+                               onclick="approveExpense('${row.id}')">
+                               <i data-lucide="check-circle" style="width:14px;height:14px;"></i>
+                           </button>
+                           <button class="icon-btn danger" title="Reject"
+                               onclick="rejectExpense('${row.id}')">
+                               <i data-lucide="x-circle" style="width:14px;height:14px;"></i>
+                           </button>`
+                        : '';
+
+                    const deleteBtn = canDelete
+                        ? `<button class="icon-btn danger" title="Hapus"
+                               onclick="deleteExpense('${row.id}', '${escHtml(row.description)}')">
+                               <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
+                           </button>`
+                        : '';
+
+                    return `<div class="table-actions">${editBtn}${approveBtn}${deleteBtn}</div>`;
                 }
             }
         ],
@@ -254,10 +278,15 @@ $(document).ready(function () {
 
 function updateExpensesTotal(api) {
     const rows = api.rows({ search: 'applied' }).data();
-    let total = 0;
-    for (let i = 0; i < rows.length; i++) total += parseFloat(rows[i].nominal_raw) || 0;
+    let total = 0, count = 0;
+    for (let i = 0; i < rows.length; i++) {
+        if (rows[i].status === 'approved') {
+            total += parseFloat(rows[i].nominal_raw) || 0;
+            count++;
+        }
+    }
     document.getElementById('expensesTotalCard').textContent = 'Rp ' + Currency.number(total);
-    document.getElementById('expensesCountCard').textContent = rows.length;
+    document.getElementById('expensesCountCard').textContent = count;
     updateBalance();
 }
 
@@ -345,6 +374,43 @@ function updateExpense() {
                 showError('Gagal', err.response?.data?.message || 'Terjadi kesalahan');
             }
         });
+}
+
+// ── Approve / Reject ──────────────────────────────────────────────────────────
+function approveExpense(id) {
+    showConfirm({
+        title: 'Konfirmasi Approve',
+        message: 'Yakin ingin menyetujui pengeluaran ini?',
+        type: 'success',
+        confirmText: 'Ya, Setujui',
+        onConfirm: async () => {
+            try {
+                const res = await axios.post(`/expenses/${id}/approve`);
+                showSuccess('Berhasil', res.data.message);
+                table.ajax.reload(null, false);
+            } catch (err) {
+                showError('Gagal', err.response?.data?.message || 'Gagal menyetujui data');
+            }
+        }
+    });
+}
+
+function rejectExpense(id) {
+    showConfirm({
+        title: 'Konfirmasi Reject',
+        message: 'Yakin ingin menolak pengeluaran ini?',
+        type: 'danger',
+        confirmText: 'Ya, Tolak',
+        onConfirm: async () => {
+            try {
+                const res = await axios.post(`/expenses/${id}/reject`);
+                showSuccess('Berhasil', res.data.message);
+                table.ajax.reload(null, false);
+            } catch (err) {
+                showError('Gagal', err.response?.data?.message || 'Gagal menolak data');
+            }
+        }
+    });
 }
 
 // ── Delete ────────────────────────────────────────────────────────────────────

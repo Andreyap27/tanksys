@@ -13,7 +13,7 @@
             <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
             Trash
         </a>
-        @if($canManage)
+        @if(auth()->user()->canManage())
         <button class="btn btn-primary" onclick="openCreateModal()">
             <i data-lucide="plus" style="width:16px;height:16px;"></i>
             Tambah Modal
@@ -87,6 +87,7 @@
 
 @push('scripts')
 <script>
+// @ts-nocheck
 // Initialize Lucide icons for page load
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof lucide !== 'undefined') {
@@ -101,9 +102,6 @@ const createForm  = document.getElementById('createForm');
 const editForm    = document.getElementById('editForm');
 const createModal = document.getElementById('createModal');
 const editModal   = document.getElementById('editModal');
-const canApprove  = @json($canApprove);
-const canManage   = @json($canManage);
-const canDelete   = @json($canDelete);
 
 function loadCapitalKapals() {
     axios.get('{{ route('kapal.list') }}').then(res => {

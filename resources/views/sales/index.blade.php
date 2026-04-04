@@ -18,7 +18,7 @@
             <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
             Trash
         </a>
-        @if($canManage)
+        @if(auth()->user()->canManage())
         <button class="btn btn-primary" onclick="openCreateModal()">
             <i data-lucide="plus" style="width:16px;height:16px;"></i>
             Tambah Penjualan
@@ -127,9 +127,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-const canApprove = @json($canApprove);
-const canManage  = @json($canManage);
-const canDelete  = @json($canDelete);
 let table;
 let editId = null;
 let activeSaleKapalId = '';

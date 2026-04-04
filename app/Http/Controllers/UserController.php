@@ -9,10 +9,7 @@ class UserController extends Controller
 {
     public function index()
     {
-        return view('user.index', [
-            'canManage' => auth()->user()->canManage(),
-            'canDelete' => auth()->user()->canDelete(),
-        ]);
+        return view('user.index');
     }
 
     public function nextId()

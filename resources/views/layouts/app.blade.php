@@ -257,6 +257,12 @@
                 dropdown.classList.remove('active');
             }
         });
+
+        // ── User Permissions (global) ─────────────────────────────────────────
+        const canApprove = @json(auth()->user()?->canApprove() ?? false);
+        const canManage  = @json(auth()->user()?->canManage() ?? false);
+        const canDelete  = @json(auth()->user()?->canDelete() ?? false);
+        const canRestore = @json(auth()->user()?->canRestore() ?? false);
     </script>
 
     @stack('scripts')

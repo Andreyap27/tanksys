@@ -9,10 +9,7 @@ class CustomerController extends Controller
 {
     public function index()
     {
-        return view('customer.index', [
-            'canManage' => auth()->user()->canManage(),
-            'canDelete' => auth()->user()->canDelete(),
-        ]);
+        return view('customer.index');
     }
 
     public function nextId()
