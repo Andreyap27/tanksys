@@ -74,7 +74,7 @@
         <!-- Laporan -->
         <div class="nav-section">Laporan</div>
         @php
-        $laporanActive = request()->routeIs('report.purchase') || request()->routeIs('report.sale') || request()->routeIs('report.expense') || request()->routeIs('report.capital');
+        $laporanActive = request()->routeIs('report.purchase') || request()->routeIs('report.sale') || request()->routeIs('report.expense') || request()->routeIs('report.capital') || request()->routeIs('report.profit-loss');
         $loriActive = request()->routeIs('lori.index') || request()->routeIs('lori-expense.*') || request()->routeIs('report.lori-omset') || request()->routeIs('report.lori-expense') || request()->routeIs('report.lori');
         @endphp
         <div class="nav-group">
@@ -95,6 +95,9 @@
                 </a>
                 <a href="{{ route('report.capital') }}" class="nav-sub-item {{ request()->routeIs('report.capital') ? 'active' : '' }}">
                     Total Capital
+                </a>
+                <a href="{{ route('report.profit-loss') }}" class="nav-sub-item {{ request()->routeIs('report.profit-loss') ? 'active' : '' }}">
+                    Profit / Loss
                 </a>
             </div>
         </div>
