@@ -14,21 +14,25 @@ class LoriExpenseController extends Controller
 
     public function data()
     {
-        $mobilId  = request('mobil_id');
-        $query    = LoriExpense::orderBy('date', 'desc');
-        if ($mobilId) $query->where('mobil_id', $mobilId);
-        $expenses = $query->get()->map(fn($e) => [
-            'id'          => $e->id,
-            'mobil_id'    => $e->mobil_id,
-            'date'        => $e->date->translatedFormat('d M Y'),
-            'date_raw'    => $e->date->format('Y-m-d'),
-            'description' => $e->description,
-            'category'    => $e->category,
-            'nominal'     => number_format($e->nominal, 0, ',', '.'),
-            'nominal_raw' => $e->nominal,
-            'noted'       => $e->noted ?? '-',
-        ]);
-        return response()->json(['data' => $expenses]);
+        try {
+            $mobilId  = request('mobil_id');
+            $query    = LoriExpense::orderBy('date', 'desc');
+            if ($mobilId) $query->where('mobil_id', $mobilId);
+            $expenses = $query->get()->map(fn($e) => [
+                'id'          => $e->id,
+                'mobil_id'    => $e->mobil_id,
+                'date'        => $e->date->translatedFormat('d M Y'),
+                'date_raw'    => $e->date->format('Y-m-d'),
+                'description' => $e->description,
+                'category'    => $e->category,
+                'nominal'     => number_format($e->nominal, 0, ',', '.'),
+                'nominal_raw' => $e->nominal,
+                'noted'       => $e->noted ?? '-',
+            ]);
+            return response()->json(['data' => $expenses]);
+        } catch (\Exception $e) {
+            return response()->json(['data' => [], 'error' => $e->getMessage()], 500);
+        }
     }
 
     public function store(Request $request)

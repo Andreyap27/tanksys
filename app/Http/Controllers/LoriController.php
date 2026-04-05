@@ -15,22 +15,26 @@ class LoriController extends Controller
 
     public function data()
     {
-        $mobilId = request('mobil_id');
-        $query   = Lori::with('customer')->orderBy('date', 'desc');
-        if ($mobilId) $query->where('mobil_id', $mobilId);
-        $loris = $query->get()->map(fn($l) => [
-            'id'            => $l->id,
-            'mobil_id'      => $l->mobil_id,
-            'date'          => $l->date->translatedFormat('d M Y'),
-            'date_raw'      => $l->date->format('Y-m-d'),
-            'customer_name' => $l->customer->name,
-            'customer_id'   => $l->customer_id,
-            'from'          => $l->from,
-            'to'            => $l->to,
-            'price'         => number_format($l->price, 0, ',', '.'),
-            'price_raw'     => $l->price,
-        ]);
-        return response()->json(['data' => $loris]);
+        try {
+            $mobilId = request('mobil_id');
+            $query   = Lori::with('customer')->orderBy('date', 'desc');
+            if ($mobilId) $query->where('mobil_id', $mobilId);
+            $loris = $query->get()->map(fn($l) => [
+                'id'            => $l->id,
+                'mobil_id'      => $l->mobil_id,
+                'date'          => $l->date->translatedFormat('d M Y'),
+                'date_raw'      => $l->date->format('Y-m-d'),
+                'customer_name' => $l->customer->name,
+                'customer_id'   => $l->customer_id,
+                'from'          => $l->from,
+                'to'            => $l->to,
+                'price'         => number_format($l->price, 0, ',', '.'),
+                'price_raw'     => $l->price,
+            ]);
+            return response()->json(['data' => $loris]);
+        } catch (\Exception $e) {
+            return response()->json(['data' => [], 'error' => $e->getMessage()], 500);
+        }
     }
 
     public function store(Request $request)

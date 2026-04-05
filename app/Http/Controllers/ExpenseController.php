@@ -15,22 +15,26 @@ class ExpenseController extends Controller
 
     public function data()
     {
-        $kapalId  = request('kapal_id');
-        $query    = Expense::orderBy('date', 'desc');
-        if ($kapalId) $query->where('kapal_id', $kapalId);
-        $expenses = $query->get()->map(fn($e) => [
-            'id'          => $e->id,
-            'kapal_id'    => $e->kapal_id,
-            'date'        => $e->date->translatedFormat('d M Y'),
-            'date_raw'    => $e->date->format('Y-m-d'),
-            'description' => $e->description,
-            'category'    => $e->category,
-            'nominal'     => number_format($e->nominal, 0, ',', '.'),
-            'nominal_raw' => $e->nominal,
-            'noted'       => $e->noted ?? '-',
-            'status'      => $e->status ?? 'pending',
-        ]);
-        return response()->json(['data' => $expenses]);
+        try {
+            $kapalId  = request('kapal_id');
+            $query    = Expense::orderBy('date', 'desc');
+            if ($kapalId) $query->where('kapal_id', $kapalId);
+            $expenses = $query->get()->map(fn($e) => [
+                'id'          => $e->id,
+                'kapal_id'    => $e->kapal_id,
+                'date'        => $e->date->translatedFormat('d M Y'),
+                'date_raw'    => $e->date->format('Y-m-d'),
+                'description' => $e->description,
+                'category'    => $e->category,
+                'nominal'     => number_format($e->nominal, 0, ',', '.'),
+                'nominal_raw' => $e->nominal,
+                'noted'       => $e->noted ?? '-',
+                'status'      => $e->status ?? 'pending',
+            ]);
+            return response()->json(['data' => $expenses]);
+        } catch (\Exception $e) {
+            return response()->json(['data' => [], 'error' => $e->getMessage()], 500);
+        }
     }
 
     public function capitalTotal()

@@ -17,26 +17,30 @@ class PurchaseController extends Controller
 
     public function data()
     {
-        $kapalId   = request('kapal_id');
-        $query     = Purchase::with('creator')->orderBy('date', 'desc');
-        if ($kapalId) $query->where('kapal_id', $kapalId);
-        $purchases = $query->get()->map(fn($p) => [
-            'id'            => $p->id,
-            'kapal_id'      => $p->kapal_id,
-            'date'          => $p->date->translatedFormat('d M Y'),
-            'date_raw'      => $p->date->format('Y-m-d'),
-            'vendor'        => $p->vendor,
-            'description'   => $p->description ?? '',
-            'quantity'      => number_format($p->quantity, 2, ',', '.'),
-            'quantity_raw'  => $p->quantity,
-            'price'         => number_format($p->price, 0, ',', '.'),
-            'price_raw'     => $p->price,
-            'amount'        => number_format($p->amount, 0, ',', '.'),
-            'amount_raw'    => $p->amount,
-            'noted'         => $p->noted ?? '',
-            'status'        => $p->status,
-        ]);
-        return response()->json(['data' => $purchases]);
+        try {
+            $kapalId   = request('kapal_id');
+            $query     = Purchase::with('creator')->orderBy('date', 'desc');
+            if ($kapalId) $query->where('kapal_id', $kapalId);
+            $purchases = $query->get()->map(fn($p) => [
+                'id'            => $p->id,
+                'kapal_id'      => $p->kapal_id,
+                'date'          => $p->date->translatedFormat('d M Y'),
+                'date_raw'      => $p->date->format('Y-m-d'),
+                'vendor'        => $p->vendor,
+                'description'   => $p->description ?? '',
+                'quantity'      => number_format($p->quantity, 2, ',', '.'),
+                'quantity_raw'  => $p->quantity,
+                'price'         => number_format($p->price, 0, ',', '.'),
+                'price_raw'     => $p->price,
+                'amount'        => number_format($p->amount, 0, ',', '.'),
+                'amount_raw'    => $p->amount,
+                'noted'         => $p->noted ?? '',
+                'status'        => $p->status,
+            ]);
+            return response()->json(['data' => $purchases]);
+        } catch (\Exception $e) {
+            return response()->json(['data' => [], 'error' => $e->getMessage()], 500);
+        }
     }
 
     public function store(Request $request)

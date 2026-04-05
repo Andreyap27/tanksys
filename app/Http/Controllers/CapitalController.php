@@ -15,21 +15,25 @@ class CapitalController extends Controller
 
     public function data()
     {
-        $kapalId  = request('kapal_id');
-        $query    = Capital::with('creator')->orderBy('date', 'desc');
-        if ($kapalId) $query->where('kapal_id', $kapalId);
-        $capitals = $query->get()->map(fn($c) => [
-            'id'          => $c->id,
-            'kapal_id'    => $c->kapal_id,
-            'date'        => $c->date->translatedFormat('d M Y'),
-            'date_raw'    => $c->date->format('Y-m-d'),
-            'name'        => $c->name,
-            'nominal'     => number_format($c->nominal, 0, ',', '.'),
-            'nominal_raw' => $c->nominal,
-            'note'        => $c->note ?? '',
-            'status'      => $c->status,
-        ]);
-        return response()->json(['data' => $capitals]);
+        try {
+            $kapalId  = request('kapal_id');
+            $query    = Capital::with('creator')->orderBy('date', 'desc');
+            if ($kapalId) $query->where('kapal_id', $kapalId);
+            $capitals = $query->get()->map(fn($c) => [
+                'id'          => $c->id,
+                'kapal_id'    => $c->kapal_id,
+                'date'        => $c->date->translatedFormat('d M Y'),
+                'date_raw'    => $c->date->format('Y-m-d'),
+                'name'        => $c->name,
+                'nominal'     => number_format($c->nominal, 0, ',', '.'),
+                'nominal_raw' => $c->nominal,
+                'note'        => $c->note ?? '',
+                'status'      => $c->status,
+            ]);
+            return response()->json(['data' => $capitals]);
+        } catch (\Exception $e) {
+            return response()->json(['data' => [], 'error' => $e->getMessage()], 500);
+        }
     }
 
     public function summary()

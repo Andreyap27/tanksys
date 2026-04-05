@@ -54,28 +54,32 @@ class SaleController extends Controller
 
     public function data()
     {
-        $kapalId = request('kapal_id');
-        $query   = Sale::with('customer')->orderBy('date', 'desc');
-        if ($kapalId) $query->where('kapal_id', $kapalId);
-        $sales = $query->get()->map(fn($s) => [
-            'id'             => $s->id,
-            'kapal_id'       => $s->kapal_id,
-            'date'           => $s->date->translatedFormat('d M Y'),
-            'date_raw'       => $s->date->format('Y-m-d'),
-            'invoice_number' => $s->invoice_number,
-            'customer_id'    => $s->customer_id,
-            'customer_name'  => $s->customer->name,
-            'description'    => $s->description ?? '-',
-            'quantity'       => number_format($s->quantity, 2),
-            'quantity_raw'   => $s->quantity,
-            'price'          => number_format($s->price, 0, ',', '.'),
-            'price_raw'      => $s->price,
-            'amount'         => number_format($s->amount, 0, ',', '.'),
-            'amount_raw'     => $s->amount,
-            'noted'          => $s->noted ?? '-',
-            'status'         => $s->status,
-        ]);
-        return response()->json(['data' => $sales]);
+        try {
+            $kapalId = request('kapal_id');
+            $query   = Sale::with('customer')->orderBy('date', 'desc');
+            if ($kapalId) $query->where('kapal_id', $kapalId);
+            $sales = $query->get()->map(fn($s) => [
+                'id'             => $s->id,
+                'kapal_id'       => $s->kapal_id,
+                'date'           => $s->date->translatedFormat('d M Y'),
+                'date_raw'       => $s->date->format('Y-m-d'),
+                'invoice_number' => $s->invoice_number,
+                'customer_id'    => $s->customer_id,
+                'customer_name'  => $s->customer->name,
+                'description'    => $s->description ?? '-',
+                'quantity'       => number_format($s->quantity, 2),
+                'quantity_raw'   => $s->quantity,
+                'price'          => number_format($s->price, 0, ',', '.'),
+                'price_raw'      => $s->price,
+                'amount'         => number_format($s->amount, 0, ',', '.'),
+                'amount_raw'     => $s->amount,
+                'noted'          => $s->noted ?? '-',
+                'status'         => $s->status,
+            ]);
+            return response()->json(['data' => $sales]);
+        } catch (\Exception $e) {
+            return response()->json(['data' => [], 'error' => $e->getMessage()], 500);
+        }
     }
 
     public function store(Request $request)
