@@ -111,6 +111,7 @@ const categoryBadge = {
     'Gaji':       'badge-info',
     'Spare Part': 'badge-warning',
     'Jasa':       'badge-info',
+    'Pinjaman':   'badge-secondary',
     'BBM ME':     'badge-danger',
     'BBM AE':     'badge-danger',
     'Umum':       'badge-success',
