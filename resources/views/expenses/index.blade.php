@@ -65,7 +65,15 @@
 </div>
 
 <div class="card">
-    <div class="card-toolbar"><div class="dt-search-slot"></div></div>
+    <div class="card-toolbar">
+        <div class="dt-search-slot"></div>
+        <select id="expensesStatusFilter" class="form-select" style="width:auto;min-width:130px;">
+            <option value="">Semua Status</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+        </select>
+    </div>
     <div class="card-content" style="padding:0;">
         <div class="table-wrap">
             <table id="expensesTable" class="w-full">
@@ -91,347 +99,372 @@
 
 @push('scripts')
 <script>
-// Initialize Lucide icons for page load
-document.addEventListener('DOMContentLoaded', () => {
-    if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
-    }
-});
+    // Initialize Lucide icons for page load
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    });
 
-let table;
-let editId = null;
-let activeExpenseKapalId = '';
-let expensesCapital = 0;
-const createForm  = document.getElementById('createForm');
-const editForm    = document.getElementById('editForm');
-const createModal = document.getElementById('createModal');
-const editModal   = document.getElementById('editModal');
+    let table;
+    let editId = null;
+    let activeExpenseKapalId = '';
+    let expensesCapital = 0;
+    const createForm = document.getElementById('createForm');
+    const editForm = document.getElementById('editForm');
+    const createModal = document.getElementById('createModal');
+    const editModal = document.getElementById('editModal');
 
-const categoryBadge = {
-    'Gaji':       'badge-info',
-    'Spare Part': 'badge-warning',
-    'Jasa':       'badge-info',
-    'Pinjaman':   'badge-secondary',
-    'BBM ME':     'badge-danger',
-    'BBM AE':     'badge-danger',
-    'Umum':       'badge-success',
-    'Fee':        'badge-warning',
-    'Lori':       'badge-info',
-};
+    const categoryBadge = {
+        'Gaji': 'badge-info',
+        'Spare Part': 'badge-warning',
+        'Jasa': 'badge-info',
+        'Pinjaman': 'badge-warning',
+        'BBM ME': 'badge-danger',
+        'BBM AE': 'badge-danger',
+        'Umum': 'badge-success',
+        'Fee': 'badge-warning',
+        'Lori': 'badge-info',
+    };
 
-// ── Kapal ─────────────────────────────────────────────────────────────────────
-function loadExpenseKapals() {
-    axios.get('{{ route('kapal.list') }}').then(res => {
-        const tabBar = document.getElementById('expenseTabs');
-        const opts = res.data.map(k => `<option value="${k.id}">${k.code} — ${k.name}</option>`).join('');
-        res.data.forEach(k => {
-            const btn = document.createElement('button');
-            btn.className = 'tab';
-            btn.dataset.kapalId = k.id;
-            btn.innerHTML = '<i data-lucide="ship" style="width:16px;height:16px;"></i> ' + k.name;
-            btn.onclick = function() { switchExpenseTab(this, k.id); };
-            tabBar.appendChild(btn);
+    // ── Kapal ─────────────────────────────────────────────────────────────────────
+    function loadExpenseKapals() {
+        axios.get('{{ route('kapal.list') }}').then(res => {
+            const tabBar = document.getElementById('expenseTabs');
+            const opts = res.data.map(k => `<option value="${k.id}">${k.code} — ${k.name}</option>`).join('');
+            res.data.forEach(k => {
+                const btn = document.createElement('button');
+                btn.className = 'tab';
+                btn.dataset.kapalId = k.id;
+                btn.innerHTML = '<i data-lucide="ship" style="width:16px;height:16px;"></i> ' + k.name;
+                btn.onclick = function() {
+                    switchExpenseTab(this, k.id);
+                };
+                tabBar.appendChild(btn);
+            });
+            lucide.createIcons();
+            document.getElementById('createExpenseKapalSelect').innerHTML = '<option value="">-- Pilih Kapal --</option>' + opts;
+            document.getElementById('editExpenseKapalSelect').innerHTML = '<option value="">-- Pilih Kapal --</option>' + opts;
         });
-        lucide.createIcons();
-        document.getElementById('createExpenseKapalSelect').innerHTML = '<option value="">-- Pilih Kapal --</option>' + opts;
-        document.getElementById('editExpenseKapalSelect').innerHTML   = '<option value="">-- Pilih Kapal --</option>' + opts;
+    }
+
+    function switchExpenseTab(btn, kapalId) {
+        document.querySelectorAll('#expenseTabs .tab').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        activeExpenseKapalId = kapalId;
+        refreshExpenseSummary(kapalId);
+        table.ajax.reload(null, false);
+    }
+
+    function refreshExpenseSummary(kapalId) {
+        const params = {};
+        if (kapalId) params.kapal_id = kapalId;
+        axios.get('{{ route('expenses.capital-total') }}', {params}).then(res => {
+            expensesCapital = res.data.total || 0;
+            document.getElementById('expensesCapitalCard').textContent = 'Rp ' + Currency.number(expensesCapital);
+            updateBalance();
+        });
+    }
+
+    function updateBalance() {
+        const totalText = document.getElementById('expensesTotalCard').textContent.replace(/[^0-9]/g, '');
+        const balance = expensesCapital - (parseFloat(totalText) || 0);
+        document.getElementById('expensesBalanceCard').textContent = 'Rp ' + Currency.number(balance);
+
+        // Update balance card color based on value
+        const balanceWrapper = document.getElementById('expensesBalanceCardWrapper');
+        balanceWrapper.classList.remove('ds-profit', 'ds-loss');
+        balanceWrapper.classList.add(balance >= 0 ? 'ds-profit' : 'ds-loss');
+    }
+
+    // ── Input formatter ───────────────────────────────────────────────────────────
+    function setRaw(el, raw) {
+        el.dataset.raw = raw;
+    }
+
+    function getRaw(el) {
+        return parseFloat(el.dataset.raw) || 0;
+    }
+
+    document.querySelectorAll('.fmt-price').forEach(el => {
+        el.addEventListener('input', function() {
+            const raw = this.value.replace(/[^0-9]/g, '');
+            this.value = raw;
+            setRaw(this, raw);
+        });
+        el.addEventListener('blur', function() {
+            const raw = parseInt(this.value.replace(/[^0-9]/g, '')) || 0;
+            setRaw(this, raw);
+            this.value = raw ? Currency.format(raw) : '';
+        });
+        el.addEventListener('focus', function() {
+            this.value = this.dataset.raw || '';
+        });
     });
-}
 
-function switchExpenseTab(btn, kapalId) {
-    document.querySelectorAll('#expenseTabs .tab').forEach(t => t.classList.remove('active'));
-    btn.classList.add('active');
-    activeExpenseKapalId = kapalId;
-    refreshExpenseSummary(kapalId);
-    table.ajax.reload(null, false);
-}
+    // ── DataTable ─────────────────────────────────────────────────────────────────
+    $(document).ready(function() {
+        loadExpenseKapals();
+        refreshExpenseSummary('');
 
-function refreshExpenseSummary(kapalId) {
-    const params = {};
-    if (kapalId) params.kapal_id = kapalId;
-    axios.get('{{ route('expenses.capital-total') }}', { params }).then(res => {
-        expensesCapital = res.data.total || 0;
-        document.getElementById('expensesCapitalCard').textContent = 'Rp ' + Currency.number(expensesCapital);
-        updateBalance();
-    });
-}
-
-function updateBalance() {
-    const totalText = document.getElementById('expensesTotalCard').textContent.replace(/[^0-9]/g, '');
-    const balance = expensesCapital - (parseFloat(totalText) || 0);
-    document.getElementById('expensesBalanceCard').textContent = 'Rp ' + Currency.number(balance);
-    
-    // Update balance card color based on value
-    const balanceWrapper = document.getElementById('expensesBalanceCardWrapper');
-    balanceWrapper.classList.remove('ds-profit', 'ds-loss');
-    balanceWrapper.classList.add(balance >= 0 ? 'ds-profit' : 'ds-loss');
-}
-
-// ── Input formatter ───────────────────────────────────────────────────────────
-function setRaw(el, raw) { el.dataset.raw = raw; }
-function getRaw(el)      { return parseFloat(el.dataset.raw) || 0; }
-
-document.querySelectorAll('.fmt-price').forEach(el => {
-    el.addEventListener('input', function () {
-        const raw = this.value.replace(/[^0-9]/g, '');
-        this.value = raw;
-        setRaw(this, raw);
-    });
-    el.addEventListener('blur', function () {
-        const raw = parseInt(this.value.replace(/[^0-9]/g, '')) || 0;
-        setRaw(this, raw);
-        this.value = raw ? Currency.format(raw) : '';
-    });
-    el.addEventListener('focus', function () {
-        this.value = this.dataset.raw || '';
-    });
-});
-
-// ── DataTable ─────────────────────────────────────────────────────────────────
-$(document).ready(function () {
-    loadExpenseKapals();
-    refreshExpenseSummary('');
-
-    table = $('#expensesTable').DataTable({
-        ajax: {
-            url: '{{ route('expenses.data') }}',
-            type: 'GET',
-            data: function(d) {
-                if (activeExpenseKapalId) d.kapal_id = activeExpenseKapalId;
-            }
-        },
-        processing: true,
-        columns: [
-            {
-                data: 'date',
-                render: function (data, type, row) {
-                    return (type === 'sort' || type === 'type') ? row.date_raw : data;
+        table = $('#expensesTable').DataTable({
+            ajax: {
+                url: '{{ route('expenses.data') }}',
+                type: 'GET',
+                data: function(d) {
+                    if (activeExpenseKapalId) d.kapal_id = activeExpenseKapalId;
                 }
             },
-            { data: 'description' },
-            {
-                data: 'category',
-                render: (data) => {
-                    const cls = categoryBadge[data] || 'badge-info';
-                    return `<span class="badge ${cls}">${data}</span>`;
-                }
-            },
-            {
-                data: 'nominal',
-                render: (data) => Currency.symbol + ' ' + data
-            },
-            {
-                data: 'noted',
-                render: (data) => data && data !== '-' ? data : '<span class="text-muted">-</span>'
-            },
-            {
-                data: 'status',
-                render: function (data) {
-                    const map = {
-                        pending:  '<span class="badge badge-warning">Pending</span>',
-                        approved: '<span class="badge badge-success">Approved</span>',
-                        rejected: '<span class="badge badge-danger">Rejected</span>',
-                    };
-                    return map[data] || data;
-                }
-            },
-            {
-                data: null,
-                orderable: false,
-                searchable: false,
-                render: function (data, type, row) {
-                    const editBtn = canManage
-                        ? `<button class="icon-btn primary" title="Edit"
+            processing: true,
+            columns: [{
+                    data: 'date',
+                    render: function(data, type, row) {
+                        return (type === 'sort' || type === 'type') ? row.date_raw : data;
+                    }
+                },
+                {
+                    data: 'description'
+                },
+                {
+                    data: 'category',
+                    render: (data) => {
+                        const cls = categoryBadge[data] || 'badge-info';
+                        return `<span class="badge ${cls}">${data}</span>`;
+                    }
+                },
+                {
+                    data: 'nominal',
+                    render: (data) => Currency.symbol + ' ' + data
+                },
+                {
+                    data: 'noted',
+                    render: (data) => data && data !== '-' ? data : '<span class="text-muted">-</span>'
+                },
+                {
+                    data: 'status',
+                    render: function(data) {
+                        const map = {
+                            pending: '<span class="badge badge-warning">Pending</span>',
+                            approved: '<span class="badge badge-success">Approved</span>',
+                            rejected: '<span class="badge badge-danger">Rejected</span>',
+                        };
+                        return map[data] || data;
+                    }
+                },
+                {
+                    data: null,
+                    orderable: false,
+                    searchable: false,
+                    render: function(data, type, row) {
+                        const editBtn = canManage ?
+                            `<button class="icon-btn primary" title="Edit"
                                onclick="openEditModal('${row.id}', '${row.date_raw}', '${escHtml(row.description)}', '${row.category}', '${row.nominal_raw}', '${escHtml(row.noted)}', '${row.kapal_id || ''}')">
                                <i data-lucide="pencil" style="width:14px;height:14px;"></i>
-                           </button>`
-                        : '';
+                           </button>` :
+                            '';
 
-                    const approveBtn = canApprove && row.status === 'pending'
-                        ? `<button class="icon-btn success" title="Approve"
+                        const approveBtn = canApprove && row.status === 'pending' ?
+                            `<button class="icon-btn success" title="Approve"
                                onclick="approveExpense('${row.id}')">
                                <i data-lucide="check-circle" style="width:14px;height:14px;"></i>
                            </button>
                            <button class="icon-btn danger" title="Reject"
                                onclick="rejectExpense('${row.id}')">
                                <i data-lucide="x-circle" style="width:14px;height:14px;"></i>
-                           </button>`
-                        : '';
+                           </button>` :
+                            '';
 
-                    const deleteBtn = canDelete
-                        ? `<button class="icon-btn danger" title="Hapus"
+                        const deleteBtn = canDelete ?
+                            `<button class="icon-btn danger" title="Hapus"
                                onclick="deleteExpense('${row.id}', '${escHtml(row.description)}')">
                                <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
-                           </button>`
-                        : '';
+                           </button>` :
+                            '';
 
-                    return `<div class="table-actions">${editBtn}${approveBtn}${deleteBtn}</div>`;
+                        return `<div class="table-actions">${editBtn}${approveBtn}${deleteBtn}</div>`;
+                    }
+                }
+            ],
+            order: [
+                [0, 'desc']
+            ],
+            drawCallback: function() {
+                lucide.createIcons();
+                updateExpensesTotal(this.api());
+            }
+        });
+
+        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+            if (settings.nTable.id !== 'expensesTable') return true;
+            const filterVal = document.getElementById('expensesStatusFilter').value;
+            if (!filterVal) return true;
+            const rowData = table.row(dataIndex).data();
+            return rowData && rowData.status === filterVal;
+        });
+
+        document.getElementById('expensesStatusFilter').addEventListener('change', function() {
+            table.draw();
+        });
+    });
+
+    function updateExpensesTotal(api) {
+        const rows = api.rows({
+            search: 'applied'
+        }).data();
+        let total = 0,
+            count = 0;
+        for (let i = 0; i < rows.length; i++) {
+            if (rows[i].status === 'approved') {
+                total += parseFloat(rows[i].nominal_raw) || 0;
+                count++;
+            }
+        }
+        document.getElementById('expensesTotalCard').textContent = 'Rp ' + Currency.number(total);
+        document.getElementById('expensesCountCard').textContent = count;
+        updateBalance();
+    }
+
+    function escHtml(str) {
+        if (str == null) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+
+    // ── Create ────────────────────────────────────────────────────────────────────
+    function openCreateModal() {
+        createForm.reset();
+        if (activeExpenseKapalId) document.getElementById('createExpenseKapalSelect').value = activeExpenseKapalId;
+        createModal.classList.add('active');
+    }
+
+    function closeCreateModal() {
+        createModal.classList.remove('active');
+    }
+
+    function storeExpense() {
+        const payload = {
+            kapal_id: document.getElementById('createExpenseKapalSelect').value || null,
+            date: createForm.date.value,
+            category: createForm.category.value,
+            description: createForm.description.value,
+            nominal: getRaw(createForm.nominal),
+            noted: createForm.noted.value,
+        };
+
+        axios.post('{{ route('expenses.store') }}', payload)
+            .then(res => {
+                showSuccess('Berhasil', res.data.message || 'Pengeluaran berhasil ditambahkan');
+                closeCreateModal();
+                table.ajax.reload(null, false);
+            })
+            .catch(err => {
+                const errors = err.response?.data?.errors;
+                if (errors) {
+                    showError('Gagal', Object.values(errors).flat().join('\n'));
+                } else {
+                    showError('Gagal', err.response?.data?.message || 'Terjadi kesalahan');
+                }
+            });
+    }
+
+    // ── Edit ──────────────────────────────────────────────────────────────────────
+    function openEditModal(id, date, description, category, nominal, noted, kapalId) {
+        editId = id;
+        editForm.date.value = date;
+        editForm.description.value = description;
+        editForm.category.value = category;
+        editForm.noted.value = noted !== '-' ? noted : '';
+        setRaw(editForm.nominal, nominal);
+        editForm.nominal.value = parseInt(nominal) ? Currency.format(nominal) : '';
+        document.getElementById('editExpenseKapalSelect').value = kapalId || '';
+        editModal.classList.add('active');
+    }
+
+    function closeEditModal() {
+        editModal.classList.remove('active');
+        editId = null;
+    }
+
+    function updateExpense() {
+        const payload = {
+            kapal_id: document.getElementById('editExpenseKapalSelect').value || null,
+            date: editForm.date.value,
+            category: editForm.category.value,
+            description: editForm.description.value,
+            nominal: getRaw(editForm.nominal),
+            noted: editForm.noted.value,
+        };
+
+        axios.put(`/expenses/${editId}`, payload)
+            .then(res => {
+                showSuccess('Berhasil', res.data.message || 'Pengeluaran berhasil diupdate');
+                closeEditModal();
+                table.ajax.reload(null, false);
+            })
+            .catch(err => {
+                const errors = err.response?.data?.errors;
+                if (errors) {
+                    showError('Gagal', Object.values(errors).flat().join('\n'));
+                } else {
+                    showError('Gagal', err.response?.data?.message || 'Terjadi kesalahan');
+                }
+            });
+    }
+
+    // ── Approve / Reject ──────────────────────────────────────────────────────────
+    function approveExpense(id) {
+        showConfirm({
+            title: 'Konfirmasi Approve',
+            message: 'Yakin ingin menyetujui pengeluaran ini?',
+            type: 'success',
+            confirmText: 'Ya, Setujui',
+            onConfirm: async () => {
+                try {
+                    const res = await axios.post(`/expenses/${id}/approve`);
+                    showSuccess('Berhasil', res.data.message);
+                    table.ajax.reload(null, false);
+                } catch (err) {
+                    showError('Gagal', err.response?.data?.message || 'Gagal menyetujui data');
                 }
             }
-        ],
-        order: [[0, 'desc']],
-        drawCallback: function () {
-            lucide.createIcons();
-            updateExpensesTotal(this.api());
-        }
-    });
-});
-
-function updateExpensesTotal(api) {
-    const rows = api.rows({ search: 'applied' }).data();
-    let total = 0, count = 0;
-    for (let i = 0; i < rows.length; i++) {
-        if (rows[i].status === 'approved') {
-            total += parseFloat(rows[i].nominal_raw) || 0;
-            count++;
-        }
+        });
     }
-    document.getElementById('expensesTotalCard').textContent = 'Rp ' + Currency.number(total);
-    document.getElementById('expensesCountCard').textContent = count;
-    updateBalance();
-}
 
-function escHtml(str) {
-    if (str == null) return '';
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-}
-
-// ── Create ────────────────────────────────────────────────────────────────────
-function openCreateModal() {
-    createForm.reset();
-    if (activeExpenseKapalId) document.getElementById('createExpenseKapalSelect').value = activeExpenseKapalId;
-    createModal.classList.add('active');
-}
-
-function closeCreateModal() {
-    createModal.classList.remove('active');
-}
-
-function storeExpense() {
-    const payload = {
-        kapal_id:    document.getElementById('createExpenseKapalSelect').value || null,
-        date:        createForm.date.value,
-        category:    createForm.category.value,
-        description: createForm.description.value,
-        nominal:     getRaw(createForm.nominal),
-        noted:       createForm.noted.value,
-    };
-
-    axios.post('{{ route('expenses.store') }}', payload)
-        .then(res => {
-            showSuccess('Berhasil', res.data.message || 'Pengeluaran berhasil ditambahkan');
-            closeCreateModal();
-            table.ajax.reload(null, false);
-        })
-        .catch(err => {
-            const errors = err.response?.data?.errors;
-            if (errors) {
-                showError('Gagal', Object.values(errors).flat().join('\n'));
-            } else {
-                showError('Gagal', err.response?.data?.message || 'Terjadi kesalahan');
+    function rejectExpense(id) {
+        showConfirm({
+            title: 'Konfirmasi Reject',
+            message: 'Yakin ingin menolak pengeluaran ini?',
+            type: 'danger',
+            confirmText: 'Ya, Tolak',
+            onConfirm: async () => {
+                try {
+                    const res = await axios.post(`/expenses/${id}/reject`);
+                    showSuccess('Berhasil', res.data.message);
+                    table.ajax.reload(null, false);
+                } catch (err) {
+                    showError('Gagal', err.response?.data?.message || 'Gagal menolak data');
+                }
             }
         });
-}
+    }
 
-// ── Edit ──────────────────────────────────────────────────────────────────────
-function openEditModal(id, date, description, category, nominal, noted, kapalId) {
-    editId = id;
-    editForm.date.value        = date;
-    editForm.description.value = description;
-    editForm.category.value    = category;
-    editForm.noted.value       = noted !== '-' ? noted : '';
-    setRaw(editForm.nominal, nominal);
-    editForm.nominal.value = parseInt(nominal) ? Currency.format(nominal) : '';
-    document.getElementById('editExpenseKapalSelect').value = kapalId || '';
-    editModal.classList.add('active');
-}
+    // ── Delete ────────────────────────────────────────────────────────────────────
 
-function closeEditModal() {
-    editModal.classList.remove('active');
-    editId = null;
-}
-
-function updateExpense() {
-    const payload = {
-        kapal_id:    document.getElementById('editExpenseKapalSelect').value || null,
-        date:        editForm.date.value,
-        category:    editForm.category.value,
-        description: editForm.description.value,
-        nominal:     getRaw(editForm.nominal),
-        noted:       editForm.noted.value,
-    };
-
-    axios.put(`/expenses/${editId}`, payload)
-        .then(res => {
-            showSuccess('Berhasil', res.data.message || 'Pengeluaran berhasil diupdate');
-            closeEditModal();
-            table.ajax.reload(null, false);
-        })
-        .catch(err => {
-            const errors = err.response?.data?.errors;
-            if (errors) {
-                showError('Gagal', Object.values(errors).flat().join('\n'));
-            } else {
-                showError('Gagal', err.response?.data?.message || 'Terjadi kesalahan');
+    function deleteExpense(id, description) {
+        showConfirm({
+            title: 'Konfirmasi Hapus',
+            message: `Yakin ingin menghapus pengeluaran "${description}"? Tindakan ini tidak dapat dibatalkan.`,
+            type: 'danger',
+            confirmText: 'Ya, Hapus',
+            onConfirm: async () => {
+                try {
+                    const res = await axios.delete(`/expenses/${id}`);
+                    showSuccess('Berhasil', res.data.message || 'Data berhasil dihapus');
+                    table.ajax.reload(null, false);
+                } catch (err) {
+                    showError('Gagal', err.response?.data?.message || 'Gagal menghapus data');
+                }
             }
         });
-}
-
-// ── Approve / Reject ──────────────────────────────────────────────────────────
-function approveExpense(id) {
-    showConfirm({
-        title: 'Konfirmasi Approve',
-        message: 'Yakin ingin menyetujui pengeluaran ini?',
-        type: 'success',
-        confirmText: 'Ya, Setujui',
-        onConfirm: async () => {
-            try {
-                const res = await axios.post(`/expenses/${id}/approve`);
-                showSuccess('Berhasil', res.data.message);
-                table.ajax.reload(null, false);
-            } catch (err) {
-                showError('Gagal', err.response?.data?.message || 'Gagal menyetujui data');
-            }
-        }
-    });
-}
-
-function rejectExpense(id) {
-    showConfirm({
-        title: 'Konfirmasi Reject',
-        message: 'Yakin ingin menolak pengeluaran ini?',
-        type: 'danger',
-        confirmText: 'Ya, Tolak',
-        onConfirm: async () => {
-            try {
-                const res = await axios.post(`/expenses/${id}/reject`);
-                showSuccess('Berhasil', res.data.message);
-                table.ajax.reload(null, false);
-            } catch (err) {
-                showError('Gagal', err.response?.data?.message || 'Gagal menolak data');
-            }
-        }
-    });
-}
-
-// ── Delete ────────────────────────────────────────────────────────────────────
-
-function deleteExpense(id, description) {
-    showConfirm({
-        title: 'Konfirmasi Hapus',
-        message: `Yakin ingin menghapus pengeluaran "${description}"? Tindakan ini tidak dapat dibatalkan.`,
-        type: 'danger',
-        confirmText: 'Ya, Hapus',
-        onConfirm: async () => {
-            try {
-                const res = await axios.delete(`/expenses/${id}`);
-                showSuccess('Berhasil', res.data.message || 'Data berhasil dihapus');
-                table.ajax.reload(null, false);
-            } catch (err) {
-                showError('Gagal', err.response?.data?.message || 'Gagal menghapus data');
-            }
-        }
-    });
-}
+    }
 </script>
 @endpush
