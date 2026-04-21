@@ -1217,17 +1217,18 @@ table.dataTable tbody tr:last-child td { border-bottom: none !important; }
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.625rem 1rem;
+    padding: 0.875rem 1.25rem;
     border-top: 1px solid var(--border);
     gap: 1rem;
+    background: var(--muted);
+    border-radius: 0 0 var(--radius) var(--radius);
+    flex-wrap: wrap;
 }
 
 .dt-foot-left {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    font-size: 0.8125rem;
-    color: var(--muted-foreground);
+    gap: 0.625rem;
     flex-wrap: wrap;
 }
 
@@ -1236,89 +1237,188 @@ table.dataTable tbody tr:last-child td { border-bottom: none !important; }
     align-items: center;
 }
 
-/* Length (entries count) */
-.dataTables_length label {
-    display: flex;
+/* ── Length select ── */
+.dataTables_length {
+    display: inline-flex;
     align-items: center;
-    gap: 0.375rem;
+    vertical-align: middle;
+}
+
+.dataTables_length label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
     font-size: 0.8125rem;
     color: var(--muted-foreground);
     white-space: nowrap;
+    background: none;
+    border: none;
+    padding: 0;
+    line-height: 1;
 }
+
+/* hide the text before/after the <select> — keep only the select */
+.dataTables_length label span,
+.dataTables_length label > #\{id\}_length { display: none; }
 
 .dataTables_length select {
-    padding: 0.25rem 1.5rem 0.25rem 0.5rem;
-    border: 1px solid var(--border);
-    border-radius: calc(var(--radius) - 2px);
-    background-color: var(--card);
-    color: var(--foreground);
-    font-size: 0.8125rem;
-    font-family: inherit;
-    cursor: pointer;
-    outline: none;
-    appearance: auto;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    padding: 0 2.25rem 0 1rem !important;
+    height: 2.1rem !important;
+    border: 1.5px solid var(--border) !important;
+    border-radius: 9999px !important;
+    background-color: var(--card) !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 0.7rem center !important;
+    color: var(--foreground) !important;
+    font-size: 0.8125rem !important;
+    font-weight: 600 !important;
+    font-family: inherit !important;
+    cursor: pointer !important;
+    outline: none !important;
+    box-shadow: none !important;
+    transition: border-color .15s, box-shadow .15s !important;
+    min-width: 5rem !important;
 }
 
-.dataTables_length select:focus { border-color: var(--primary); }
+.dataTables_length select:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(26,92,184,.15) !important;
+}
 
-/* Info text */
+.dataTables_length select:hover:not(:focus) {
+    border-color: var(--primary) !important;
+}
+
+/* ── Info text — plain, no pill ── */
 .dataTables_info {
-    font-size: 0.8125rem;
-    color: var(--muted-foreground);
-}
-
-/* Pagination */
-.dataTables_paginate {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
+    vertical-align: middle;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--muted-foreground);
+    white-space: nowrap;
+    line-height: 1;
+    padding: 0;
+    border: none;
+    background: none;
+    height: 2.1rem;
 }
 
+.dataTables_info b {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+/* ── Pagination ──────────────────────────────────────────────────── */
+.dataTables_paginate {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 0.3rem;
+    background: transparent;
+    border: none;
+    padding: 0;
+    box-shadow: none;
+}
+
+/* Base button — circle with border */
 .dataTables_paginate .paginate_button {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 2rem !important;
-    height: 2rem !important;
+    width: 2.1rem !important;
+    height: 2.1rem !important;
     padding: 0 !important;
     border-radius: 50% !important;
-    border: 1px solid transparent !important;
-    background: none !important;
+    border: 1.5px solid var(--border) !important;
+    background: var(--card) !important;
     color: var(--foreground) !important;
     cursor: pointer !important;
     font-size: 0.8125rem !important;
+    font-weight: 600 !important;
     font-family: inherit !important;
-    transition: all 0.15s ease !important;
+    transition: background .15s, border-color .15s, color .15s !important;
     text-decoration: none !important;
     box-shadow: none !important;
+    line-height: 1 !important;
 }
 
-.dataTables_paginate .paginate_button:hover {
-    background: var(--muted) !important;
-    border-color: var(--border) !important;
-    color: var(--foreground) !important;
-    border-radius: 50% !important;
+.dataTables_paginate .paginate_button:hover:not(.disabled):not(.current) {
+    background: var(--accent) !important;
+    border-color: var(--primary) !important;
+    color: var(--primary) !important;
 }
 
+/* Active page — filled primary color, white text */
 .dataTables_paginate .paginate_button.current,
 .dataTables_paginate .paginate_button.current:hover {
     background: var(--primary) !important;
     border-color: var(--primary) !important;
-    color: #fff !important;
-    border-radius: 50% !important;
+    color: var(--primary-foreground) !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 8px rgba(26,92,184,.35) !important;
 }
 
 .dataTables_paginate .paginate_button.disabled,
 .dataTables_paginate .paginate_button.disabled:hover {
     color: var(--muted-foreground) !important;
-    background: none !important;
-    cursor: default;
-    opacity: 0.4;
+    background: var(--card) !important;
+    border-color: var(--border) !important;
+    cursor: default !important;
+    opacity: 0.4 !important;
+    box-shadow: none !important;
+}
+
+/* Prev / Next — pill shape */
+.dataTables_paginate .paginate_button.previous,
+.dataTables_paginate .paginate_button.next {
+    width: auto !important;
+    padding: 0 1rem !important;
+    border-radius: 9999px !important;
+    font-size: 0.8125rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.02em !important;
+}
+
+/* First / Last — pill shape, distinct with primary accent */
+.dataTables_paginate .paginate_button.first,
+.dataTables_paginate .paginate_button.last {
+    width: auto !important;
+    padding: 0 0.75rem !important;
+    border-radius: 9999px !important;
+    font-size: 0.875rem !important;
+    font-weight: 700 !important;
+    border-color: var(--primary) !important;
+    color: var(--primary) !important;
+}
+
+.dataTables_paginate .paginate_button.first:hover:not(.disabled),
+.dataTables_paginate .paginate_button.last:hover:not(.disabled) {
+    background: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: var(--primary-foreground) !important;
+}
+
+.dataTables_paginate .paginate_button.first.disabled,
+.dataTables_paginate .paginate_button.last.disabled {
+    border-color: var(--border) !important;
+    color: var(--muted-foreground) !important;
 }
 
 .dataTables_paginate .ellipsis {
-    padding: 0 0.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.1rem;
+    height: 2.1rem;
     color: var(--muted-foreground);
+    font-size: 0.875rem;
+    letter-spacing: 0.05em;
+    pointer-events: none;
 }
 
 /* ── Empty State ─────────────────────────────────────────────── */

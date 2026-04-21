@@ -135,20 +135,21 @@
                     search: ' ',
                     searchPlaceholder: 'Cari data...',
                     lengthMenu: '_MENU_',
-                    info: '_START_\u2013_END_ dari _TOTAL_ data',
+                    info: '<b>_START_–_END_</b>&nbsp;dari&nbsp;<b>_TOTAL_</b>&nbsp;data',
                     infoEmpty: 'Tidak ada data',
-                    infoFiltered: '(filter _MAX_)',
+                    infoFiltered: '(filter dari&nbsp;<b>_MAX_</b>)',
                     zeroRecords: dtNoResultHtml,
                     emptyTable: dtEmptyHtml,
                     paginate: {
-                        first: '«',
-                        last: '»',
-                        next: '›',
-                        previous: '‹'
+                        first: 'First',
+                        last: 'Last',
+                        next: 'Next',
+                        previous: 'Prev'
                     },
                     processing: dtProcessingHtml,
                 },
                 dom: 'ft<"dt-foot"<"dt-foot-left"il><"dt-foot-right"p>>',
+                pagingType: 'full_numbers',
                 processing: true,
                 pageLength: 25,
                 order: [
@@ -259,10 +260,10 @@
         });
 
         // ── User Permissions (global) ─────────────────────────────────────────
-        const canApprove = @json(auth()->user()?->canApprove() ?? false);
-        const canManage  = @json(auth()->user()?->canManage() ?? false);
-        const canDelete  = @json(auth()->user()?->canDelete() ?? false);
-        const canRestore = @json(auth()->user()?->canRestore() ?? false);
+        const canApprove = @json(auth()->user() ?->canApprove() ?? false);
+        const canManage = @json(auth()->user() ?->canManage() ?? false);
+        const canDelete = @json(auth()->user() ?->canDelete() ?? false);
+        const canRestore = @json(auth()->user() ?->canRestore() ?? false);
     </script>
 
     @stack('scripts')
