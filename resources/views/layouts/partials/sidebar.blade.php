@@ -125,6 +125,10 @@
                 </a>
             </div>
         </div>
+        <a href="{{ route('bank.index') }}" class="nav-item {{ request()->routeIs('bank.*') ? 'active' : '' }}">
+            <i data-lucide="landmark"></i>
+            <span>Bank In/Out</span>
+        </a>
     </nav>
 
     <!-- User Profile Strip -->

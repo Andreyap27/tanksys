@@ -21,6 +21,53 @@
         @endif
     </div>
 </div>
+
+{{-- Summary Cards --}}
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.25rem;margin-bottom:1.5rem;">
+    <div class="dash-stat ds-profit">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon">
+                <i data-lucide="arrow-up-circle" style="width:20px;height:20px;"></i>
+            </div>
+            <div>
+                <div class="dash-stat__label">Total Kredit (Omset)</div>
+                <div class="dash-stat__value" id="loriExpKreditCard">Rp 0</div>
+            </div>
+        </div>
+        <div class="dash-stat__bg-icon">
+            <i data-lucide="arrow-up-circle" style="width:110px;height:110px;"></i>
+        </div>
+    </div>
+    <div class="dash-stat ds-expense">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon">
+                <i data-lucide="arrow-down-circle" style="width:20px;height:20px;"></i>
+            </div>
+            <div>
+                <div class="dash-stat__label">Total Debit (Pengeluaran)</div>
+                <div class="dash-stat__value" id="loriExpDebitCard">Rp 0</div>
+            </div>
+        </div>
+        <div class="dash-stat__bg-icon">
+            <i data-lucide="arrow-down-circle" style="width:110px;height:110px;"></i>
+        </div>
+    </div>
+    <div class="dash-stat" id="loriExpBalanceWrapper">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon">
+                <i data-lucide="scale" style="width:20px;height:20px;"></i>
+            </div>
+            <div>
+                <div class="dash-stat__label">Balance</div>
+                <div class="dash-stat__value" id="loriExpBalanceCard">Rp 0</div>
+            </div>
+        </div>
+        <div class="dash-stat__bg-icon">
+            <i data-lucide="scale" style="width:110px;height:110px;"></i>
+        </div>
+    </div>
+</div>
+
 {{-- Tabs --}}
 <div class="tab-bar" id="loriExpenseMobilTabs">
 </div>
@@ -98,7 +145,21 @@ function switchLoriExpenseTab(btn, mobilId) {
     document.querySelectorAll('#loriExpenseMobilTabs .tab').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
     activeLoriExpenseMobilId = mobilId;
+    refreshLoriExpSummary(mobilId);
     table.ajax.reload(null, false);
+}
+
+function refreshLoriExpSummary(mobilId) {
+    const params = {};
+    if (mobilId) params.mobil_id = mobilId;
+    axios.get('{{ route('lori-expense.summary') }}', { params }).then(res => {
+        document.getElementById('loriExpKreditCard').textContent  = 'Rp ' + Currency.number(res.data.kredit || 0);
+        document.getElementById('loriExpDebitCard').textContent   = 'Rp ' + Currency.number(res.data.debit  || 0);
+        document.getElementById('loriExpBalanceCard').textContent = 'Rp ' + Currency.number(res.data.balance || 0);
+        const wrapper = document.getElementById('loriExpBalanceWrapper');
+        wrapper.classList.remove('ds-profit', 'ds-loss');
+        wrapper.classList.add((res.data.balance || 0) >= 0 ? 'ds-profit' : 'ds-loss');
+    });
 }
 
 // ── Input formatter ───────────────────────────────────────────────────────────
@@ -124,6 +185,7 @@ document.querySelectorAll('.fmt-price').forEach(el => {
 // ── DataTable ─────────────────────────────────────────────────────────────────
 $(document).ready(function () {
     loadLoriExpenseMobils();
+    refreshLoriExpSummary(null);
 
     table = $('#loriExpenseTable').DataTable({
         ajax: {
@@ -199,7 +261,7 @@ function storeExpense() {
         noted:       createForm.noted.value,
     };
     axios.post('{{ route('lori-expense.store') }}', payload)
-        .then(res => { showSuccess('Berhasil', res.data.message); closeCreateModal(); table.ajax.reload(null, false); })
+        .then(res => { showSuccess('Berhasil', res.data.message); closeCreateModal(); table.ajax.reload(null, false); refreshLoriExpSummary(activeLoriExpenseMobilId); })
         .catch(err => {
             const errors = err.response?.data?.errors;
             showError('Gagal', errors ? Object.values(errors).flat().join('\n') : err.response?.data?.message || 'Terjadi kesalahan');
@@ -230,7 +292,7 @@ function updateExpense() {
         noted:       editForm.noted.value,
     };
     axios.put(`/lori-expense/${editId}`, payload)
-        .then(res => { showSuccess('Berhasil', res.data.message); closeEditModal(); table.ajax.reload(null, false); })
+        .then(res => { showSuccess('Berhasil', res.data.message); closeEditModal(); table.ajax.reload(null, false); refreshLoriExpSummary(activeLoriExpenseMobilId); })
         .catch(err => {
             const errors = err.response?.data?.errors;
             showError('Gagal', errors ? Object.values(errors).flat().join('\n') : err.response?.data?.message || 'Terjadi kesalahan');
@@ -249,6 +311,7 @@ function deleteExpense(id, description) {
                 const res = await axios.delete(`/lori-expense/${id}`);
                 showSuccess('Berhasil', res.data.message);
                 table.ajax.reload(null, false);
+                refreshLoriExpSummary(activeLoriExpenseMobilId);
             } catch (err) {
                 showError('Gagal', err.response?.data?.message || 'Gagal menghapus data');
             }

@@ -17,6 +17,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\KapalController;
 use App\Http\Controllers\MobilController;
+use App\Http\Controllers\BankTransactionController;
 
 // Guest routes
 Route::middleware('guest.jwt')->group(function () {
@@ -122,12 +123,22 @@ Route::middleware('auth.jwt')->group(function () {
     Route::resource('lori', LoriController::class)->names('lori')->except(['create', 'edit', 'show']);
 
     // Mobil Tangki / Lori Expense
+    Route::get('/lori-expense/summary', [LoriExpenseController::class, 'summary'])->name('lori-expense.summary');
     Route::get('/lori-expense/data', [LoriExpenseController::class, 'data'])->name('lori-expense.data');
     Route::get('/lori-expense/trash', [LoriExpenseController::class, 'trash'])->name('lori-expense.trash');
     Route::get('/lori-expense/trash-data', [LoriExpenseController::class, 'trashData'])->name('lori-expense.trash-data');
     Route::post('/lori-expense/{id}/restore', [LoriExpenseController::class, 'restore'])->name('lori-expense.restore');
     Route::post('/lori-expense/{id}/force-delete', [LoriExpenseController::class, 'forceDelete'])->name('lori-expense.force-delete');
     Route::resource('lori-expense', LoriExpenseController::class)->names('lori-expense')->except(['create', 'edit', 'show']);
+
+    // Bank In/Out
+    Route::get('/bank/print', [BankTransactionController::class, 'printView'])->name('bank.print');
+    Route::get('/bank/data', [BankTransactionController::class, 'data'])->name('bank.data');
+    Route::get('/bank/trash', [BankTransactionController::class, 'trash'])->name('bank.trash');
+    Route::get('/bank/trash-data', [BankTransactionController::class, 'trashData'])->name('bank.trash-data');
+    Route::post('/bank/{id}/restore', [BankTransactionController::class, 'restore'])->name('bank.restore');
+    Route::post('/bank/{id}/force-delete', [BankTransactionController::class, 'forceDelete'])->name('bank.force-delete');
+    Route::resource('bank', BankTransactionController::class)->names('bank')->except(['create', 'edit', 'show']);
 
     // Notifications
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');

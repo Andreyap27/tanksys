@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\LoriExpense;
+use App\Models\Lori;
 use Illuminate\Http\Request;
 
 class LoriExpenseController extends Controller
@@ -33,6 +34,28 @@ class LoriExpenseController extends Controller
         } catch (\Exception $e) {
             return response()->json(['data' => [], 'error' => $e->getMessage()], 500);
         }
+    }
+
+    public function summary()
+    {
+        $mobilId = request('mobil_id');
+
+        $debitQuery  = LoriExpense::query();
+        $kreditQuery = Lori::query();
+
+        if ($mobilId) {
+            $debitQuery->where('mobil_id', $mobilId);
+            $kreditQuery->where('mobil_id', $mobilId);
+        }
+
+        $debit  = (float) $debitQuery->sum('nominal');
+        $kredit = (float) $kreditQuery->sum('price');
+
+        return response()->json([
+            'debit'   => $debit,
+            'kredit'  => $kredit,
+            'balance' => $kredit - $debit,
+        ]);
     }
 
     public function store(Request $request)
