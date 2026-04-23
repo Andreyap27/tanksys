@@ -14,27 +14,35 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Tanggal</label>
+                        <label class="form-label">Tanggal <span class="text-danger">*</span></label>
                         <input type="date" name="date" class="form-input" required>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Deskripsi</label>
+                        <label class="form-label">Type <span class="text-danger">*</span></label>
+                        <select name="type" class="form-select" required>
+                            <option value="" disabled hidden>-- Pilih Type --</option>
+                            <option value="in">In (Kredit)</option>
+                            <option value="out">Out (Debit)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Deskripsi <span class="text-danger">*</span></label>
                         <input type="text" name="description" class="form-input" placeholder="Keterangan pengeluaran" required>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Kategori</label>
+                        <label class="form-label">Kategori <span class="text-danger">*</span></label>
                         <select name="category" class="form-select" required>
                             <option value="" disabled hidden>-- Pilih Kategori --</option>
                             @foreach(\App\Models\LoriExpense::CATEGORIES as $cat)
-                                <option value="{{ $cat }}">{{ $cat }}</option>
+                            <option value="{{ $cat }}">{{ $cat }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Nominal</label>
+                        <label class="form-label">Nominal <span class="text-danger">*</span></label>
                         <input type="text" name="nominal" class="form-input fmt-price" placeholder="0" data-raw="0" required>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group full">
                         <label class="form-label">Catatan</label>
                         <textarea name="noted" class="form-input" rows="2" placeholder="Opsional"></textarea>
                     </div>

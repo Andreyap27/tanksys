@@ -14,6 +14,7 @@ class LoriExpense extends Model
 
     protected $fillable = [
         'mobil_id',
+        'type',
         'date',
         'description',
         'category',

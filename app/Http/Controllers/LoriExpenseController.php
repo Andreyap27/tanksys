@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\LoriExpense;
-use App\Models\Lori;
 use Illuminate\Http\Request;
 
 class LoriExpenseController extends Controller
@@ -22,6 +21,7 @@ class LoriExpenseController extends Controller
             $expenses = $query->get()->map(fn($e) => [
                 'id'          => $e->id,
                 'mobil_id'    => $e->mobil_id,
+                'type'        => $e->type,
                 'date'        => $e->date->translatedFormat('d M Y'),
                 'date_raw'    => $e->date->format('Y-m-d'),
                 'description' => $e->description,
@@ -40,16 +40,13 @@ class LoriExpenseController extends Controller
     {
         $mobilId = request('mobil_id');
 
-        $debitQuery  = LoriExpense::query();
-        $kreditQuery = Lori::query();
-
+        $query = LoriExpense::query();
         if ($mobilId) {
-            $debitQuery->where('mobil_id', $mobilId);
-            $kreditQuery->where('mobil_id', $mobilId);
+            $query->where('mobil_id', $mobilId);
         }
 
-        $debit  = (float) $debitQuery->sum('nominal');
-        $kredit = (float) $kreditQuery->sum('price');
+        $kredit = (float) (clone $query)->where('type', 'in')->sum('nominal');
+        $debit  = (float) (clone $query)->where('type', 'out')->sum('nominal');
 
         return response()->json([
             'debit'   => $debit,
@@ -62,6 +59,7 @@ class LoriExpenseController extends Controller
     {
         $request->validate([
             'mobil_id'    => 'nullable|exists:mobils,id',
+            'type'        => 'required|in:in,out',
             'date'        => 'required|date',
             'description' => 'required|string|max:255',
             'category'    => 'required|in:' . implode(',', LoriExpense::CATEGORIES),
@@ -71,6 +69,7 @@ class LoriExpenseController extends Controller
 
         LoriExpense::create([
             'mobil_id'    => $request->mobil_id ?: null,
+            'type'        => $request->type,
             'date'        => $request->date,
             'description' => $request->description,
             'category'    => $request->category,
@@ -90,6 +89,7 @@ class LoriExpenseController extends Controller
 
         $request->validate([
             'mobil_id'    => 'nullable|exists:mobils,id',
+            'type'        => 'required|in:in,out',
             'date'        => 'required|date',
             'description' => 'required|string|max:255',
             'category'    => 'required|in:' . implode(',', LoriExpense::CATEGORIES),
@@ -98,7 +98,7 @@ class LoriExpenseController extends Controller
         ]);
 
         $loriExpense->update(array_merge(
-            $request->only(['date', 'description', 'category', 'nominal', 'noted']),
+            $request->only(['type', 'date', 'description', 'category', 'nominal', 'noted']),
             ['mobil_id' => $request->mobil_id ?: null]
         ));
 
@@ -128,12 +128,13 @@ class LoriExpenseController extends Controller
         $loriExpenses = $query->get()->map(fn($le) => [
             'id'         => $le->id,
             'mobil_id'   => $le->mobil_id,
+            'type'       => $le->type,
             'date'       => $le->date->translatedFormat('d M Y'),
             'date_raw'   => $le->date->format('Y-m-d'),
-            'description'=> $le->description,
+            'description' => $le->description,
             'category'   => $le->category,
             'nominal'    => number_format($le->nominal, 0, ',', '.'),
-            'nominal_raw'=> $le->nominal,
+            'nominal_raw' => $le->nominal,
             'noted'      => $le->noted ?? '',
             'deleted_at' => $le->deleted_at->translatedFormat('d M Y H:i'),
             'deleted_by' => $le->deleter?->name ?? 'N/A',

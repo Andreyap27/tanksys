@@ -55,6 +55,7 @@
                 <thead>
                     <tr>
                         <th>Tanggal</th>
+                        <th>Type</th>
                         <th>Deskripsi</th>
                         <th>Kategori</th>
                         <th>Nominal</th>
@@ -102,7 +103,7 @@
                 const btn = document.createElement('button');
                 btn.className = 'tab';
                 btn.dataset.mobilId = m.id;
-                btn.innerHTML = '<i data-lucide="truck" style="width:16px;height:16px;"></i> ' + m.plate_number;
+                btn.innerHTML = '<i data-lucide="truck" style="width:16px;height:16px;"></i> ' + (m.plat_nomer || m.name);
                 btn.onclick = function() {
                     switchTab(this, m.id);
                 };
@@ -130,6 +131,12 @@
                     }
                 },
                 {
+                    data: 'type',
+                    render: (data) => data === 'in'
+                        ? '<span class="badge badge-success">In</span>'
+                        : '<span class="badge badge-danger">Out</span>'
+                },
+                {
                     data: 'description'
                 },
                 {
@@ -140,7 +147,11 @@
                     }
                 },
                 {
-                    data: 'nominal'
+                    data: 'nominal',
+                    render: (data, type, row) => {
+                        const cls = row.type === 'in' ? 'text-success' : 'text-danger';
+                        return `<span class="${cls}">${Currency.symbol} ${data}</span>`;
+                    }
                 },
                 {
                     data: 'noted'
@@ -180,8 +191,10 @@
 
     function updateSummaryCards() {
         if (!table || typeof table.rows !== 'function') return;
-        
-        const data = table.rows({order: 'current'}).data();
+
+        const data = table.rows({
+            order: 'current'
+        }).data();
         let totalNominal = 0;
 
         data.each(function(row) {
