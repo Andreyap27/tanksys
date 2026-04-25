@@ -162,13 +162,13 @@ class ReportController extends Controller
         $cats    = LoriExpense::CATEGORIES;
 
         $loriExpensesByCategory = LoriExpense::selectRaw('MONTH(date) as month, category, SUM(nominal) as total')
-            ->whereYear('date', $year)
+            ->whereYear('date', $year)->where('type', 'out')
             ->when($mobilId, fn($q) => $q->where('mobil_id', $mobilId))
             ->groupBy('month', 'category')
             ->get()->groupBy('month');
 
         $loriExpensesTotal = LoriExpense::selectRaw('MONTH(date) as month, SUM(nominal) as total')
-            ->whereYear('date', $year)
+            ->whereYear('date', $year)->where('type', 'out')
             ->when($mobilId, fn($q) => $q->where('mobil_id', $mobilId))
             ->groupBy('month')
             ->pluck('total', 'month');
@@ -423,12 +423,12 @@ class ReportController extends Controller
                 $data['cats'] = $cats;
                 $query = $isTrash ? LoriExpense::onlyTrashed() : LoriExpense::query();
                 $data['loriExpensesByCategory'] = $query->selectRaw('MONTH(date) as month, category, SUM(nominal) as total')
-                    ->whereYear('date', $year)->whereIn('category', $cats)
+                    ->whereYear('date', $year)->where('type', 'out')->whereIn('category', $cats)
                     ->when($mobilId, fn($q) => $q->where('mobil_id', $mobilId))
                     ->groupBy('month', 'category')->get()->groupBy('month');
                 $query = $isTrash ? LoriExpense::onlyTrashed() : LoriExpense::query();
                 $data['loriExpensesTotal'] = $query->selectRaw('MONTH(date) as month, SUM(nominal) as total')
-                    ->whereYear('date', $year)->whereIn('category', $cats)
+                    ->whereYear('date', $year)->where('type', 'out')->whereIn('category', $cats)
                     ->when($mobilId, fn($q) => $q->where('mobil_id', $mobilId))
                     ->groupBy('month')->pluck('total', 'month');
                 $data['title'] = $isTrash ? 'Expenses Mobil Tangki (Trash)' : 'Expenses Mobil Tangki';
