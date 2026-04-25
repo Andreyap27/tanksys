@@ -190,7 +190,7 @@ class ReportController extends Controller
             ->pluck('total_income', 'month');
 
         $loriExpenses = LoriExpense::selectRaw('MONTH(date) as month, SUM(nominal) as total')
-            ->whereYear('date', $year)
+            ->whereYear('date', $year)->where('type', 'out')
             ->when($mobilId, fn($q) => $q->where('mobil_id', $mobilId))
             ->groupBy('month')
             ->pluck('total', 'month');
@@ -291,7 +291,7 @@ class ReportController extends Controller
 
         $loriExpenses = LoriExpense::onlyTrashed()
             ->selectRaw('MONTH(date) as month, SUM(nominal) as total')
-            ->whereYear('date', $year)
+            ->whereYear('date', $year)->where('type', 'out')
             ->when($mobilId, fn($q) => $q->where('mobil_id', $mobilId))
             ->groupBy('month')
             ->pluck('total', 'month');
@@ -309,14 +309,14 @@ class ReportController extends Controller
 
         $loriExpensesByCategory = LoriExpense::onlyTrashed()
             ->selectRaw('MONTH(date) as month, category, SUM(nominal) as total')
-            ->whereYear('date', $year)
+            ->whereYear('date', $year)->where('type', 'out')
             ->when($mobilId, fn($q) => $q->where('mobil_id', $mobilId))
             ->groupBy('month', 'category')
             ->get()->groupBy('month');
 
         $loriExpensesTotal = LoriExpense::onlyTrashed()
             ->selectRaw('MONTH(date) as month, SUM(nominal) as total')
-            ->whereYear('date', $year)
+            ->whereYear('date', $year)->where('type', 'out')
             ->when($mobilId, fn($q) => $q->where('mobil_id', $mobilId))
             ->groupBy('month')
             ->pluck('total', 'month');
@@ -441,7 +441,7 @@ class ReportController extends Controller
                     ->groupBy('month')->pluck('total_income', 'month');
                 $query = $isTrash ? LoriExpense::onlyTrashed() : LoriExpense::query();
                 $data['loriExpenses'] = $query->selectRaw('MONTH(date) as month, SUM(nominal) as total')
-                    ->whereYear('date', $year)
+                    ->whereYear('date', $year)->where('type', 'out')
                     ->when($mobilId, fn($q) => $q->where('mobil_id', $mobilId))
                     ->groupBy('month')->pluck('total', 'month');
                 $data['title'] = $isTrash ? 'Profit / Loss Mobil Tangki (Trash)' : 'Profit / Loss Mobil Tangki';
