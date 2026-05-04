@@ -15,16 +15,17 @@ class BankTransactionController extends Controller
     public function data()
     {
         try {
-            $transactions = BankTransaction::orderBy('date', 'desc')->get()->map(fn($t) => [
-                'id'          => $t->id,
-                'date'        => $t->date->translatedFormat('d M Y'),
-                'date_raw'    => $t->date->format('Y-m-d'),
-                'type'        => $t->type,
-                'amount'      => number_format($t->amount, 0, ',', '.'),
-                'amount_raw'  => $t->amount,
-                'description' => $t->description,
-                'note'        => $t->note,
-                'job'         => $t->job,
+            $transactions = BankTransaction::orderBy('date', 'desc')->orderBy('created_at', 'desc')->get()->map(fn($t) => [
+                'id'             => $t->id,
+                'date'           => $t->date->translatedFormat('d M Y'),
+                'date_raw'       => $t->date->format('Y-m-d'),
+                'created_at_raw' => $t->created_at->format('Y-m-d H:i:s'),
+                'type'           => $t->type,
+                'amount'         => number_format($t->amount, 0, ',', '.'),
+                'amount_raw'     => $t->amount,
+                'description'    => $t->description,
+                'note'           => $t->note,
+                'job'            => $t->job,
             ]);
             return response()->json(['data' => $transactions]);
         } catch (\Exception $e) {
