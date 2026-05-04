@@ -56,7 +56,7 @@ class BankTransactionController extends Controller
         return response()->json(['message' => 'Transaksi berhasil disimpan.']);
     }
 
-    public function update(Request $request, BankTransaction $bankTransaction)
+    public function update(Request $request, BankTransaction $bank)
     {
         if (!auth()->user()->canManage()) {
             return response()->json(['message' => 'Anda tidak memiliki izin untuk mengedit.'], 403);
@@ -71,18 +71,18 @@ class BankTransactionController extends Controller
             'job'         => 'required|string|max:255',
         ]);
 
-        $bankTransaction->update($request->only(['date', 'type', 'amount', 'description', 'note', 'job']));
+        $bank->update($request->only(['date', 'type', 'amount', 'description', 'note', 'job']));
 
         return response()->json(['message' => 'Transaksi berhasil diupdate.']);
     }
 
-    public function destroy(BankTransaction $bankTransaction)
+    public function destroy(BankTransaction $bank)
     {
         if (!auth()->user()->canDelete()) {
             return response()->json(['message' => 'Anda tidak memiliki izin untuk menghapus data.'], 403);
         }
 
-        $bankTransaction->delete();
+        $bank->delete();
         return response()->json(['message' => 'Transaksi berhasil dihapus.']);
     }
 
