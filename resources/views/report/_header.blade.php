@@ -11,6 +11,9 @@
             @if(isset($mobilId) && $mobilId)
                 <input type="hidden" name="mobil_id" value="{{ $mobilId }}">
             @endif
+            @if(isset($pettyCashId) && $pettyCashId)
+                <input type="hidden" name="petty_cash_id" value="{{ $pettyCashId }}">
+            @endif
             <select name="year" class="form-select" style="width:auto;" onchange="document.getElementById('yearForm').submit()">
                 @foreach($years as $y)
                     <option value="{{ $y }}" {{ $y == $year ? 'selected' : '' }}>{{ $y }}</option>
@@ -55,6 +58,21 @@
     @foreach($kapals as $k)
     <a href="{{ request()->fullUrlWithQuery(['kapal_id' => $k->id]) }}"
        class="tab {{ (isset($kapalId) && $kapalId == $k->id) ? 'active' : '' }}"><i data-lucide="ship" style="width:16px;height:16px;"></i> {{ $k->name }}</a>
+    @endforeach
+</div>
+@endif
+
+@if(isset($pettyCashes) && $pettyCashes->count() > 0)
+<div class="tab-bar">
+    <a href="{{ request()->fullUrlWithQuery(['petty_cash_id' => '']) }}"
+       class="tab {{ !isset($pettyCashId) || !$pettyCashId ? 'active' : '' }}">
+        <i data-lucide="list" style="width:16px;height:16px;"></i> Semua
+    </a>
+    @foreach($pettyCashes as $pc)
+    <a href="{{ request()->fullUrlWithQuery(['petty_cash_id' => $pc->id]) }}"
+       class="tab {{ (isset($pettyCashId) && $pettyCashId == $pc->id) ? 'active' : '' }}">
+        <i data-lucide="wallet" style="width:16px;height:16px;"></i> {{ $pc->name }}
+    </a>
     @endforeach
 </div>
 @endif

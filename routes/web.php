@@ -18,6 +18,8 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\KapalController;
 use App\Http\Controllers\MobilController;
 use App\Http\Controllers\BankTransactionController;
+use App\Http\Controllers\PettyCashController;
+use App\Http\Controllers\PettyCashTransactionController;
 
 // Guest routes
 Route::middleware('guest.jwt')->group(function () {
@@ -131,6 +133,20 @@ Route::middleware('auth.jwt')->group(function () {
     Route::post('/lori-expense/{id}/force-delete', [LoriExpenseController::class, 'forceDelete'])->name('lori-expense.force-delete');
     Route::resource('lori-expense', LoriExpenseController::class)->names('lori-expense')->except(['create', 'edit', 'show']);
 
+    // Petty Cash Master
+    Route::get('/petty-cash/list', [PettyCashController::class, 'list'])->name('petty-cash.list');
+    Route::get('/petty-cash/data', [PettyCashController::class, 'data'])->name('petty-cash.data');
+    Route::resource('petty-cash', PettyCashController::class)->names('petty-cash')->except(['create', 'edit', 'show']);
+
+    // Petty Cash Transactions
+    Route::get('/petty-cash-transaction/summary', [PettyCashTransactionController::class, 'summary'])->name('petty-cash-transaction.summary');
+    Route::get('/petty-cash-transaction/data', [PettyCashTransactionController::class, 'data'])->name('petty-cash-transaction.data');
+    Route::get('/petty-cash-transaction/trash', [PettyCashTransactionController::class, 'trash'])->name('petty-cash-transaction.trash');
+    Route::get('/petty-cash-transaction/trash-data', [PettyCashTransactionController::class, 'trashData'])->name('petty-cash-transaction.trash-data');
+    Route::post('/petty-cash-transaction/{id}/restore', [PettyCashTransactionController::class, 'restore'])->name('petty-cash-transaction.restore');
+    Route::post('/petty-cash-transaction/{id}/force-delete', [PettyCashTransactionController::class, 'forceDelete'])->name('petty-cash-transaction.force-delete');
+    Route::resource('petty-cash-transaction', PettyCashTransactionController::class)->names('petty-cash-transaction')->except(['create', 'edit', 'show']);
+
     // Bank In/Out
     Route::get('/bank/print', [BankTransactionController::class, 'printView'])->name('bank.print');
     Route::get('/bank/data', [BankTransactionController::class, 'data'])->name('bank.data');
@@ -162,4 +178,5 @@ Route::middleware('auth.jwt')->group(function () {
     Route::get('/report/lori',          [ReportController::class, 'lori'])->name('report.lori');
     Route::get('/report/lori/trash',    [ReportController::class, 'loriTrash'])->name('report.lori.trash');
     Route::get('/report/profit-loss',   [ReportController::class, 'profitLoss'])->name('report.profit-loss');
+    Route::get('/report/petty-cash',    [ReportController::class, 'pettyCash'])->name('report.petty-cash');
 });

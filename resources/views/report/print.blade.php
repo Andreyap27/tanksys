@@ -216,7 +216,7 @@
     {{-- Report Label --}}
     <div class="rpt-label">
         <span class="rpt-label-title">Laporan {{ $title }}</span>
-        <span class="rpt-label-year">Tahun {{ $year }}{{ !empty($kapalName) ? ' — ' . $kapalName : '' }}{{ !empty($mobilName) ? ' — ' . $mobilName : '' }}</span>
+        <span class="rpt-label-year">Tahun {{ $year }}{{ !empty($kapalName) ? ' — ' . $kapalName : '' }}{{ !empty($mobilName) ? ' — ' . $mobilName : '' }}{{ !empty($pettyCashName ?? null) ? ' — ' . $pettyCashName : '' }}</span>
     </div>
 
     {{-- Report Content --}}
@@ -529,6 +529,53 @@
                         <td class="r">Rp {{ $fmt($gExp) }}</td>
                         <td class="r {{ $gPL >= 0 ? 'text-profit' : 'text-loss' }}">
                             {{ $gPL < 0 ? '-' : '' }}Rp {{ $fmt(abs($gPL)) }}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        {{-- ── Petty Cash ──────────────────────────────────────────── --}}
+        @elseif($section === 'petty-cash')
+            @php
+                $gIn = $gOut = 0;
+                foreach (range(1,12) as $m) {
+                    $gIn  += (float)($pcIn[$m]  ?? 0);
+                    $gOut += (float)($pcOut[$m] ?? 0);
+                }
+                $gBal = $gIn - $gOut;
+            @endphp
+            <table class="rpt-table">
+                <thead>
+                    <tr>
+                        <th>Bulan</th>
+                        <th class="r">In (Kredit)</th>
+                        <th class="r">Out (Debit)</th>
+                        <th class="r">Balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($months as $m => $name)
+                        @php
+                            $in  = (float)($pcIn[$m]  ?? 0);
+                            $out = (float)($pcOut[$m] ?? 0);
+                            $bal = $in - $out;
+                        @endphp
+                        <tr>
+                            <td>{{ $name }}</td>
+                            <td class="r">{{ $in  ? 'Rp '.$fmt($in)  : '-' }}</td>
+                            <td class="r">{{ $out ? 'Rp '.$fmt($out) : '-' }}</td>
+                            <td class="r {{ ($in || $out) ? ($bal >= 0 ? 'text-profit' : 'text-loss') : '' }}">
+                                @if($in || $out) {{ $bal < 0 ? '-' : '' }}Rp {{ $fmt(abs($bal)) }} @else - @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td>Total</td>
+                        <td class="r">Rp {{ $fmt($gIn) }}</td>
+                        <td class="r">Rp {{ $fmt($gOut) }}</td>
+                        <td class="r {{ $gBal >= 0 ? 'text-profit' : 'text-loss' }}">
+                            {{ $gBal < 0 ? '-' : '' }}Rp {{ $fmt(abs($gBal)) }}
                         </td>
                     </tr>
                 </tfoot>

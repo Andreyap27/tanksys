@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Capital;
 use App\Models\Kapal;
 use App\Models\Mobil;
+use App\Models\PettyCash;
+use App\Models\PettyCashTransaction;
 use App\Models\Purchase;
 use App\Models\Sale;
 use App\Models\Expense;
@@ -22,6 +24,7 @@ class ReportController extends Controller
             Lori::selectRaw('YEAR(date) as y')->distinct(),
             LoriExpense::selectRaw('YEAR(date) as y')->distinct(),
             Capital::selectRaw('YEAR(date) as y')->distinct(),
+            PettyCashTransaction::selectRaw('YEAR(date) as y')->distinct(),
         ])->flatMap(fn($q) => $q->pluck('y'))
           ->push(now()->year)
           ->unique()->sort()->values();
@@ -196,6 +199,26 @@ class ReportController extends Controller
             ->pluck('total', 'month');
 
         return view('report.lori', compact('year', 'years', 'loris', 'loriExpenses', 'mobils', 'mobilId'));
+    }
+
+    public function pettyCash()
+    {
+        $year         = $this->getYear();
+        $years        = $this->getYears();
+        $pettyCashId  = request('petty_cash_id') ?: null;
+        $pettyCashes  = PettyCash::orderBy('name')->get();
+
+        $pcIn = PettyCashTransaction::selectRaw('MONTH(date) as month, SUM(amount) as total')
+            ->whereYear('date', $year)->where('type', 'in')
+            ->when($pettyCashId, fn($q) => $q->where('petty_cash_id', $pettyCashId))
+            ->groupBy('month')->pluck('total', 'month');
+
+        $pcOut = PettyCashTransaction::selectRaw('MONTH(date) as month, SUM(amount) as total')
+            ->whereYear('date', $year)->where('type', 'out')
+            ->when($pettyCashId, fn($q) => $q->where('petty_cash_id', $pettyCashId))
+            ->groupBy('month')->pluck('total', 'month');
+
+        return view('report.petty-cash', compact('year', 'years', 'pcIn', 'pcOut', 'pettyCashes', 'pettyCashId'));
     }
 
     public function purchaseTrash()
@@ -445,6 +468,20 @@ class ReportController extends Controller
                     ->when($mobilId, fn($q) => $q->where('mobil_id', $mobilId))
                     ->groupBy('month')->pluck('total', 'month');
                 $data['title'] = $isTrash ? 'Profit / Loss Mobil Tangki (Trash)' : 'Profit / Loss Mobil Tangki';
+                break;
+            case 'petty-cash':
+                $pettyCashId = request('petty_cash_id') ?: null;
+                $data['pettyCashId']   = $pettyCashId;
+                $data['pettyCashName'] = $pettyCashId ? optional(PettyCash::find($pettyCashId))->name : null;
+                $data['pcIn']  = PettyCashTransaction::selectRaw('MONTH(date) as month, SUM(amount) as total')
+                    ->whereYear('date', $year)->where('type', 'in')
+                    ->when($pettyCashId, fn($q) => $q->where('petty_cash_id', $pettyCashId))
+                    ->groupBy('month')->pluck('total', 'month');
+                $data['pcOut'] = PettyCashTransaction::selectRaw('MONTH(date) as month, SUM(amount) as total')
+                    ->whereYear('date', $year)->where('type', 'out')
+                    ->when($pettyCashId, fn($q) => $q->where('petty_cash_id', $pettyCashId))
+                    ->groupBy('month')->pluck('total', 'month');
+                $data['title'] = 'Laporan Petty Cash';
                 break;
             default:
                 abort(404);
