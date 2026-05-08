@@ -6,26 +6,17 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Sale extends Model
+class StockUsage extends Model
 {
     use HasUuids, SoftDeletes;
 
     protected $fillable = [
-        'kapal_id',
         'date',
-        'invoice_number',
-        'customer_id',
-        'description',
+        'kapal_id',
         'warna',
         'quantity',
-        'extra',
-        'price',
-        'amount',
-        'noted',
+        'keperluan',
         'created_by',
-        'status',
-        'approved_by',
-        'approved_at',
         'deleted_by',
     ];
 
@@ -34,9 +25,6 @@ class Sale extends Model
         return [
             'date'     => 'date',
             'quantity' => 'decimal:2',
-            'extra'    => 'decimal:2',
-            'price'    => 'decimal:2',
-            'amount'   => 'decimal:2',
         ];
     }
 
@@ -45,24 +33,9 @@ class Sale extends Model
         return $this->belongsTo(Kapal::class);
     }
 
-    public function customer()
-    {
-        return $this->belongsTo(Customer::class);
-    }
-
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function approver()
-    {
-        return $this->belongsTo(User::class, 'approved_by');
-    }
-
-    public function deleter()
-    {
-        return $this->belongsTo(User::class, 'deleted_by');
     }
 
     public function stock()

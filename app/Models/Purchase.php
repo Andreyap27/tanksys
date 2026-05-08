@@ -15,7 +15,9 @@ class Purchase extends Model
         'date',
         'vendor',
         'description',
+        'warna',
         'quantity',
+        'extra',
         'price',
         'amount',
         'noted',
@@ -31,6 +33,7 @@ class Purchase extends Model
         return [
             'date'     => 'date',
             'quantity' => 'decimal:2',
+            'extra'    => 'decimal:2',
             'price'    => 'decimal:2',
             'amount'   => 'decimal:2',
         ];

@@ -39,15 +39,35 @@
         </div>
         <div class="dash-stat__bg-icon"><i data-lucide="wallet" style="width:110px;height:110px;"></i></div>
     </div>
-    <div class="dash-stat ds-purchase">
+    <div class="dash-stat" style="background:rgba(220,38,38,0.08);border-radius:var(--radius-lg,0.75rem);padding:1.25rem;position:relative;overflow:hidden;">
         <div class="dash-stat__header">
-            <div class="dash-stat__icon"><i data-lucide="fuel" style="width:20px;height:20px;"></i></div>
+            <div class="dash-stat__icon" style="background:rgba(220,38,38,0.12);color:#dc2626;"><i data-lucide="fuel" style="width:20px;height:20px;"></i></div>
             <div>
-                <div class="dash-stat__label">Total Qty (Approved)</div>
-                <div class="dash-stat__value" id="purchaseTotalQty">0 L</div>
+                <div class="dash-stat__label">Qty Merah (Approved)</div>
+                <div class="dash-stat__value" id="purchaseQtyMerah" style="color:#dc2626;">0 L</div>
             </div>
         </div>
-        <div class="dash-stat__bg-icon"><i data-lucide="fuel" style="width:110px;height:110px;"></i></div>
+        <div class="dash-stat__bg-icon" style="color:#dc2626;"><i data-lucide="fuel" style="width:110px;height:110px;"></i></div>
+    </div>
+    <div class="dash-stat" style="background:rgba(37,99,235,0.08);border-radius:var(--radius-lg,0.75rem);padding:1.25rem;position:relative;overflow:hidden;">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon" style="background:rgba(37,99,235,0.12);color:#2563eb;"><i data-lucide="fuel" style="width:20px;height:20px;"></i></div>
+            <div>
+                <div class="dash-stat__label">Qty Biru (Approved)</div>
+                <div class="dash-stat__value" id="purchaseQtyBiru" style="color:#2563eb;">0 L</div>
+            </div>
+        </div>
+        <div class="dash-stat__bg-icon" style="color:#2563eb;"><i data-lucide="fuel" style="width:110px;height:110px;"></i></div>
+    </div>
+    <div class="dash-stat" style="background:rgba(202,138,4,0.08);border-radius:var(--radius-lg,0.75rem);padding:1.25rem;position:relative;overflow:hidden;">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon" style="background:rgba(202,138,4,0.12);color:#ca8a04;"><i data-lucide="fuel" style="width:20px;height:20px;"></i></div>
+            <div>
+                <div class="dash-stat__label">Qty Kuning (Approved)</div>
+                <div class="dash-stat__value" id="purchaseQtyKuning" style="color:#ca8a04;">0 L</div>
+            </div>
+        </div>
+        <div class="dash-stat__bg-icon" style="color:#ca8a04;"><i data-lucide="fuel" style="width:110px;height:110px;"></i></div>
     </div>
 </div>
 
@@ -74,7 +94,9 @@
                         <th>Tanggal</th>
                         <th>Vendor</th>
                         <th>Deskripsi</th>
+                        <th>Warna</th>
                         <th>Qty (L)</th>
+                        <th>Extra (L)</th>
                         <th>Harga/L</th>
                         <th>Amount</th>
                         <th>Status</th>
@@ -208,26 +230,30 @@
         return parseFloat(el.dataset.raw) || 0;
     }
 
-    document.querySelectorAll('.fmt-qty').forEach(el => {
-        el.addEventListener('input', function() {
-            let val = this.value.replace(/[^0-9.]/g, '');
-            const parts = val.split('.');
-            if (parts.length > 2) val = parts[0] + '.' + parts.slice(1).join('');
-            this.value = val;
-            setRaw(this, val);
-            triggerAmountCalc(this);
-        });
-        el.addEventListener('blur', function() {
-            const raw = parseFloat(this.value) || 0;
-            setRaw(this, raw);
-            if (raw) this.value = raw.toLocaleString('id-ID', {
-                maximumFractionDigits: 3
+    function attachDecimalInput(selector, onInput) {
+        document.querySelectorAll(selector).forEach(el => {
+            el.addEventListener('input', function() {
+                let val = this.value.replace(/[^0-9.]/g, '');
+                const parts = val.split('.');
+                if (parts.length > 2) val = parts[0] + '.' + parts.slice(1).join('');
+                this.value = val;
+                setRaw(this, val);
+                if (onInput) onInput(this);
+            });
+            el.addEventListener('blur', function() {
+                const raw = parseFloat(this.value) || 0;
+                setRaw(this, raw);
+                if (raw) this.value = raw.toLocaleString('id-ID', { maximumFractionDigits: 3 });
+                else this.value = '';
+            });
+            el.addEventListener('focus', function() {
+                this.value = this.dataset.raw || '';
             });
         });
-        el.addEventListener('focus', function() {
-            this.value = this.dataset.raw || '';
-        });
-    });
+    }
+
+    attachDecimalInput('.fmt-qty', function(el) { triggerAmountCalc(el); });
+    attachDecimalInput('.fmt-extra');
 
     document.querySelectorAll('.fmt-price').forEach(el => {
         el.addEventListener('input', function() {
@@ -257,16 +283,20 @@
     // ── Summary card ─────────────────────────────────────────────────────────────
     function updatePurchaseSummary(api) {
         const rows = api.rows({ search: 'applied' }).data();
-        let totalAmount = 0,
-            totalQty = 0;
+        let totalAmount = 0, qtyMerah = 0, qtyBiru = 0, qtyKuning = 0;
         for (let i = 0; i < rows.length; i++) {
             if (rows[i].status === 'approved') {
                 totalAmount += parseFloat(rows[i].amount_raw) || 0;
-                totalQty += parseFloat(rows[i].quantity_raw) || 0;
+                const qty = (parseFloat(rows[i].quantity_raw) || 0) + (parseFloat(rows[i].extra_raw) || 0);
+                if (rows[i].warna === 'merah') qtyMerah += qty;
+                else if (rows[i].warna === 'biru') qtyBiru += qty;
+                else if (rows[i].warna === 'kuning') qtyKuning += qty;
             }
         }
         document.getElementById('purchaseTotalAmount').textContent = 'Rp ' + Currency.number(totalAmount);
-        document.getElementById('purchaseTotalQty').textContent = Currency.number(totalQty) + ' L';
+        document.getElementById('purchaseQtyMerah').textContent = Currency.number(qtyMerah) + ' L';
+        document.getElementById('purchaseQtyBiru').textContent = Currency.number(qtyBiru) + ' L';
+        document.getElementById('purchaseQtyKuning').textContent = Currency.number(qtyKuning) + ' L';
     }
 
     // ── DataTable ────────────────────────────────────────────────────────────────
@@ -294,7 +324,23 @@
                     render: (data) => data ? data : '<span class="text-muted">-</span>'
                 },
                 {
+                    data: 'warna',
+                    render: function(data) {
+                        if (!data) return '<span class="text-muted">-</span>';
+                        const map = {
+                            merah:   '<span class="badge" style="background:#dc2626;color:#fff;">Merah</span>',
+                            biru:    '<span class="badge" style="background:#2563eb;color:#fff;">Biru</span>',
+                            kuning:  '<span class="badge" style="background:#ca8a04;color:#fff;">Kuning</span>',
+                        };
+                        return map[data] || data;
+                    }
+                },
+                {
                     data: 'quantity'
+                },
+                {
+                    data: 'extra',
+                    render: (data) => data && data !== '0,00' ? data : '<span class="text-muted">0</span>'
                 },
                 {
                     data: 'price',
@@ -334,7 +380,9 @@
                                     '${row.date_raw}',
                                     '${escHtml(row.vendor)}',
                                     '${escHtml(row.description)}',
+                                    '${row.warna || ''}',
                                     '${row.quantity_raw}',
+                                    '${row.extra_raw}',
                                     '${row.price_raw}',
                                     '${escHtml(row.noted)}',
                                     '${row.kapal_id || ''}'
@@ -405,6 +453,8 @@
     function openCreateModal() {
         createForm.reset();
         document.getElementById('createAmountDisplay').value = '';
+        setRaw(createForm.extra, 0);
+        createForm.extra.value = '';
         if (activeKapalId) document.getElementById('createKapalSelect').value = activeKapalId;
         loadVendorOptions();
         createModal.classList.add('active');
@@ -426,7 +476,9 @@
             date: createForm.date.value,
             vendor: vendor,
             description: createForm.description.value,
+            warna: createForm.warna.value || null,
             quantity: getRaw(createForm.quantity),
+            extra: getRaw(createForm.extra) || 0,
             price: getRaw(createForm.price),
             noted: createForm.noted.value,
         };
@@ -455,19 +507,21 @@
         document.getElementById('editAmountDisplay').value = Currency.format(qty * price);
     }
 
-    function openEditModal(id, date, vendor, description, quantity, price, noted, kapalId) {
+    function openEditModal(id, date, vendor, description, warna, quantity, extra, price, noted, kapalId) {
         editId = id;
         editForm.date.value = date;
         editForm.description.value = description;
         editForm.noted.value = noted;
         document.getElementById('editKapalSelect').value = kapalId || '';
+        document.getElementById('editWarnaSelect').value = warna || '';
 
         setRaw(editForm.quantity, quantity);
         editForm.quantity.value = parseFloat(quantity) ?
-            parseFloat(quantity).toLocaleString('id-ID', {
-                maximumFractionDigits: 3
-            }) :
-            '';
+            parseFloat(quantity).toLocaleString('id-ID', { maximumFractionDigits: 3 }) : '';
+
+        setRaw(editForm.extra, extra);
+        editForm.extra.value = parseFloat(extra) ?
+            parseFloat(extra).toLocaleString('id-ID', { maximumFractionDigits: 3 }) : '';
 
         setRaw(editForm.price, price);
         editForm.price.value = parseInt(price) ? Currency.format(price) : '';
@@ -494,7 +548,9 @@
             date: editForm.date.value,
             vendor: vendor,
             description: editForm.description.value,
+            warna: editForm.warna.value || null,
             quantity: getRaw(editForm.quantity),
+            extra: getRaw(editForm.extra) || 0,
             price: getRaw(editForm.price),
             noted: editForm.noted.value,
         };

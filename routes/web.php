@@ -20,6 +20,8 @@ use App\Http\Controllers\MobilController;
 use App\Http\Controllers\BankTransactionController;
 use App\Http\Controllers\PettyCashController;
 use App\Http\Controllers\PettyCashTransactionController;
+use App\Http\Controllers\StockTransferController;
+use App\Http\Controllers\StockUsageController;
 
 // Guest routes
 Route::middleware('guest.jwt')->group(function () {
@@ -80,6 +82,18 @@ Route::middleware('auth.jwt')->group(function () {
     Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
     Route::get('/stock/data', [StockController::class, 'data'])->name('stock.data');
     Route::get('/stock/summary', [StockController::class, 'summary'])->name('stock.summary');
+
+    // Operasional — Transfer Stok
+    Route::get('/operasional/transfer', [StockTransferController::class, 'index'])->name('stock-transfer.index');
+    Route::get('/operasional/transfer/data', [StockTransferController::class, 'data'])->name('stock-transfer.data');
+    Route::post('/operasional/transfer', [StockTransferController::class, 'store'])->name('stock-transfer.store');
+    Route::delete('/operasional/transfer/{stockTransfer}', [StockTransferController::class, 'destroy'])->name('stock-transfer.destroy');
+
+    // Operasional — Pemakaian Stok
+    Route::get('/operasional/usage', [StockUsageController::class, 'index'])->name('stock-usage.index');
+    Route::get('/operasional/usage/data', [StockUsageController::class, 'data'])->name('stock-usage.data');
+    Route::post('/operasional/usage', [StockUsageController::class, 'store'])->name('stock-usage.store');
+    Route::delete('/operasional/usage/{stockUsage}', [StockUsageController::class, 'destroy'])->name('stock-usage.destroy');
 
     // Sales
     Route::get('/sales/data', [SaleController::class, 'data'])->name('sales.data');

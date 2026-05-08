@@ -50,10 +50,26 @@
 
         <!-- Transaksi -->
         <div class="nav-section">Transaksi</div>
-        <a href="{{ route('stock.index') }}" class="nav-item {{ request()->routeIs('stock.*') ? 'active' : '' }}">
+        <a href="{{ route('stock.index') }}" class="nav-item {{ request()->routeIs('stock.index') || request()->routeIs('stock.data') || request()->routeIs('stock.summary') ? 'active' : '' }}">
             <i data-lucide="package"></i>
-            <span>Stock</span>
+            <span>Stock BBM</span>
         </a>
+        @php $operasionalActive = request()->routeIs('stock-transfer.*') || request()->routeIs('stock-usage.*'); @endphp
+        <div class="nav-group">
+            <div class="nav-group-header {{ $operasionalActive ? 'open' : '' }}" onclick="toggleNavGroup(this)">
+                <i data-lucide="settings-2"></i>
+                <span>Operasional</span>
+                <i data-lucide="chevron-right" class="nav-chevron"></i>
+            </div>
+            <div class="nav-sub {{ $operasionalActive ? 'open' : '' }}">
+                <a href="{{ route('stock-transfer.index') }}" class="nav-sub-item {{ request()->routeIs('stock-transfer.*') ? 'active' : '' }}">
+                    Transfer Stok
+                </a>
+                <a href="{{ route('stock-usage.index') }}" class="nav-sub-item {{ request()->routeIs('stock-usage.*') ? 'active' : '' }}">
+                    Pemakaian Stok
+                </a>
+            </div>
+        </div>
         <a href="{{ route('purchase.index') }}" class="nav-item {{ request()->routeIs('purchase.*') ? 'active' : '' }}">
             <i data-lucide="arrow-down-to-line"></i>
             <span>Purchase</span>

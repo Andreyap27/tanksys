@@ -17,6 +17,7 @@ class Stock extends Model
         'reference_id',
         'reference_type',
         'party',
+        'warna',
         'qty_in',
         'qty_out',
         'balance',

@@ -28,8 +28,11 @@ class PurchaseController extends Controller
                 'date_raw'      => $p->date->format('Y-m-d'),
                 'vendor'        => $p->vendor,
                 'description'   => $p->description ?? '',
+                'warna'         => $p->warna ?? '',
                 'quantity'      => number_format($p->quantity, 2, ',', '.'),
                 'quantity_raw'  => $p->quantity,
+                'extra'         => number_format($p->extra, 2, ',', '.'),
+                'extra_raw'     => $p->extra,
                 'price'         => number_format($p->price, 0, ',', '.'),
                 'price_raw'     => $p->price,
                 'amount'        => number_format($p->amount, 0, ',', '.'),
@@ -50,18 +53,23 @@ class PurchaseController extends Controller
             'date'        => 'required|date',
             'vendor'      => 'required|string|max:255',
             'description' => 'nullable|string|max:255',
+            'warna'       => 'nullable|in:merah,biru,kuning',
             'quantity'    => 'required|numeric|min:0.01',
+            'extra'       => 'nullable|numeric|min:0',
             'price'       => 'required|numeric|min:0',
             'noted'       => 'nullable|string',
         ]);
 
         DB::transaction(function () use ($request) {
+            $extra = (float) ($request->extra ?? 0);
             $purchase = Purchase::create([
                 'kapal_id'    => $request->kapal_id ?: null,
                 'date'        => $request->date,
                 'vendor'      => $request->vendor,
                 'description' => $request->description,
+                'warna'       => $request->warna ?: null,
                 'quantity'    => $request->quantity,
+                'extra'       => $extra,
                 'price'       => $request->price,
                 'amount'      => $request->quantity * $request->price,
                 'noted'       => $request->noted,
@@ -78,7 +86,8 @@ class PurchaseController extends Controller
                 'reference_id'   => $purchase->id,
                 'reference_type' => Purchase::class,
                 'party'          => $purchase->vendor,
-                'qty_in'         => $purchase->quantity,
+                'warna'          => $purchase->warna,
+                'qty_in'         => (float) $purchase->quantity + (float) $purchase->extra,
                 'qty_out'        => 0,
             ]);
         });
@@ -97,7 +106,9 @@ class PurchaseController extends Controller
             'date'        => 'required|date',
             'vendor'      => 'required|string|max:255',
             'description' => 'nullable|string|max:255',
+            'warna'       => 'nullable|in:merah,biru,kuning',
             'quantity'    => 'required|numeric|min:0.01',
+            'extra'       => 'nullable|numeric|min:0',
             'price'       => 'required|numeric|min:0',
             'noted'       => 'nullable|string',
         ]);
@@ -112,7 +123,9 @@ class PurchaseController extends Controller
                 'date'        => $request->date,
                 'vendor'      => $request->vendor,
                 'description' => $request->description,
+                'warna'       => $request->warna ?: null,
                 'quantity'    => $request->quantity,
+                'extra'       => (float) ($request->extra ?? 0),
                 'price'       => $request->price,
                 'amount'      => $request->quantity * $request->price,
                 'noted'       => $request->noted,
@@ -169,7 +182,8 @@ class PurchaseController extends Controller
                 'reference_id'   => $purchase->id,
                 'reference_type' => Purchase::class,
                 'party'          => $purchase->vendor,
-                'qty_in'         => $purchase->quantity,
+                'warna'          => $purchase->warna,
+                'qty_in'         => (float) $purchase->quantity + (float) $purchase->extra,
                 'qty_out'        => 0,
             ]);
         });

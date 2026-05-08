@@ -91,7 +91,6 @@
                         <th>Deskripsi</th>
                         <th>Note</th>
                         <th>Job</th>
-                        <th>Type</th>
                         <th>Amount</th>
                         <th>Aksi</th>
                     </tr>
@@ -244,7 +243,7 @@
             processing: true,
             columns: [{
                     data: 'date',
-                    orderData: [0, 7],
+                    orderData: [0, 6],
                     render: (data, type, row) => (type === 'sort' || type === 'type') ? row.date_raw : data,
                 },
                 {
@@ -255,12 +254,6 @@
                 },
                 {
                     data: 'job'
-                },
-                {
-                    data: 'type',
-                    render: (data) => data === 'in' ?
-                        '<span class="badge badge-success">In (Kredit)</span>' :
-                        '<span class="badge badge-danger">Out (Debit)</span>',
                 },
                 {
                     data: 'amount',

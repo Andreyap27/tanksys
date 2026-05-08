@@ -67,8 +67,11 @@ class SaleController extends Controller
                 'customer_id'    => $s->customer_id,
                 'customer_name'  => $s->customer->name,
                 'description'    => $s->description ?? '-',
+                'warna'          => $s->warna ?? '',
                 'quantity'       => number_format($s->quantity, 2),
                 'quantity_raw'   => $s->quantity,
+                'extra'          => number_format($s->extra, 2, ',', '.'),
+                'extra_raw'      => $s->extra,
                 'price'          => number_format($s->price, 0, ',', '.'),
                 'price_raw'      => $s->price,
                 'amount'         => number_format($s->amount, 0, ',', '.'),
@@ -90,26 +93,32 @@ class SaleController extends Controller
             'invoice_number' => 'required|string|unique:sales,invoice_number,NULL,id,deleted_at,NULL',
             'customer_id'    => 'required|exists:customers,id',
             'description'    => 'nullable|string|max:255',
+            'warna'          => 'nullable|in:merah,biru,kuning',
             'quantity'       => 'required|numeric|min:0.01',
+            'extra'          => 'nullable|numeric|min:0',
             'price'          => 'required|numeric|min:0',
             'noted'          => 'nullable|string',
         ]);
 
+        $extra = (float) ($request->extra ?? 0);
+        $totalOut = (float) $request->quantity + $extra;
         $currentBalance = Stock::currentBalance();
-        if ($request->quantity > $currentBalance) {
+        if ($totalOut > $currentBalance) {
             return response()->json([
                 'message' => 'Stok tidak mencukupi. Stok saat ini: ' . number_format($currentBalance, 2) . ' L',
             ], 422);
         }
 
-        DB::transaction(function () use ($request) {
+        DB::transaction(function () use ($request, $extra) {
             $sale = Sale::create([
                 'kapal_id'       => $request->kapal_id ?: null,
                 'date'           => $request->date,
                 'invoice_number' => $request->invoice_number,
                 'customer_id'    => $request->customer_id,
                 'description'    => $request->description,
+                'warna'          => $request->warna ?: null,
                 'quantity'       => $request->quantity,
+                'extra'          => $extra,
                 'price'          => $request->price,
                 'amount'         => $request->quantity * $request->price,
                 'noted'          => $request->noted,
@@ -126,8 +135,9 @@ class SaleController extends Controller
                 'reference_id'   => $sale->id,
                 'reference_type' => Sale::class,
                 'party'          => $sale->customer->name,
+                'warna'          => $sale->warna,
                 'qty_in'         => 0,
-                'qty_out'        => $sale->quantity,
+                'qty_out'        => (float) $sale->quantity + (float) $sale->extra,
             ]);
         });
 
@@ -146,7 +156,9 @@ class SaleController extends Controller
             'invoice_number' => 'required|string|unique:sales,invoice_number,' . $sale->id . ',id,deleted_at,NULL',
             'customer_id'    => 'required|exists:customers,id',
             'description'    => 'nullable|string|max:255',
+            'warna'          => 'nullable|in:merah,biru,kuning',
             'quantity'       => 'required|numeric|min:0.01',
+            'extra'          => 'nullable|numeric|min:0',
             'price'          => 'required|numeric|min:0',
             'noted'          => 'nullable|string',
         ]);
@@ -162,7 +174,9 @@ class SaleController extends Controller
                 'invoice_number' => $request->invoice_number,
                 'customer_id'    => $request->customer_id,
                 'description'    => $request->description,
+                'warna'          => $request->warna ?: null,
                 'quantity'       => $request->quantity,
+                'extra'          => (float) ($request->extra ?? 0),
                 'price'          => $request->price,
                 'amount'         => $request->quantity * $request->price,
                 'noted'          => $request->noted,
@@ -205,8 +219,9 @@ class SaleController extends Controller
             return response()->json(['message' => 'Penjualan ini sudah diproses sebelumnya.'], 422);
         }
 
+        $totalOut = (float) $sale->quantity + (float) $sale->extra;
         $currentBalance = Stock::currentBalance();
-        if ($sale->quantity > $currentBalance) {
+        if ($totalOut > $currentBalance) {
             return response()->json([
                 'message' => 'Stok tidak mencukupi untuk menyetujui penjualan ini. Stok saat ini: ' . number_format($currentBalance, 2) . ' L',
             ], 422);
@@ -226,8 +241,9 @@ class SaleController extends Controller
                 'reference_id'   => $sale->id,
                 'reference_type' => Sale::class,
                 'party'          => $sale->customer->name,
+                'warna'          => $sale->warna,
                 'qty_in'         => 0,
-                'qty_out'        => $sale->quantity,
+                'qty_out'        => (float) $sale->quantity + (float) $sale->extra,
             ]);
         });
 

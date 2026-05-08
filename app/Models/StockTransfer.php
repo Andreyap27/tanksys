@@ -6,26 +6,18 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Sale extends Model
+class StockTransfer extends Model
 {
     use HasUuids, SoftDeletes;
 
     protected $fillable = [
-        'kapal_id',
         'date',
-        'invoice_number',
-        'customer_id',
-        'description',
+        'from_kapal_id',
+        'to_kapal_id',
         'warna',
         'quantity',
-        'extra',
-        'price',
-        'amount',
-        'noted',
+        'note',
         'created_by',
-        'status',
-        'approved_by',
-        'approved_at',
         'deleted_by',
     ];
 
@@ -34,20 +26,17 @@ class Sale extends Model
         return [
             'date'     => 'date',
             'quantity' => 'decimal:2',
-            'extra'    => 'decimal:2',
-            'price'    => 'decimal:2',
-            'amount'   => 'decimal:2',
         ];
     }
 
-    public function kapal()
+    public function fromKapal()
     {
-        return $this->belongsTo(Kapal::class);
+        return $this->belongsTo(Kapal::class, 'from_kapal_id');
     }
 
-    public function customer()
+    public function toKapal()
     {
-        return $this->belongsTo(Customer::class);
+        return $this->belongsTo(Kapal::class, 'to_kapal_id');
     }
 
     public function creator()
@@ -55,19 +44,9 @@ class Sale extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function approver()
+    public function stocks()
     {
-        return $this->belongsTo(User::class, 'approved_by');
-    }
-
-    public function deleter()
-    {
-        return $this->belongsTo(User::class, 'deleted_by');
-    }
-
-    public function stock()
-    {
-        return $this->morphOne(Stock::class, 'reference');
+        return $this->morphMany(Stock::class, 'reference');
     }
 
     protected static function booted()

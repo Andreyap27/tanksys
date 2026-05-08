@@ -80,7 +80,6 @@
                     <tr>
                         <th>Tanggal</th>
                         <th>Petty Cash</th>
-                        <th>Type</th>
                         <th>Deskripsi</th>
                         <th>Amount</th>
                         <th>Catatan</th>
@@ -199,12 +198,6 @@ $(document).ready(function () {
                 render: (data, type, row) => (type === 'sort' || type === 'type') ? row.date_raw : data,
             },
             { data: 'petty_cash_name' },
-            {
-                data: 'type',
-                render: (data) => data === 'in'
-                    ? '<span class="badge badge-success">In (Kredit)</span>'
-                    : '<span class="badge badge-danger">Out (Debit)</span>',
-            },
             { data: 'description' },
             {
                 data: 'amount',

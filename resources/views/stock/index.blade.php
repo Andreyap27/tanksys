@@ -10,40 +10,48 @@
     </div>
 </div>
 
-<div class="stock-summary-grid">
-    <div class="stock-card stock-card--balance">
-        <div class="stock-card__header">
-            <div class="stock-card__icon"><i data-lucide="fuel" style="width:20px;height:20px;"></i></div>
-            <div>
-                <div class="stock-card__label">Saldo Saat Ini</div>
-                <div class="stock-card__value" id="stockBalance">{{ number_format($balance ?? 0, 2, ',', '.') }}</div>
-                <div class="stock-card__unit">Liter tersedia</div>
+@php
+    $warnaConfig = [
+        'merah'  => ['label' => 'Merah',  'color' => '#dc2626', 'bg' => 'rgba(220,38,38,0.08)',  'iconBg' => 'rgba(220,38,38,0.12)'],
+        'biru'   => ['label' => 'Biru',   'color' => '#2563eb', 'bg' => 'rgba(37,99,235,0.08)',  'iconBg' => 'rgba(37,99,235,0.12)'],
+        'kuning' => ['label' => 'Kuning', 'color' => '#ca8a04', 'bg' => 'rgba(202,138,4,0.08)', 'iconBg' => 'rgba(202,138,4,0.12)'],
+    ];
+@endphp
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-bottom:1.5rem;">
+    @foreach($warnaConfig as $key => $cfg)
+    <div style="background:{{ $cfg['bg'] }};border-radius:var(--radius-lg,0.75rem);padding:1.25rem;position:relative;overflow:hidden;">
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
+            <div style="background:{{ $cfg['iconBg'] }};color:{{ $cfg['color'] }};border-radius:0.5rem;padding:0.5rem;display:flex;">
+                <i data-lucide="droplets" style="width:20px;height:20px;"></i>
+            </div>
+            <span style="font-weight:700;font-size:1rem;color:{{ $cfg['color'] }};">BBM {{ $cfg['label'] }}</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0.5rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:0.75rem;color:var(--muted-foreground);">Saldo</span>
+                <span id="stock_balance_{{ $key }}" style="font-weight:700;font-size:1rem;color:{{ $cfg['color'] }};">
+                    {{ number_format($byWarna[$key]['balance'] ?? 0, 2, ',', '.') }} L
+                </span>
+            </div>
+            <div style="border-top:1px solid {{ $cfg['color'] }}22;"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:0.75rem;color:var(--muted-foreground);">Total Masuk</span>
+                <span id="stock_in_{{ $key }}" style="font-weight:600;font-size:0.875rem;color:var(--success,#16a34a);">
+                    +{{ number_format($byWarna[$key]['in'] ?? 0, 2, ',', '.') }} L
+                </span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:0.75rem;color:var(--muted-foreground);">Total Keluar</span>
+                <span id="stock_out_{{ $key }}" style="font-weight:600;font-size:0.875rem;color:var(--destructive,#dc2626);">
+                    -{{ number_format($byWarna[$key]['out'] ?? 0, 2, ',', '.') }} L
+                </span>
             </div>
         </div>
-        <div class="stock-card__bg-icon"><i data-lucide="fuel" style="width:110px;height:110px;"></i></div>
-    </div>
-    <div class="stock-card stock-card--in">
-        <div class="stock-card__header">
-            <div class="stock-card__icon"><i data-lucide="arrow-down-to-line" style="width:20px;height:20px;"></i></div>
-            <div>
-                <div class="stock-card__label">Total Masuk</div>
-                <div class="stock-card__value" id="stockTotalIn">{{ number_format($totalIn ?? 0, 2, ',', '.') }}</div>
-                <div class="stock-card__unit">Liter diterima</div>
-            </div>
+        <div style="position:absolute;right:-1rem;bottom:-1rem;color:{{ $cfg['color'] }};opacity:0.08;pointer-events:none;">
+            <i data-lucide="droplets" style="width:110px;height:110px;"></i>
         </div>
-        <div class="stock-card__bg-icon"><i data-lucide="arrow-down-to-line" style="width:110px;height:110px;"></i></div>
     </div>
-    <div class="stock-card stock-card--out">
-        <div class="stock-card__header">
-            <div class="stock-card__icon"><i data-lucide="arrow-up-from-line" style="width:20px;height:20px;"></i></div>
-            <div>
-                <div class="stock-card__label">Total Keluar</div>
-                <div class="stock-card__value" id="stockTotalOut">{{ number_format($totalOut ?? 0, 2, ',', '.') }}</div>
-                <div class="stock-card__unit">Liter terpakai</div>
-            </div>
-        </div>
-        <div class="stock-card__bg-icon"><i data-lucide="arrow-up-from-line" style="width:110px;height:110px;"></i></div>
-    </div>
+    @endforeach
 </div>
 
 {{-- Kapal Tabs --}}
@@ -92,9 +100,12 @@ function refreshStockSummary(kapalId) {
     if (kapalId) params.kapal_id = kapalId;
     axios.get('{{ route('stock.summary') }}', { params }).then(res => {
         const fmt = n => new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
-        document.getElementById('stockBalance').textContent  = fmt(res.data.balance);
-        document.getElementById('stockTotalIn').textContent  = fmt(res.data.totalIn);
-        document.getElementById('stockTotalOut').textContent = fmt(res.data.totalOut);
+        ['merah', 'biru', 'kuning'].forEach(w => {
+            const d = res.data.byWarna?.[w] ?? { balance: 0, in: 0, out: 0 };
+            document.getElementById(`stock_balance_${w}`).textContent = fmt(d.balance) + ' L';
+            document.getElementById(`stock_in_${w}`).textContent      = '+' + fmt(d.in)  + ' L';
+            document.getElementById(`stock_out_${w}`).textContent     = '-' + fmt(d.out) + ' L';
+        });
     });
 }
 
@@ -116,9 +127,14 @@ $(document).ready(function () {
             {
                 data: 'type',
                 render: function (data) {
-                    if (data === 'Pembelian') return '<span class="badge badge-success">Pembelian</span>';
-                    if (data === 'Penjualan') return '<span class="badge badge-danger">Penjualan</span>';
-                    return `<span class="badge badge-info">${data}</span>`;
+                    const map = {
+                        'Pembelian':      '<span class="badge badge-success">Pembelian</span>',
+                        'Penjualan':      '<span class="badge badge-danger">Penjualan</span>',
+                        'Transfer Masuk': '<span class="badge" style="background:#7c3aed;color:#fff;">Transfer Masuk</span>',
+                        'Transfer Keluar':'<span class="badge" style="background:#9333ea;color:#fff;">Transfer Keluar</span>',
+                        'Pemakaian':      '<span class="badge" style="background:#ea580c;color:#fff;">Pemakaian</span>',
+                    };
+                    return map[data] || `<span class="badge badge-info">${data}</span>`;
                 }
             },
             {
