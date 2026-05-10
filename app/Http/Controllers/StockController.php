@@ -41,7 +41,10 @@ class StockController extends Controller
         foreach (['merah', 'biru', 'kuning'] as $w) {
             $q = Purchase::where('status', 'approved')->where('warna', $w);
             if ($kapalId) $q->where('kapal_id', $kapalId);
-            $result[$w] = (float) $q->sum('extra');
+            $result[$w] = [
+                'qty'   => (float) (clone $q)->sum('quantity'),
+                'extra' => (float) (clone $q)->sum('extra'),
+            ];
         }
         return $result;
     }

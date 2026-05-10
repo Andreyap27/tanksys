@@ -61,22 +61,31 @@
             </div>
             <span style="font-weight:700;font-size:1rem;color:#7c3aed;">Total Extra</span>
         </div>
-        <div style="display:flex;flex-direction:column;gap:0.5rem;">
-            @foreach($warnaConfig as $key => $cfg)
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-                <span style="font-size:0.75rem;color:var(--muted-foreground);display:flex;align-items:center;gap:0.35rem;">
-                    <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{{ $cfg['color'] }};"></span>
-                    {{ $cfg['label'] }}
-                </span>
-                <span id="stock_extra_{{ $key }}" style="font-weight:600;font-size:0.875rem;color:#7c3aed;">
-                    {{ number_format($extras[$key] ?? 0, 2, ',', '.') }} L
-                </span>
-            </div>
-            @if(!$loop->last)
-            <div style="border-top:1px solid rgba(124,58,237,0.12);"></div>
-            @endif
-            @endforeach
-        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:0.75rem;">
+            <thead>
+                <tr style="color:var(--muted-foreground);">
+                    <th style="text-align:left;font-weight:500;padding-bottom:0.4rem;">Warna</th>
+                    <th style="text-align:right;font-weight:500;padding-bottom:0.4rem;">Qty (L)</th>
+                    <th style="text-align:right;font-weight:500;padding-bottom:0.4rem;">Extra (L)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($warnaConfig as $key => $cfg)
+                <tr>
+                    <td style="padding:0.2rem 0;display:flex;align-items:center;gap:0.35rem;">
+                        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{{ $cfg['color'] }};flex-shrink:0;"></span>
+                        <span style="color:{{ $cfg['color'] }};font-weight:600;">{{ $cfg['label'] }}</span>
+                    </td>
+                    <td style="text-align:right;font-weight:600;color:#7c3aed;padding:0.2rem 0;">
+                        <span id="stock_qty_{{ $key }}">{{ number_format($extras[$key]['qty'] ?? 0, 2, ',', '.') }}</span>
+                    </td>
+                    <td style="text-align:right;font-weight:600;color:#7c3aed;padding:0.2rem 0;">
+                        <span id="stock_extra_{{ $key }}">{{ number_format($extras[$key]['extra'] ?? 0, 2, ',', '.') }}</span>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
         <div style="position:absolute;right:-1rem;bottom:-1rem;color:#7c3aed;opacity:0.08;pointer-events:none;">
             <i data-lucide="plus-circle" style="width:110px;height:110px;"></i>
         </div>
@@ -135,8 +144,9 @@ function refreshStockSummary(kapalId) {
             document.getElementById(`stock_in_${w}`).textContent      = '+' + fmt(d.in)  + ' L';
             document.getElementById(`stock_out_${w}`).textContent     = '-' + fmt(d.out) + ' L';
 
-            const extra = res.data.extras?.[w] ?? 0;
-            document.getElementById(`stock_extra_${w}`).textContent = fmt(extra) + ' L';
+            const ex = res.data.extras?.[w] ?? { qty: 0, extra: 0 };
+            document.getElementById(`stock_qty_${w}`).textContent   = fmt(ex.qty)   + ' L';
+            document.getElementById(`stock_extra_${w}`).textContent = fmt(ex.extra) + ' L';
         });
     });
 }
