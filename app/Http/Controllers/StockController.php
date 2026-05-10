@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Purchase;
 use App\Models\Stock;
 use App\Models\Kapal;
 use App\Models\Mobil;
@@ -13,7 +14,8 @@ class StockController extends Controller
         $kapals  = Kapal::orderBy('code')->get();
         $mobils  = Mobil::orderBy('name')->get();
         $byWarna = $this->warnaBalances(null);
-        return view('stock.index', compact('kapals', 'mobils', 'byWarna'));
+        $extras  = $this->extraByWarna(null);
+        return view('stock.index', compact('kapals', 'mobils', 'byWarna', 'extras'));
     }
 
     private function warnaBalances(?string $kapalId): array
@@ -29,6 +31,17 @@ class StockController extends Controller
                 'out'     => $out,
                 'balance' => $in - $out,
             ];
+        }
+        return $result;
+    }
+
+    private function extraByWarna(?string $kapalId): array
+    {
+        $result = [];
+        foreach (['merah', 'biru', 'kuning'] as $w) {
+            $q = Purchase::where('status', 'approved')->where('warna', $w);
+            if ($kapalId) $q->where('kapal_id', $kapalId);
+            $result[$w] = (float) $q->sum('extra');
         }
         return $result;
     }
@@ -66,6 +79,7 @@ class StockController extends Controller
     {
         $kapalId = request('kapal_id') ?: null;
         $byWarna = $this->warnaBalances($kapalId);
-        return response()->json(compact('byWarna'));
+        $extras  = $this->extraByWarna($kapalId);
+        return response()->json(compact('byWarna', 'extras'));
     }
 }

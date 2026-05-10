@@ -17,7 +17,7 @@
         'kuning' => ['label' => 'Kuning', 'color' => '#ca8a04', 'bg' => 'rgba(202,138,4,0.08)', 'iconBg' => 'rgba(202,138,4,0.12)'],
     ];
 @endphp
-<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-bottom:1.5rem;">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.25rem;margin-bottom:1.5rem;">
     @foreach($warnaConfig as $key => $cfg)
     <div style="background:{{ $cfg['bg'] }};border-radius:var(--radius-lg,0.75rem);padding:1.25rem;position:relative;overflow:hidden;">
         <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
@@ -52,6 +52,35 @@
         </div>
     </div>
     @endforeach
+
+    {{-- Extra Card --}}
+    <div style="background:rgba(124,58,237,0.08);border-radius:var(--radius-lg,0.75rem);padding:1.25rem;position:relative;overflow:hidden;">
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
+            <div style="background:rgba(124,58,237,0.12);color:#7c3aed;border-radius:0.5rem;padding:0.5rem;display:flex;">
+                <i data-lucide="plus-circle" style="width:20px;height:20px;"></i>
+            </div>
+            <span style="font-weight:700;font-size:1rem;color:#7c3aed;">Total Extra</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0.5rem;">
+            @foreach($warnaConfig as $key => $cfg)
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:0.75rem;color:var(--muted-foreground);display:flex;align-items:center;gap:0.35rem;">
+                    <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{{ $cfg['color'] }};"></span>
+                    {{ $cfg['label'] }}
+                </span>
+                <span id="stock_extra_{{ $key }}" style="font-weight:600;font-size:0.875rem;color:#7c3aed;">
+                    {{ number_format($extras[$key] ?? 0, 2, ',', '.') }} L
+                </span>
+            </div>
+            @if(!$loop->last)
+            <div style="border-top:1px solid rgba(124,58,237,0.12);"></div>
+            @endif
+            @endforeach
+        </div>
+        <div style="position:absolute;right:-1rem;bottom:-1rem;color:#7c3aed;opacity:0.08;pointer-events:none;">
+            <i data-lucide="plus-circle" style="width:110px;height:110px;"></i>
+        </div>
+    </div>
 </div>
 
 {{-- Kapal Tabs --}}
@@ -105,6 +134,9 @@ function refreshStockSummary(kapalId) {
             document.getElementById(`stock_balance_${w}`).textContent = fmt(d.balance) + ' L';
             document.getElementById(`stock_in_${w}`).textContent      = '+' + fmt(d.in)  + ' L';
             document.getElementById(`stock_out_${w}`).textContent     = '-' + fmt(d.out) + ' L';
+
+            const extra = res.data.extras?.[w] ?? 0;
+            document.getElementById(`stock_extra_${w}`).textContent = fmt(extra) + ' L';
         });
     });
 }
