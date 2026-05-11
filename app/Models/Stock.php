@@ -44,10 +44,11 @@ class Stock extends Model
         return $this->belongsTo(User::class, 'deleted_by');
     }
 
-    public static function currentBalance(?string $kapalId = null): float
+    public static function currentBalance(?string $kapalId = null, ?string $warna = null): float
     {
         $query = static::query();
         if ($kapalId) $query->where('kapal_id', $kapalId);
+        if ($warna)   $query->where('warna', $warna);
         return (float) ($query->sum('qty_in') - $query->sum('qty_out'));
     }
 

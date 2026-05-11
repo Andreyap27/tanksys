@@ -8,6 +8,11 @@
         <h1 class="page-title-text">Stok BBM</h1>
         <p class="page-subtitle">Riwayat dan saldo stok bahan bakar</p>
     </div>
+    <div class="page-actions">
+        <button class="btn btn-secondary" onclick="openTxPrintModal()">
+            <i data-lucide="printer" style="width:16px;height:16px;"></i> Print
+        </button>
+    </div>
 </div>
 
 @php
@@ -118,6 +123,8 @@
         </div>
     </div>
 </div>
+@php $txSection='stock'; $txHasKapal=true; $txHasMobil=false; $txHasPc=false; @endphp
+@include('print._tx_filter_modal')
 @endsection
 
 @push('scripts')

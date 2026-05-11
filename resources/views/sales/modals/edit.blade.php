@@ -39,8 +39,8 @@
                         <input type="text" name="description" class="form-input" placeholder="Deskripsi penjualan">
                     </div>
                     <div class="form-group full">
-                        <label class="form-label">Warna</label>
-                        <select name="warna" id="editSaleWarnaSelect" class="form-select">
+                        <label class="form-label">Warna <span class="text-danger">*</span></label>
+                        <select name="warna" id="editSaleWarnaSelect" class="form-select" required>
                             <option value="">-- Pilih Warna --</option>
                             <option value="merah">Merah</option>
                             <option value="biru">Biru</option>
@@ -67,12 +67,9 @@
                         </div>
                         <div class="form-group full" style="margin:0;">
                             <label class="form-label">Amount (otomatis)</label>
-                            <input type="text" id="editAmountDisplay" class="form-input" readonly
-                                placeholder="Rp 0" style="background:var(--muted);cursor:not-allowed;">
+                            <input type="text" id="editAmountDisplay" class="form-input" readonly placeholder="Rp 0" style="background:var(--muted);cursor:not-allowed;">
+                            <small class="text-muted">* Extra tidak dihitung dalam Amount, namun ditambahkan ke stok.</small>
                         </div>
-                    </div>
-                    <div class="form-group full">
-                        <small class="text-muted">* Extra tidak dihitung dalam Amount, namun ikut mengurangi stok.</small>
                     </div>
                     <div class="form-group full">
                         <label class="form-label">Noted</label>

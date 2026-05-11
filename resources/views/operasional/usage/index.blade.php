@@ -9,6 +9,9 @@
         <p class="page-subtitle">Pencatatan pemakaian stok untuk keperluan operasional</p>
     </div>
     <div class="page-actions">
+        <button class="btn btn-secondary" onclick="openTxPrintModal()">
+            <i data-lucide="printer" style="width:16px;height:16px;"></i> Print
+        </button>
         @if(auth()->user()->canManage())
         <button class="btn btn-primary" onclick="openCreateModal()">
             <i data-lucide="plus" style="width:16px;height:16px;"></i>
@@ -105,6 +108,8 @@
         </div>
     </div>
 </div>
+@php $txSection='stock-usage'; $txHasKapal=true; $txHasMobil=false; $txHasPc=false; @endphp
+@include('print._tx_filter_modal')
 @endsection
 
 @push('scripts')

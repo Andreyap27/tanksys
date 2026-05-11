@@ -14,6 +14,9 @@
         <p class="page-subtitle">Kelola data pengiriman mobil tangki</p>
     </div>
     <div class="page-actions">
+        <button class="btn btn-secondary" onclick="openTxPrintModal()">
+            <i data-lucide="printer" style="width:16px;height:16px;"></i> Print
+        </button>
         <a href="{{ route('lori.trash') }}" class="btn btn-secondary">
             <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
             Trash
@@ -53,6 +56,8 @@
 
 @include('lori.modals.create')
 @include('lori.modals.edit')
+@php $txSection='lori'; $txHasKapal=false; $txHasMobil=true; $txHasPc=false; @endphp
+@include('print._tx_filter_modal')
 @include('customer.modals.create', [
 'modalId' => 'quickCustomerModal',
 'formId' => 'quickCustomerForm',

@@ -162,7 +162,9 @@ body {
 
 @media (min-width: 1024px) {
     .sidebar {
-        position: static;
+        position: sticky;
+        top: 0;
+        height: 100vh;
         transform: translateX(0);
         box-shadow: none;
     }

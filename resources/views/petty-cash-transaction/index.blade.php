@@ -9,6 +9,9 @@
         <p class="page-subtitle">Kelola transaksi kredit dan debit petty cash</p>
     </div>
     <div class="page-actions">
+        <button class="btn btn-secondary" onclick="openTxPrintModal()">
+            <i data-lucide="printer" style="width:16px;height:16px;"></i> Print
+        </button>
         <a href="{{ route('petty-cash-transaction.trash') }}" class="btn btn-secondary">
             <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
             Trash
@@ -93,6 +96,8 @@
 
 @include('petty-cash-transaction.modals.create')
 @include('petty-cash-transaction.modals.edit')
+@php $txSection='petty-cash'; $txHasKapal=false; $txHasMobil=false; $txHasPc=true; @endphp
+@include('print._tx_filter_modal')
 @endsection
 
 @push('scripts')

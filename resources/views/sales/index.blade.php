@@ -14,6 +14,9 @@
         <p class="page-subtitle">Kelola data penjualan bahan bakar</p>
     </div>
     <div class="page-actions">
+        <button class="btn btn-secondary" onclick="openTxPrintModal()">
+            <i data-lucide="printer" style="width:16px;height:16px;"></i> Print
+        </button>
         <a href="{{ route('sales.trash') }}" class="btn btn-secondary">
             <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
             Trash
@@ -111,6 +114,8 @@
 
 @include('sales.modals.create')
 @include('sales.modals.edit')
+@php $txSection='sales'; $txHasKapal=true; $txHasMobil=false; $txHasPc=false; @endphp
+@include('print._tx_filter_modal')
 
 {{-- Invoice Preview Modal --}}
 <div class="modal-overlay" id="invoiceModal">

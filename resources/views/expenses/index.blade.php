@@ -9,6 +9,9 @@
         <p class="page-subtitle">Kelola data pengeluaran operasional</p>
     </div>
     <div class="page-actions">
+        <button class="btn btn-secondary" onclick="openTxPrintModal()">
+            <i data-lucide="printer" style="width:16px;height:16px;"></i> Print
+        </button>
         <a href="{{ route('expenses.trash') }}" class="btn btn-secondary">
             <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
             Trash
@@ -95,6 +98,8 @@
 
 @include('expenses.modals.create')
 @include('expenses.modals.edit')
+@php $txSection='expenses'; $txHasKapal=true; $txHasMobil=false; $txHasPc=false; @endphp
+@include('print._tx_filter_modal')
 @endsection
 
 @push('scripts')

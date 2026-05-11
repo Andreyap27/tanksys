@@ -22,6 +22,7 @@ use App\Http\Controllers\PettyCashController;
 use App\Http\Controllers\PettyCashTransactionController;
 use App\Http\Controllers\StockTransferController;
 use App\Http\Controllers\StockUsageController;
+use App\Http\Controllers\TxPrintController;
 
 // Guest routes
 Route::middleware('guest.jwt')->group(function () {
@@ -174,6 +175,9 @@ Route::middleware('auth.jwt')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+
+    // Transaction Print
+    Route::get('/tx-print', [TxPrintController::class, 'show'])->name('tx.print');
 
     // Report
     Route::get('/report', fn() => redirect()->route('report.purchase'))->name('report.index');

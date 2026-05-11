@@ -11,11 +11,13 @@ $months = [
 ];
 $fmt = fn($n) => number_format((float)$n, 0, ',', '.');
 $fmtQty = fn($n) => number_format((float)$n, 2, ',', '.');
-$gQty = 0; $gAmt = 0;
+$gQty = 0; $gExtra = 0; $gAmt = 0;
 foreach (range(1,12) as $m) {
-$gQty += (float)($sales->get($m)->total_qty ?? 0);
-$gAmt += (float)($sales->get($m)->total_amount ?? 0);
+$gQty   += (float)($sales->get($m)->total_qty    ?? 0);
+$gExtra += (float)($sales->get($m)->total_extra  ?? 0);
+$gAmt   += (float)($sales->get($m)->total_amount ?? 0);
 }
+$gTotal = $gQty + $gExtra;
 @endphp
 
 @include('report._header')
@@ -30,20 +32,26 @@ $gAmt += (float)($sales->get($m)->total_amount ?? 0);
                 <thead>
                     <tr>
                         <th>Bulan</th>
-                        <th class="text-right">Total Quantity (L)</th>
+                        <th class="text-right">Qty (L)</th>
+                        <th class="text-right">Extra (L)</th>
+                        <th class="text-right">Total Qty (L)</th>
                         <th class="text-right">Total Amount</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($months as $m => $name)
                     @php
-                    $qty = (float)($sales->get($m)->total_qty ?? 0);
-                    $amt = (float)($sales->get($m)->total_amount ?? 0);
+                    $qty   = (float)($sales->get($m)->total_qty    ?? 0);
+                    $extra = (float)($sales->get($m)->total_extra  ?? 0);
+                    $amt   = (float)($sales->get($m)->total_amount ?? 0);
+                    $tot   = $qty + $extra;
                     @endphp
                     <tr>
                         <td>{{ $name }}</td>
-                        <td class="text-right">{{ $qty ? $fmtQty($qty) : '-' }}</td>
-                        <td class="text-right">{{ $amt ? 'Rp '.$fmt($amt) : '-' }}</td>
+                        <td class="text-right">{{ $qty   ? $fmtQty($qty)   : '-' }}</td>
+                        <td class="text-right">{{ $extra ? $fmtQty($extra) : '-' }}</td>
+                        <td class="text-right">{{ $tot   ? $fmtQty($tot)   : '-' }}</td>
+                        <td class="text-right">{{ $amt   ? 'Rp '.$fmt($amt) : '-' }}</td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -51,6 +59,8 @@ $gAmt += (float)($sales->get($m)->total_amount ?? 0);
                     <tr class="report-total-row">
                         <td><strong>Total</strong></td>
                         <td class="text-right"><strong>{{ $fmtQty($gQty) }}</strong></td>
+                        <td class="text-right"><strong>{{ $fmtQty($gExtra) }}</strong></td>
+                        <td class="text-right"><strong>{{ $fmtQty($gTotal) }}</strong></td>
                         <td class="text-right"><strong>Rp {{ $fmt($gAmt) }}</strong></td>
                     </tr>
                 </tfoot>

@@ -93,19 +93,21 @@ class SaleController extends Controller
             'invoice_number' => 'required|string|unique:sales,invoice_number,NULL,id,deleted_at,NULL',
             'customer_id'    => 'required|exists:customers,id',
             'description'    => 'nullable|string|max:255',
-            'warna'          => 'nullable|in:merah,biru,kuning',
+            'warna'          => 'required|in:merah,biru,kuning',
             'quantity'       => 'required|numeric|min:0.01',
             'extra'          => 'nullable|numeric|min:0',
             'price'          => 'required|numeric|min:0',
             'noted'          => 'nullable|string',
         ]);
 
-        $extra = (float) ($request->extra ?? 0);
+        $extra    = (float) ($request->extra ?? 0);
         $totalOut = (float) $request->quantity + $extra;
-        $currentBalance = Stock::currentBalance();
+        $warna    = $request->warna ?: null;
+        $currentBalance = Stock::currentBalance(null, $warna);
         if ($totalOut > $currentBalance) {
+            $label = $warna ? " BBM " . ucfirst($warna) : '';
             return response()->json([
-                'message' => 'Stok tidak mencukupi. Stok saat ini: ' . number_format($currentBalance, 2) . ' L',
+                'message' => 'Stok' . $label . ' tidak mencukupi. Stok saat ini: ' . number_format($currentBalance, 2, ',', '.') . ' L',
             ], 422);
         }
 
@@ -156,7 +158,7 @@ class SaleController extends Controller
             'invoice_number' => 'required|string|unique:sales,invoice_number,' . $sale->id . ',id,deleted_at,NULL',
             'customer_id'    => 'required|exists:customers,id',
             'description'    => 'nullable|string|max:255',
-            'warna'          => 'nullable|in:merah,biru,kuning',
+            'warna'          => 'required|in:merah,biru,kuning',
             'quantity'       => 'required|numeric|min:0.01',
             'extra'          => 'nullable|numeric|min:0',
             'price'          => 'required|numeric|min:0',
@@ -220,10 +222,12 @@ class SaleController extends Controller
         }
 
         $totalOut = (float) $sale->quantity + (float) $sale->extra;
-        $currentBalance = Stock::currentBalance();
+        $warna    = $sale->warna ?: null;
+        $currentBalance = Stock::currentBalance(null, $warna);
         if ($totalOut > $currentBalance) {
+            $label = $warna ? " BBM " . ucfirst($warna) : '';
             return response()->json([
-                'message' => 'Stok tidak mencukupi untuk menyetujui penjualan ini. Stok saat ini: ' . number_format($currentBalance, 2) . ' L',
+                'message' => 'Stok' . $label . ' tidak mencukupi untuk menyetujui penjualan ini. Stok saat ini: ' . number_format($currentBalance, 2, ',', '.') . ' L',
             ], 422);
         }
 

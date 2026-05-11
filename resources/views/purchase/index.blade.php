@@ -14,6 +14,9 @@
         <p class="page-subtitle">Kelola data pembelian bahan bakar</p>
     </div>
     <div class="page-actions">
+        <button class="btn btn-secondary" onclick="openTxPrintModal()">
+            <i data-lucide="printer" style="width:16px;height:16px;"></i> Print
+        </button>
         <a href="{{ route('purchase.trash') }}" class="btn btn-secondary">
             <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
             Trash
@@ -111,6 +114,8 @@
 
 @include('purchase.modals.create')
 @include('purchase.modals.edit')
+@php $txSection='purchase'; $txHasKapal=true; $txHasMobil=false; $txHasPc=false; @endphp
+@include('print._tx_filter_modal')
 @include('vendor.modals.create', [
 'modalId' => 'quickVendorModal',
 'formId' => 'quickVendorForm',
