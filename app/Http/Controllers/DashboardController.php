@@ -7,6 +7,7 @@ use App\Models\Sale;
 use App\Models\Expense;
 use App\Models\Lori;
 use App\Models\Stock;
+use App\Models\PettyCashTransaction;
 
 class DashboardController extends Controller
 {
@@ -22,8 +23,10 @@ class DashboardController extends Controller
         $salesAmt    = (float) Sale::where('status', 'approved')->whereYear('date', $thisYear)->whereMonth('date', $thisMonth)->sum('amount');
         $purchaseAmt = (float) Purchase::where('status', 'approved')->whereYear('date', $thisYear)->whereMonth('date', $thisMonth)->sum('amount');
         $expenseAmt  = (float) Expense::whereYear('date', $thisYear)->whereMonth('date', $thisMonth)->sum('nominal');
+        $pcDebitAmt  = (float) PettyCashTransaction::where('type', 'out')->whereYear('date', $thisYear)->whereMonth('date', $thisMonth)->sum('amount');
+        $totalExpenseAmt = $expenseAmt + $pcDebitAmt;
         $loriAmt     = (float) Lori::whereYear('date', $thisYear)->whereMonth('date', $thisMonth)->sum('price');
-        $profitAmt   = $salesAmt - $purchaseAmt - $expenseAmt;
+        $profitAmt   = $salesAmt - $purchaseAmt - $totalExpenseAmt;
         $stockBal = Stock::currentBalance();
 
         $purchaseByWarna = Stock::where('type', 'purchase')
@@ -76,6 +79,8 @@ class DashboardController extends Controller
         // ── Recent transactions ──────────────────────────────────────
         $recentSales    = Sale::with('customer')->latest('date')->limit(5)->get();
         $recentExpenses = Expense::latest('date')->limit(5)->get();
+
+        $expenseAmt = $totalExpenseAmt;
 
         return view('dashboard.index', compact(
             'salesAmt', 'purchaseAmt', 'expenseAmt', 'loriAmt', 'profitAmt', 'stockBal',
