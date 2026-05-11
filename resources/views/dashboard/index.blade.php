@@ -20,8 +20,17 @@ $profitIcon = $isProfit ? 'trending-up' : 'trending-down';
     </div>
 </div>
 
-{{-- ── Stat Cards ───────────────────────────────────────────────────────────── --}}
-<div class="dash-grid">
+{{-- ── Section: Keuangan ────────────────────────────────────────────────────── --}}
+@php
+$warnaMap = ['merah' => ['#dc2626','Merah'], 'biru' => ['#2563eb','Biru'], 'kuning' => ['#ca8a04','Kuning']];
+@endphp
+
+<div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
+    <span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted-foreground);white-space:nowrap;">Keuangan Bulan Ini</span>
+    <div style="flex:1;height:1px;background:var(--border);"></div>
+</div>
+
+<div class="dash-grid" style="margin-bottom:1.5rem;">
 
     {{-- Sales --}}
     <div class="dash-stat ds-sales">
@@ -111,24 +120,6 @@ $profitIcon = $isProfit ? 'trending-up' : 'trending-down';
         <div class="dash-stat__bg-icon"><i data-lucide="receipt" style="width:110px;height:110px;"></i></div>
     </div>
 
-    {{-- Stock --}}
-    <div class="dash-stat ds-stock">
-        <div class="dash-stat__header">
-            <div class="dash-stat__icon">
-                <i data-lucide="fuel" style="width:20px;height:20px;"></i>
-            </div>
-            <div>
-                <div class="dash-stat__label">Saldo Stok BBM</div>
-                <div class="dash-stat__value">{{ $fmtQty($stockBal) }} <span style="font-size:0.9rem;font-weight:500;color:var(--muted-foreground);">L</span></div>
-                <div class="dash-stat__trend flat">
-                    <i data-lucide="clock"></i>
-                    Per {{ now()->translatedFormat('d M Y') }}
-                </div>
-            </div>
-        </div>
-        <div class="dash-stat__bg-icon"><i data-lucide="fuel" style="width:110px;height:110px;"></i></div>
-    </div>
-
     {{-- Lori --}}
     <div class="dash-stat ds-lori">
         <div class="dash-stat__header">
@@ -145,6 +136,91 @@ $profitIcon = $isProfit ? 'trending-up' : 'trending-down';
             </div>
         </div>
         <div class="dash-stat__bg-icon"><i data-lucide="truck" style="width:110px;height:110px;"></i></div>
+    </div>
+
+</div>
+
+{{-- ── Section: Stok BBM ────────────────────────────────────────────────────── --}}
+<div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
+    <span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted-foreground);white-space:nowrap;">Stok BBM Keseluruhan</span>
+    <div style="flex:1;height:1px;background:var(--border);"></div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-bottom:1.5rem;">
+
+    {{-- Total Purchase (L) --}}
+    <div class="dash-stat ds-purchase" style="position:relative;overflow:hidden;">
+        <div class="dash-stat__header" style="margin-bottom:0.75rem;">
+            <div class="dash-stat__icon">
+                <i data-lucide="package-check" style="width:20px;height:20px;"></i>
+            </div>
+            <div>
+                <div class="dash-stat__label">Total Purchase BBM</div>
+                <div class="dash-stat__value">{{ $fmtQty($purchaseLtr) }} <span style="font-size:0.85rem;font-weight:500;color:var(--muted-foreground);">L</span></div>
+            </div>
+        </div>
+        <div style="border-top:1px solid rgba(37,99,235,0.15);padding-top:0.6rem;display:flex;flex-direction:column;gap:0.35rem;position:relative;z-index:1;">
+            @foreach($warnaMap as $w => [$c, $l])
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div style="display:flex;align-items:center;gap:0.4rem;">
+                    <span style="width:8px;height:8px;border-radius:50%;background:{{ $c }};flex-shrink:0;"></span>
+                    <span style="font-size:0.72rem;color:var(--muted-foreground);">{{ $l }}</span>
+                </div>
+                <span style="font-size:0.78rem;font-weight:600;color:{{ $c }};">{{ $fmtQty($purchaseByWarna[$w] ?? 0) }} L</span>
+            </div>
+            @endforeach
+        </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="package-check" style="width:110px;height:110px;"></i></div>
+    </div>
+
+    {{-- Total Sale (L) --}}
+    <div class="dash-stat ds-sales" style="position:relative;overflow:hidden;">
+        <div class="dash-stat__header" style="margin-bottom:0.75rem;">
+            <div class="dash-stat__icon">
+                <i data-lucide="package-minus" style="width:20px;height:20px;"></i>
+            </div>
+            <div>
+                <div class="dash-stat__label">Total Sale BBM</div>
+                <div class="dash-stat__value">{{ $fmtQty($saleLtr) }} <span style="font-size:0.85rem;font-weight:500;color:var(--muted-foreground);">L</span></div>
+            </div>
+        </div>
+        <div style="border-top:1px solid rgba(217,119,6,0.15);padding-top:0.6rem;display:flex;flex-direction:column;gap:0.35rem;position:relative;z-index:1;">
+            @foreach($warnaMap as $w => [$c, $l])
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div style="display:flex;align-items:center;gap:0.4rem;">
+                    <span style="width:8px;height:8px;border-radius:50%;background:{{ $c }};flex-shrink:0;"></span>
+                    <span style="font-size:0.72rem;color:var(--muted-foreground);">{{ $l }}</span>
+                </div>
+                <span style="font-size:0.78rem;font-weight:600;color:{{ $c }};">{{ $fmtQty($saleByWarna[$w] ?? 0) }} L</span>
+            </div>
+            @endforeach
+        </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="package-minus" style="width:110px;height:110px;"></i></div>
+    </div>
+
+    {{-- Saldo Stok (L) --}}
+    <div class="dash-stat ds-stock" style="position:relative;overflow:hidden;">
+        <div class="dash-stat__header" style="margin-bottom:0.75rem;">
+            <div class="dash-stat__icon">
+                <i data-lucide="fuel" style="width:20px;height:20px;"></i>
+            </div>
+            <div>
+                <div class="dash-stat__label">Saldo Stok BBM</div>
+                <div class="dash-stat__value">{{ $fmtQty($stockBal) }} <span style="font-size:0.85rem;font-weight:500;color:var(--muted-foreground);">L</span></div>
+            </div>
+        </div>
+        <div style="border-top:1px solid rgba(0,0,0,0.08);padding-top:0.6rem;display:flex;flex-direction:column;gap:0.35rem;position:relative;z-index:1;">
+            @foreach($warnaMap as $w => [$c, $l])
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div style="display:flex;align-items:center;gap:0.4rem;">
+                    <span style="width:8px;height:8px;border-radius:50%;background:{{ $c }};flex-shrink:0;"></span>
+                    <span style="font-size:0.72rem;color:var(--muted-foreground);">{{ $l }}</span>
+                </div>
+                <span style="font-size:0.78rem;font-weight:600;color:{{ $c }};">{{ $fmtQty($saldoByWarna[$w] ?? 0) }} L</span>
+            </div>
+            @endforeach
+        </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="fuel" style="width:110px;height:110px;"></i></div>
     </div>
 
 </div>
