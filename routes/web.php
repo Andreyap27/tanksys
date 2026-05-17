@@ -77,7 +77,7 @@ Route::middleware('auth.jwt')->group(function () {
     // Mobil (Master)
     Route::get('/mobil-master/list', [MobilController::class, 'list'])->name('mobil-master.list');
     Route::get('/mobil-master/data', [MobilController::class, 'data'])->name('mobil-master.data');
-    Route::resource('mobil-master', MobilController::class)->names('mobil-master')->except(['create', 'edit', 'show']);
+    Route::resource('mobil-master', MobilController::class)->names('mobil-master')->parameters(['mobil-master' => 'mobil'])->except(['create', 'edit', 'show']);
 
     // Stock (read only, auto)
     Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
