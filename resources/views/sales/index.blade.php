@@ -86,6 +86,7 @@
             <option value="">Semua Status</option>
             <option value="pending">Pending</option>
             <option value="approved">Approved</option>
+            <option value="paid">Paid</option>
             <option value="rejected">Rejected</option>
         </select>
     </div>
@@ -214,7 +215,7 @@
         const rows = api.rows({ search: 'applied' }).data();
         let totalAmount = 0, qtyMerah = 0, qtyBiru = 0, qtyKuning = 0;
         for (let i = 0; i < rows.length; i++) {
-            if (rows[i].status === 'approved') {
+            if (rows[i].status === 'approved' || rows[i].status === 'paid') {
                 totalAmount += parseFloat(rows[i].amount_raw) || 0;
                 const qty = (parseFloat(rows[i].quantity_raw) || 0) + (parseFloat(rows[i].extra_raw) || 0);
                 if (rows[i].warna === 'merah') qtyMerah += qty;
@@ -403,8 +404,9 @@
                     data: 'status',
                     render: function(data) {
                         const map = {
-                            pending: '<span class="badge badge-warning">Pending</span>',
-                            approved: '<span class="badge badge-success">Approved</span>',
+                            pending:  '<span class="badge badge-warning">Pending</span>',
+                            approved: '<span class="badge badge-info">Approved</span>',
+                            paid:     '<span class="badge badge-success">Paid</span>',
                             rejected: '<span class="badge badge-danger">Rejected</span>',
                         };
                         return map[data] || data;
@@ -434,6 +436,16 @@
                             <button class="icon-btn warning" title="Tolak"
                                 onclick="rejectSale('${row.id}', '${escHtml(row.invoice_number)}')">
                                 <i data-lucide="x" style="width:14px;height:14px;"></i>
+                            </button>`;
+                        }
+
+                        if (canApprove && (row.status === 'approved' || row.status === 'paid')) {
+                            const isPaid = row.status === 'paid';
+                            actions += `
+                            <button class="icon-btn" title="${isPaid ? 'Sudah Paid' : 'Tandai Paid'}"
+                                style="background:${isPaid ? 'rgba(22,163,74,0.15)' : 'rgba(22,163,74,0.1)'};color:#16a34a;${isPaid ? 'opacity:0.5;cursor:not-allowed;' : ''}"
+                                ${isPaid ? 'disabled' : `onclick="paidSale('${row.id}', '${escHtml(row.invoice_number)}')"`}>
+                                <i data-lucide="banknote" style="width:14px;height:14px;"></i>
                             </button>`;
                         }
 
@@ -682,6 +694,24 @@
                     table.ajax.reload(null, false);
                 } catch (err) {
                     showError('Gagal', err.response?.data?.message || 'Gagal menolak data');
+                }
+            }
+        });
+    }
+
+    function paidSale(id, invoice) {
+        showConfirm({
+            title: 'Konfirmasi Paid',
+            message: `Tandai penjualan "${invoice}" sebagai paid?`,
+            type: 'warning',
+            confirmText: 'Ya, Paid',
+            onConfirm: async () => {
+                try {
+                    const res = await axios.post(`/sales/${id}/paid`);
+                    showSuccess('Paid', res.data.message);
+                    table.ajax.reload(null, false);
+                } catch (err) {
+                    showError('Gagal', err.response?.data?.message || 'Gagal menandai paid');
                 }
             }
         });

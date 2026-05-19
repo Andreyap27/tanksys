@@ -67,6 +67,7 @@ Route::middleware('auth.jwt')->group(function () {
     Route::post('/purchase/{id}/force-delete', [PurchaseController::class, 'forceDelete'])->name('purchase.force-delete');
     Route::post('/purchase/{purchase}/approve', [PurchaseController::class, 'approve'])->name('purchase.approve');
     Route::post('/purchase/{purchase}/reject', [PurchaseController::class, 'reject'])->name('purchase.reject');
+    Route::post('/purchase/{purchase}/paid', [PurchaseController::class, 'paid'])->name('purchase.paid');
     Route::resource('purchase', PurchaseController::class)->names('purchase')->except(['create', 'edit', 'show']);
 
     // Kapal
@@ -107,6 +108,7 @@ Route::middleware('auth.jwt')->group(function () {
     Route::get('/sales/{sale}', [SaleController::class, 'show'])->name('sales.show');
     Route::post('/sales/{sale}/approve', [SaleController::class, 'approve'])->name('sales.approve');
     Route::post('/sales/{sale}/reject', [SaleController::class, 'reject'])->name('sales.reject');
+    Route::post('/sales/{sale}/paid', [SaleController::class, 'paid'])->name('sales.paid');
     Route::resource('sales', SaleController::class)->names('sales')->except(['create', 'edit', 'show']);
 
     // Capital

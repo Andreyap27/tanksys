@@ -42,7 +42,7 @@ class ReportController extends Controller
         $kapalId  = request('kapal_id') ?: null;
         $kapals   = Kapal::orderBy('code')->get();
 
-        $purchases = Purchase::where('status', 'approved')
+        $purchases = Purchase::where('status', 'paid')
             ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(amount) as total_amount')
             ->whereYear('date', $year)
             ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
@@ -59,7 +59,7 @@ class ReportController extends Controller
         $kapalId = request('kapal_id') ?: null;
         $kapals  = Kapal::orderBy('code')->get();
 
-        $sales = Sale::where('status', 'approved')
+        $sales = Sale::where('status', 'paid')
             ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(amount) as total_amount')
             ->whereYear('date', $year)
             ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
@@ -367,7 +367,7 @@ class ReportController extends Controller
 
         switch ($section) {
             case 'purchase':
-                $query = $isTrash ? Purchase::onlyTrashed() : Purchase::where('status', 'approved');
+                $query = $isTrash ? Purchase::onlyTrashed() : Purchase::where('status', 'paid');
                 $data['purchases'] = $query
                     ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(amount) as total_amount')
                     ->whereYear('date', $year)
@@ -376,7 +376,7 @@ class ReportController extends Controller
                 $data['title'] = $isTrash ? 'Total Purchase (Trash)' : 'Total Purchase';
                 break;
             case 'sale':
-                $query = $isTrash ? Sale::onlyTrashed() : Sale::where('status', 'approved');
+                $query = $isTrash ? Sale::onlyTrashed() : Sale::where('status', 'paid');
                 $data['sales'] = $query
                     ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(amount) as total_amount')
                     ->whereYear('date', $year)

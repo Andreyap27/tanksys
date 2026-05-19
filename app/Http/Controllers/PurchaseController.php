@@ -114,7 +114,7 @@ class PurchaseController extends Controller
         ]);
 
         DB::transaction(function () use ($request, $purchase) {
-            if ($purchase->status === 'approved') {
+            if (in_array($purchase->status, ['approved', 'paid'])) {
                 $purchase->stock?->delete();
             }
 
@@ -149,7 +149,7 @@ class PurchaseController extends Controller
         }
 
         DB::transaction(function () use ($purchase) {
-            if ($purchase->status === 'approved') {
+            if (in_array($purchase->status, ['approved', 'paid'])) {
                 $purchase->stock?->delete();
             }
             $purchase->delete();
@@ -213,6 +213,21 @@ class PurchaseController extends Controller
             route('purchase.index'));
 
         return response()->json(['message' => 'Purchase berhasil ditolak.']);
+    }
+
+    public function paid(Purchase $purchase)
+    {
+        if (!auth()->user()->canApprove()) {
+            return response()->json(['message' => 'Tidak memiliki akses.'], 403);
+        }
+
+        if ($purchase->status !== 'approved') {
+            return response()->json(['message' => 'Hanya purchase berstatus approved yang dapat ditandai paid.'], 422);
+        }
+
+        $purchase->update(['status' => 'paid']);
+
+        return response()->json(['message' => 'Purchase berhasil ditandai sebagai paid.']);
     }
 
     public function trash()

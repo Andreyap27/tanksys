@@ -166,7 +166,7 @@ class SaleController extends Controller
         ]);
 
         DB::transaction(function () use ($request, $sale) {
-            if ($sale->status === 'approved') {
+            if (in_array($sale->status, ['approved', 'paid'])) {
                 $sale->stock?->delete();
             }
 
@@ -202,7 +202,7 @@ class SaleController extends Controller
         }
 
         DB::transaction(function () use ($sale) {
-            if ($sale->status === 'approved') {
+            if (in_array($sale->status, ['approved', 'paid'])) {
                 $sale->stock?->delete();
             }
             $sale->delete();
@@ -275,6 +275,21 @@ class SaleController extends Controller
             route('sales.index'));
 
         return response()->json(['message' => 'Penjualan berhasil ditolak.']);
+    }
+
+    public function paid(Sale $sale)
+    {
+        if (!auth()->user()->canApprove()) {
+            return response()->json(['message' => 'Tidak memiliki akses.'], 403);
+        }
+
+        if ($sale->status !== 'approved') {
+            return response()->json(['message' => 'Hanya penjualan berstatus approved yang dapat ditandai paid.'], 422);
+        }
+
+        $sale->update(['status' => 'paid']);
+
+        return response()->json(['message' => 'Penjualan berhasil ditandai sebagai paid.']);
     }
 
     public function invoice(Sale $sale)
