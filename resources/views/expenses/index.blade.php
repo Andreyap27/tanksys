@@ -307,24 +307,23 @@
         const rows = api.rows({ search: 'applied' }).data();
         let totalPaid = 0, countPaid = 0;
         let totalUnpaid = 0, countUnpaid = 0;
-        let totalAll = 0, countAll = 0;
         for (let i = 0; i < rows.length; i++) {
             const nom = parseFloat(rows[i].nominal_raw) || 0;
             const st  = rows[i].status;
             if (st === 'paid') {
                 totalPaid += nom; countPaid++;
-                totalAll  += nom; countAll++;
             } else if (st === 'approved' || st === 'pending') {
                 totalUnpaid += nom; countUnpaid++;
-                if (st === 'approved') { totalAll += nom; countAll++; }
             }
         }
-        document.getElementById('expensesPaidCard').textContent   = 'Rp ' + Currency.number(totalPaid);
-        document.getElementById('expensesPaidCountCard').textContent = countPaid;
-        document.getElementById('expensesUnpaidCard').textContent  = 'Rp ' + Currency.number(totalUnpaid);
+        const totalAll  = totalPaid + totalUnpaid;
+        const countAll  = countPaid + countUnpaid;
+        document.getElementById('expensesPaidCard').textContent      = 'Rp ' + Currency.number(totalPaid);
+        document.getElementById('expensesPaidCountCard').textContent  = countPaid;
+        document.getElementById('expensesUnpaidCard').textContent     = 'Rp ' + Currency.number(totalUnpaid);
         document.getElementById('expensesUnpaidCountCard').textContent = countUnpaid;
-        document.getElementById('expensesTotalCard').textContent   = 'Rp ' + Currency.number(totalAll);
-        document.getElementById('expensesCountCard').textContent   = countAll;
+        document.getElementById('expensesTotalCard').textContent      = 'Rp ' + Currency.number(totalAll);
+        document.getElementById('expensesCountCard').textContent      = countAll;
     }
 
     function escHtml(str) {
