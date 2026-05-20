@@ -1,11 +1,11 @@
-<div class="modal-overlay" id="createModal">
+<div class="modal-overlay" id="hutangCreateModal">
     <div class="modal-box">
         <div class="modal-header">
             <h3 class="modal-title">Tambah Hutang</h3>
-            <button class="modal-close-btn" onclick="closeCreateModal()">&times;</button>
+            <button class="modal-close-btn" onclick="closeHutangCreateModal()">&times;</button>
         </div>
         <div class="modal-body">
-            <form id="createForm" onsubmit="return false;">
+            <form id="hutangCreateForm" onsubmit="return false;">
                 <div class="form-grid">
                     <div class="form-group full">
                         <label class="form-label">Tanggal <span class="text-danger">*</span></label>
@@ -13,7 +13,7 @@
                     </div>
                     <div class="form-group full">
                         <label class="form-label">Nama <span class="text-danger">*</span></label>
-                        <input type="text" name="nama" class="form-input" placeholder="Nama pemberi / penerima hutang" required>
+                        <input type="text" name="nama" class="form-input" placeholder="Nama pemberi hutang" required>
                     </div>
                     <div class="form-group full">
                         <label class="form-label">Deskripsi <span class="text-danger">*</span></label>
@@ -31,7 +31,7 @@
             </form>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-danger" onclick="closeCreateModal()">
+            <button class="btn btn-danger" onclick="closeHutangCreateModal()">
                 <i data-lucide="x" style="width:15px;height:15px;"></i> Batal
             </button>
             <button class="btn btn-primary" data-save-btn onclick="storeHutang()">

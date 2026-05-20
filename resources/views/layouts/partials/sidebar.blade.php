@@ -117,6 +117,10 @@
             <i data-lucide="hand-coins"></i>
             <span>Hutang</span>
         </a>
+        <a href="{{ route('piutang.index') }}" class="nav-item {{ request()->routeIs('piutang.*') ? 'active' : '' }}">
+            <i data-lucide="wallet"></i>
+            <span>Piutang</span>
+        </a>
 
         <!-- Report -->
         <div class="nav-section">Report</div>

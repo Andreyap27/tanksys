@@ -19,6 +19,7 @@ use App\Http\Controllers\KapalController;
 use App\Http\Controllers\MobilController;
 use App\Http\Controllers\BankTransactionController;
 use App\Http\Controllers\HutangController;
+use App\Http\Controllers\PiutangController;
 use App\Http\Controllers\PettyCashController;
 use App\Http\Controllers\PettyCashTransactionController;
 use App\Http\Controllers\StockTransferController;
@@ -162,6 +163,17 @@ Route::middleware('auth.jwt')->group(function () {
     Route::post('/hutang/{hutang}/reject',       [HutangController::class, 'reject'])->name('hutang.reject');
     Route::post('/hutang/{hutang}/paid',         [HutangController::class, 'paid'])->name('hutang.paid');
     Route::resource('hutang', HutangController::class)->names('hutang')->except(['create', 'edit', 'show']);
+
+    // Piutang
+    Route::get('/piutang/data',                   [PiutangController::class, 'data'])->name('piutang.data');
+    Route::get('/piutang/trash',                   [PiutangController::class, 'trash'])->name('piutang.trash');
+    Route::get('/piutang/trash-data',              [PiutangController::class, 'trashData'])->name('piutang.trash-data');
+    Route::post('/piutang/{id}/restore',           [PiutangController::class, 'restore'])->name('piutang.restore');
+    Route::post('/piutang/{id}/force-delete',      [PiutangController::class, 'forceDelete'])->name('piutang.force-delete');
+    Route::post('/piutang/{piutang}/approve',      [PiutangController::class, 'approve'])->name('piutang.approve');
+    Route::post('/piutang/{piutang}/reject',       [PiutangController::class, 'reject'])->name('piutang.reject');
+    Route::post('/piutang/{piutang}/paid',         [PiutangController::class, 'paid'])->name('piutang.paid');
+    Route::resource('piutang', PiutangController::class)->names('piutang')->except(['create', 'edit', 'show']);
 
     // Petty Cash Master
     Route::get('/petty-cash/list', [PettyCashController::class, 'list'])->name('petty-cash.list');

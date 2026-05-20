@@ -35,6 +35,7 @@
         .badge-approved { background:#dcfce7; color:#16a34a; }
         .badge-pending  { background:#fef9c3; color:#a16207; }
         .badge-rejected { background:#fee2e2; color:#dc2626; }
+        .badge-paid     { background:#dbeafe; color:#1d4ed8; }
         .badge-in  { background:#dcfce7; color:#16a34a; }
         .badge-out { background:#fee2e2; color:#dc2626; }
         .print-bar { max-width:1100px; margin:0.75rem auto 0; padding:0 1rem; display:flex; justify-content:flex-end; gap:0.5rem; }
@@ -126,13 +127,20 @@
 
     {{-- ── PURCHASE ────────────────────────────────────────────────────── --}}
     @elseif($section === 'purchase')
-    @php $gQty=0; $gExtra=0; $gAmt=0; foreach($rows as $r){ $gQty+=$r->quantity; $gExtra+=$r->extra; $gAmt+=$r->amount; } @endphp
+    @php
+        $gQty=0; $gExtra=0; $gAmt=0; $gQtyPaid=0; $gExtraPaid=0; $gAmtPaid=0; $gQtyUnpaid=0; $gExtraUnpaid=0; $gAmtUnpaid=0;
+        foreach($rows as $r){
+            $gQty+=$r->quantity; $gExtra+=$r->extra; $gAmt+=$r->amount;
+            if($r->status==='paid'){ $gQtyPaid+=$r->quantity; $gExtraPaid+=$r->extra; $gAmtPaid+=$r->amount; }
+            else { $gQtyUnpaid+=$r->quantity; $gExtraUnpaid+=$r->extra; $gAmtUnpaid+=$r->amount; }
+        }
+    @endphp
     <table>
         <thead><tr>
             <th style="width:3%">#</th>
             <th>Tanggal</th><th>Vendor</th><th>Deskripsi</th><th>Warna</th>
             <th class="r">Qty (L)</th><th class="r">Extra (L)</th>
-            <th class="r">Harga/L</th><th class="r">Amount</th>
+            <th class="r">Harga/L</th><th class="c">Status</th><th class="r">Amount</th>
         </tr></thead>
         <tbody>
             @forelse($rows as $i => $r)
@@ -144,29 +152,53 @@
                 <td class="r">{{ $fmtQty($r->quantity) }}</td>
                 <td class="r">{{ $r->extra > 0 ? $fmtQty($r->extra) : '-' }}</td>
                 <td class="r">Rp {{ $fmt($r->price) }}</td>
+                <td class="c"><span class="badge badge-{{ $r->status }}">{{ ucfirst($r->status) }}</span></td>
                 <td class="r">Rp {{ $fmt($r->amount) }}</td>
             </tr>
-            @empty<tr><td colspan="9" style="text-align:center;color:#888;">Tidak ada data</td></tr>
+            @empty<tr><td colspan="10" style="text-align:center;color:#888;">Tidak ada data</td></tr>
             @endforelse
         </tbody>
-        <tfoot><tr>
-            <td colspan="5"><strong>Total</strong></td>
-            <td class="r">{{ $fmtQty($gQty) }}</td>
-            <td class="r">{{ $fmtQty($gExtra) }}</td>
-            <td class="r"></td>
-            <td class="r">Rp {{ $fmt($gAmt) }}</td>
-        </tr></tfoot>
+        <tfoot>
+            <tr>
+                <td colspan="5"><strong>Total</strong></td>
+                <td class="r">{{ $fmtQty($gQty) }}</td>
+                <td class="r">{{ $fmtQty($gExtra) }}</td>
+                <td></td><td></td>
+                <td class="r">Rp {{ $fmt($gAmt) }}</td>
+            </tr>
+            <tr style="background:#dcfce7;">
+                <td colspan="5" style="color:#16a34a;"><strong>Total Paid</strong></td>
+                <td class="r" style="color:#16a34a;">{{ $fmtQty($gQtyPaid) }}</td>
+                <td class="r" style="color:#16a34a;">{{ $fmtQty($gExtraPaid) }}</td>
+                <td></td><td></td>
+                <td class="r" style="color:#16a34a;">Rp {{ $fmt($gAmtPaid) }}</td>
+            </tr>
+            <tr style="background:#fee2e2;">
+                <td colspan="5" style="color:#dc2626;"><strong>Total Unpaid</strong></td>
+                <td class="r" style="color:#dc2626;">{{ $fmtQty($gQtyUnpaid) }}</td>
+                <td class="r" style="color:#dc2626;">{{ $fmtQty($gExtraUnpaid) }}</td>
+                <td></td><td></td>
+                <td class="r" style="color:#dc2626;">Rp {{ $fmt($gAmtUnpaid) }}</td>
+            </tr>
+        </tfoot>
     </table>
 
     {{-- ── SALES ───────────────────────────────────────────────────────── --}}
     @elseif($section === 'sales')
-    @php $gQty=0; $gExtra=0; $gAmt=0; foreach($rows as $r){ $gQty+=$r->quantity; $gExtra+=$r->extra; $gAmt+=$r->amount; } @endphp
+    @php
+        $gQty=0; $gExtra=0; $gAmt=0; $gQtyPaid=0; $gExtraPaid=0; $gAmtPaid=0; $gQtyUnpaid=0; $gExtraUnpaid=0; $gAmtUnpaid=0;
+        foreach($rows as $r){
+            $gQty+=$r->quantity; $gExtra+=$r->extra; $gAmt+=$r->amount;
+            if($r->status==='paid'){ $gQtyPaid+=$r->quantity; $gExtraPaid+=$r->extra; $gAmtPaid+=$r->amount; }
+            else { $gQtyUnpaid+=$r->quantity; $gExtraUnpaid+=$r->extra; $gAmtUnpaid+=$r->amount; }
+        }
+    @endphp
     <table>
         <thead><tr>
             <th style="width:3%">#</th>
             <th>Tanggal</th><th>Invoice</th><th>Customer</th><th>Warna</th>
             <th class="r">Qty (L)</th><th class="r">Extra (L)</th>
-            <th class="r">Harga/L</th><th class="r">Amount</th>
+            <th class="r">Harga/L</th><th class="c">Status</th><th class="r">Amount</th>
         </tr></thead>
         <tbody>
             @forelse($rows as $i => $r)
@@ -179,23 +211,47 @@
                 <td class="r">{{ $fmtQty($r->quantity) }}</td>
                 <td class="r">{{ $r->extra > 0 ? $fmtQty($r->extra) : '-' }}</td>
                 <td class="r">Rp {{ $fmt($r->price) }}</td>
+                <td class="c"><span class="badge badge-{{ $r->status }}">{{ ucfirst($r->status) }}</span></td>
                 <td class="r">Rp {{ $fmt($r->amount) }}</td>
             </tr>
-            @empty<tr><td colspan="9" style="text-align:center;color:#888;">Tidak ada data</td></tr>
+            @empty<tr><td colspan="10" style="text-align:center;color:#888;">Tidak ada data</td></tr>
             @endforelse
         </tbody>
-        <tfoot><tr>
-            <td colspan="5"><strong>Total</strong></td>
-            <td class="r">{{ $fmtQty($gQty) }}</td>
-            <td class="r">{{ $fmtQty($gExtra) }}</td>
-            <td class="r"></td>
-            <td class="r">Rp {{ $fmt($gAmt) }}</td>
-        </tr></tfoot>
+        <tfoot>
+            <tr>
+                <td colspan="5"><strong>Total</strong></td>
+                <td class="r">{{ $fmtQty($gQty) }}</td>
+                <td class="r">{{ $fmtQty($gExtra) }}</td>
+                <td></td><td></td>
+                <td class="r">Rp {{ $fmt($gAmt) }}</td>
+            </tr>
+            <tr style="background:#dcfce7;">
+                <td colspan="5" style="color:#16a34a;"><strong>Total Paid</strong></td>
+                <td class="r" style="color:#16a34a;">{{ $fmtQty($gQtyPaid) }}</td>
+                <td class="r" style="color:#16a34a;">{{ $fmtQty($gExtraPaid) }}</td>
+                <td></td><td></td>
+                <td class="r" style="color:#16a34a;">Rp {{ $fmt($gAmtPaid) }}</td>
+            </tr>
+            <tr style="background:#fee2e2;">
+                <td colspan="5" style="color:#dc2626;"><strong>Total Unpaid</strong></td>
+                <td class="r" style="color:#dc2626;">{{ $fmtQty($gQtyUnpaid) }}</td>
+                <td class="r" style="color:#dc2626;">{{ $fmtQty($gExtraUnpaid) }}</td>
+                <td></td><td></td>
+                <td class="r" style="color:#dc2626;">Rp {{ $fmt($gAmtUnpaid) }}</td>
+            </tr>
+        </tfoot>
     </table>
 
     {{-- ── EXPENSES SHIP ───────────────────────────────────────────────── --}}
     @elseif($section === 'expenses')
-    @php $gNom=0; foreach($rows as $r){ $gNom+=$r->nominal; } @endphp
+    @php
+        $gNom=0; $gNomPaid=0; $gNomUnpaid=0;
+        foreach($rows as $r){
+            $gNom+=$r->nominal;
+            if($r->status==='paid') $gNomPaid+=$r->nominal;
+            else $gNomUnpaid+=$r->nominal;
+        }
+    @endphp
     <table>
         <thead><tr>
             <th style="width:3%">#</th>
@@ -214,10 +270,20 @@
             @empty<tr><td colspan="6" style="text-align:center;color:#888;">Tidak ada data</td></tr>
             @endforelse
         </tbody>
-        <tfoot><tr>
-            <td colspan="4"><strong>Total</strong></td>
-            <td class="r">Rp {{ $fmt($gNom) }}</td><td></td>
-        </tr></tfoot>
+        <tfoot>
+            <tr>
+                <td colspan="4"><strong>Total</strong></td>
+                <td class="r">Rp {{ $fmt($gNom) }}</td><td></td>
+            </tr>
+            <tr style="background:#dcfce7;">
+                <td colspan="4" style="color:#16a34a;"><strong>Total Paid</strong></td>
+                <td class="r" style="color:#16a34a;">Rp {{ $fmt($gNomPaid) }}</td><td></td>
+            </tr>
+            <tr style="background:#fee2e2;">
+                <td colspan="4" style="color:#dc2626;"><strong>Total Unpaid</strong></td>
+                <td class="r" style="color:#dc2626;">Rp {{ $fmt($gNomUnpaid) }}</td><td></td>
+            </tr>
+        </tfoot>
     </table>
 
     {{-- ── PETTY CASH ──────────────────────────────────────────────────── --}}
@@ -398,6 +464,120 @@
             <td colspan="6"><strong>Total Debit</strong></td>
             <td class="r">Rp {{ $fmt($gNom) }}</td>
         </tr></tfoot>
+    </table>
+
+    {{-- ── PIUTANG ─────────────────────────────────────────────────────── --}}
+    @elseif($section === 'piutang')
+    @php
+        $gNom=0; $gNomPaid=0; $gNomUnpaid=0;
+        foreach($rows as $r){
+            $gNom+=$r->nominal;
+            if($r->status==='paid') $gNomPaid+=$r->nominal;
+            else $gNomUnpaid+=$r->nominal;
+        }
+    @endphp
+    <table>
+        <thead><tr>
+            <th style="width:3%">#</th>
+            <th>Tanggal</th><th>Nama</th><th>Deskripsi</th><th>Note</th>
+            <th class="r">Nominal</th><th class="c">Status</th>
+        </tr></thead>
+        <tbody>
+            @forelse($rows as $i => $r)
+            <tr>
+                <td class="c">{{ $i+1 }}</td>
+                <td>{{ $r->date->translatedFormat('d M Y') }}</td>
+                <td>{{ $r->nama }}</td>
+                <td>{{ $r->description }}</td>
+                <td>{{ $r->note ?? '-' }}</td>
+                <td class="r">Rp {{ $fmt($r->nominal) }}</td>
+                <td class="c">
+                    @php
+                        $badgeCls = match($r->status) {
+                            'paid'     => 'badge-approved',
+                            'approved' => 'badge-in',
+                            'pending'  => 'badge-pending',
+                            'rejected' => 'badge-rejected',
+                            default    => '',
+                        };
+                    @endphp
+                    <span class="badge {{ $badgeCls }}">{{ ucfirst($r->status) }}</span>
+                </td>
+            </tr>
+            @empty<tr><td colspan="7" style="text-align:center;color:#888;">Tidak ada data</td></tr>
+            @endforelse
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5"><strong>Total</strong></td>
+                <td class="r">Rp {{ $fmt($gNom) }}</td><td></td>
+            </tr>
+            <tr style="background:#dcfce7;">
+                <td colspan="5" style="color:#16a34a;"><strong>Total Paid</strong></td>
+                <td class="r" style="color:#16a34a;">Rp {{ $fmt($gNomPaid) }}</td><td></td>
+            </tr>
+            <tr style="background:#fee2e2;">
+                <td colspan="5" style="color:#dc2626;"><strong>Total Unpaid</strong></td>
+                <td class="r" style="color:#dc2626;">Rp {{ $fmt($gNomUnpaid) }}</td><td></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    {{-- ── HUTANG ──────────────────────────────────────────────────────── --}}
+    @elseif($section === 'hutang')
+    @php
+        $gNom=0; $gNomPaid=0; $gNomUnpaid=0;
+        foreach($rows as $r){
+            $gNom+=$r->nominal;
+            if($r->status==='paid') $gNomPaid+=$r->nominal;
+            else $gNomUnpaid+=$r->nominal;
+        }
+    @endphp
+    <table>
+        <thead><tr>
+            <th style="width:3%">#</th>
+            <th>Tanggal</th><th>Nama</th><th>Deskripsi</th><th>Note</th>
+            <th class="r">Nominal</th><th class="c">Status</th>
+        </tr></thead>
+        <tbody>
+            @forelse($rows as $i => $r)
+            <tr>
+                <td class="c">{{ $i+1 }}</td>
+                <td>{{ $r->date->translatedFormat('d M Y') }}</td>
+                <td>{{ $r->nama }}</td>
+                <td>{{ $r->description }}</td>
+                <td>{{ $r->note ?? '-' }}</td>
+                <td class="r">Rp {{ $fmt($r->nominal) }}</td>
+                <td class="c">
+                    @php
+                        $badgeCls = match($r->status) {
+                            'paid'     => 'badge-approved',
+                            'approved' => 'badge-in',
+                            'pending'  => 'badge-pending',
+                            'rejected' => 'badge-rejected',
+                            default    => '',
+                        };
+                    @endphp
+                    <span class="badge {{ $badgeCls }}">{{ ucfirst($r->status) }}</span>
+                </td>
+            </tr>
+            @empty<tr><td colspan="7" style="text-align:center;color:#888;">Tidak ada data</td></tr>
+            @endforelse
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5"><strong>Total</strong></td>
+                <td class="r">Rp {{ $fmt($gNom) }}</td><td></td>
+            </tr>
+            <tr style="background:#dcfce7;">
+                <td colspan="5" style="color:#16a34a;"><strong>Total Paid</strong></td>
+                <td class="r" style="color:#16a34a;">Rp {{ $fmt($gNomPaid) }}</td><td></td>
+            </tr>
+            <tr style="background:#fef9c3;">
+                <td colspan="5" style="color:#a16207;"><strong>Total Unpaid</strong></td>
+                <td class="r" style="color:#a16207;">Rp {{ $fmt($gNomUnpaid) }}</td><td></td>
+            </tr>
+        </tfoot>
     </table>
     @endif
 

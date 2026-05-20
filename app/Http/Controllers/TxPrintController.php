@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Capital;
+use App\Models\Hutang;
+use App\Models\Piutang;
 use App\Models\Kapal;
 use App\Models\Lori;
 use App\Models\LoriExpense;
@@ -70,7 +72,7 @@ class TxPrintController extends Controller
                 break;
 
             case 'purchase':
-                $q = Purchase::where('status', 'approved')->with('kapal')->orderBy('date')->orderBy('created_at');
+                $q = Purchase::whereIn('status', ['approved', 'paid'])->with('kapal')->orderBy('date')->orderBy('created_at');
                 if ($kapalId)  $q->where('kapal_id', $kapalId);
                 if ($dateFrom) $q->whereDate('date', '>=', $dateFrom);
                 if ($dateTo)   $q->whereDate('date', '<=', $dateTo);
@@ -79,7 +81,7 @@ class TxPrintController extends Controller
                 break;
 
             case 'sales':
-                $q = Sale::where('status', 'approved')->with('customer', 'kapal')->orderBy('date')->orderBy('created_at');
+                $q = Sale::whereIn('status', ['approved', 'paid'])->with('customer', 'kapal')->orderBy('date')->orderBy('created_at');
                 if ($kapalId)  $q->where('kapal_id', $kapalId);
                 if ($dateFrom) $q->whereDate('date', '>=', $dateFrom);
                 if ($dateTo)   $q->whereDate('date', '<=', $dateTo);
@@ -148,6 +150,22 @@ class TxPrintController extends Controller
                 if ($dateTo)   $q->whereDate('date', '<=', $dateTo);
                 $data['rows'] = $q->get();
                 $data['title'] = 'Data Expenses Mobil Tangki';
+                break;
+
+            case 'hutang':
+                $q = Hutang::orderBy('date')->orderBy('created_at');
+                if ($dateFrom) $q->whereDate('date', '>=', $dateFrom);
+                if ($dateTo)   $q->whereDate('date', '<=', $dateTo);
+                $data['rows'] = $q->get();
+                $data['title'] = 'Data Hutang';
+                break;
+
+            case 'piutang':
+                $q = Piutang::orderBy('date')->orderBy('created_at');
+                if ($dateFrom) $q->whereDate('date', '>=', $dateFrom);
+                if ($dateTo)   $q->whereDate('date', '<=', $dateTo);
+                $data['rows'] = $q->get();
+                $data['title'] = 'Data Piutang';
                 break;
 
             default:

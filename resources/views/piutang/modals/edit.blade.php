@@ -1,11 +1,11 @@
-<div class="modal-overlay" id="hutangEditModal">
+<div class="modal-overlay" id="piutangEditModal">
     <div class="modal-box">
         <div class="modal-header">
-            <h3 class="modal-title">Edit Hutang</h3>
-            <button class="modal-close-btn" onclick="closeHutangEditModal()">&times;</button>
+            <h3 class="modal-title">Edit Piutang</h3>
+            <button class="modal-close-btn" onclick="closePiutangEditModal()">&times;</button>
         </div>
         <div class="modal-body">
-            <form id="hutangEditForm" onsubmit="return false;">
+            <form id="piutangEditForm" onsubmit="return false;">
                 <div class="form-grid">
                     <div class="form-group full">
                         <label class="form-label">Tanggal <span class="text-danger">*</span></label>
@@ -13,11 +13,11 @@
                     </div>
                     <div class="form-group full">
                         <label class="form-label">Nama <span class="text-danger">*</span></label>
-                        <input type="text" name="nama" class="form-input" placeholder="Nama pemberi hutang" required>
+                        <input type="text" name="nama" class="form-input" placeholder="Nama penerima piutang" required>
                     </div>
                     <div class="form-group full">
                         <label class="form-label">Deskripsi <span class="text-danger">*</span></label>
-                        <input type="text" name="description" class="form-input" placeholder="Keterangan hutang" required>
+                        <input type="text" name="description" class="form-input" placeholder="Keterangan piutang" required>
                     </div>
                     <div class="form-group full">
                         <label class="form-label">Nominal <span class="text-danger">*</span></label>
@@ -31,10 +31,10 @@
             </form>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-danger" onclick="closeHutangEditModal()">
+            <button class="btn btn-danger" onclick="closePiutangEditModal()">
                 <i data-lucide="x" style="width:15px;height:15px;"></i> Batal
             </button>
-            <button class="btn btn-primary" data-save-btn onclick="updateHutang()">
+            <button class="btn btn-primary" data-save-btn onclick="updatePiutang()">
                 <i data-lucide="save" style="width:15px;height:15px;"></i> Simpan
             </button>
         </div>
