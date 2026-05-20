@@ -133,6 +133,21 @@ class ExpenseController extends Controller
         return response()->json(['message' => 'Pengeluaran berhasil ditolak.']);
     }
 
+    public function paid(Expense $expense)
+    {
+        if (!auth()->user()->canApprove()) {
+            return response()->json(['message' => 'Tidak memiliki akses.'], 403);
+        }
+
+        if ($expense->status !== 'approved') {
+            return response()->json(['message' => 'Hanya pengeluaran berstatus approved yang dapat ditandai paid.'], 422);
+        }
+
+        $expense->update(['status' => 'paid']);
+
+        return response()->json(['message' => 'Pengeluaran berhasil ditandai sebagai paid.']);
+    }
+
     public function destroy(Expense $expense)
     {
         if (!auth()->user()->canDelete()) {

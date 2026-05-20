@@ -113,6 +113,11 @@
             </div>
         </div>
 
+        <a href="{{ route('hutang.index') }}" class="nav-item {{ request()->routeIs('hutang.*') ? 'active' : '' }}">
+            <i data-lucide="hand-coins"></i>
+            <span>Hutang</span>
+        </a>
+
         <!-- Report -->
         <div class="nav-section">Report</div>
         <a href="{{ route('bank.index') }}" class="nav-item {{ request()->routeIs('bank.*') ? 'active' : '' }}">

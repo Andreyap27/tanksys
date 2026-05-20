@@ -74,6 +74,7 @@
             <option value="">Semua Status</option>
             <option value="pending">Pending</option>
             <option value="approved">Approved</option>
+            <option value="paid">Paid</option>
             <option value="rejected">Rejected</option>
         </select>
     </div>
@@ -249,9 +250,10 @@
                     data: 'status',
                     render: function(data) {
                         const map = {
-                            pending: '<span class="badge badge-warning">Pending</span>',
-                            approved: '<span class="badge badge-success">Approved</span>',
+                            pending:  '<span class="badge badge-warning">Pending</span>',
+                            approved: '<span class="badge badge-info">Approved</span>',
                             rejected: '<span class="badge badge-danger">Rejected</span>',
+                            paid:     '<span class="badge badge-success">Paid</span>',
                         };
                         return map[data] || data;
                     }
@@ -279,6 +281,13 @@
                            </button>` :
                             '';
 
+                        const payBtn = canApprove && row.status === 'approved' ?
+                            `<button class="icon-btn success" title="Tandai Paid"
+                               onclick="payExpense('${row.id}', '${escHtml(row.description)}')">
+                               <i data-lucide="banknote" style="width:14px;height:14px;"></i>
+                           </button>` :
+                            '';
+
                         const deleteBtn = canDelete ?
                             `<button class="icon-btn danger" title="Hapus"
                                onclick="deleteExpense('${row.id}', '${escHtml(row.description)}')">
@@ -286,7 +295,7 @@
                            </button>` :
                             '';
 
-                        return `<div class="table-actions">${editBtn}${approveBtn}${deleteBtn}</div>`;
+                        return `<div class="table-actions">${editBtn}${approveBtn}${payBtn}${deleteBtn}</div>`;
                     }
                 }
             ],
@@ -319,7 +328,7 @@
         let total = 0,
             count = 0;
         for (let i = 0; i < rows.length; i++) {
-            if (rows[i].status === 'approved') {
+            if (rows[i].status === 'approved' || rows[i].status === 'paid') {
                 total += parseFloat(rows[i].nominal_raw) || 0;
                 count++;
             }
@@ -447,6 +456,25 @@
                     table.ajax.reload(null, false);
                 } catch (err) {
                     showError('Gagal', err.response?.data?.message || 'Gagal menolak data');
+                }
+            }
+        });
+    }
+
+    // ── Pay ───────────────────────────────────────────────────────────────────────
+    function payExpense(id, description) {
+        showConfirm({
+            title: 'Tandai Paid',
+            message: `Tandai pengeluaran "${description}" sebagai sudah dibayar?`,
+            type: 'success',
+            confirmText: 'Ya, Paid',
+            onConfirm: async () => {
+                try {
+                    const res = await axios.post(`/expenses/${id}/paid`);
+                    showSuccess('Berhasil', res.data.message);
+                    table.ajax.reload(null, false);
+                } catch (err) {
+                    showError('Gagal', err.response?.data?.message || 'Gagal memperbarui status');
                 }
             }
         });

@@ -18,6 +18,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\KapalController;
 use App\Http\Controllers\MobilController;
 use App\Http\Controllers\BankTransactionController;
+use App\Http\Controllers\HutangController;
 use App\Http\Controllers\PettyCashController;
 use App\Http\Controllers\PettyCashTransactionController;
 use App\Http\Controllers\StockTransferController;
@@ -131,6 +132,7 @@ Route::middleware('auth.jwt')->group(function () {
     Route::post('/expenses/{id}/force-delete', [ExpenseController::class, 'forceDelete'])->name('expenses.force-delete');
     Route::post('/expenses/{expense}/approve', [ExpenseController::class, 'approve'])->name('expenses.approve');
     Route::post('/expenses/{expense}/reject', [ExpenseController::class, 'reject'])->name('expenses.reject');
+    Route::post('/expenses/{expense}/paid', [ExpenseController::class, 'paid'])->name('expenses.paid');
     Route::resource('expenses', ExpenseController::class)->names('expenses')->except(['create', 'edit', 'show']);
 
     // Mobil Tangki / Lori Sale
@@ -149,6 +151,17 @@ Route::middleware('auth.jwt')->group(function () {
     Route::post('/lori-expense/{id}/restore', [LoriExpenseController::class, 'restore'])->name('lori-expense.restore');
     Route::post('/lori-expense/{id}/force-delete', [LoriExpenseController::class, 'forceDelete'])->name('lori-expense.force-delete');
     Route::resource('lori-expense', LoriExpenseController::class)->names('lori-expense')->except(['create', 'edit', 'show']);
+
+    // Hutang
+    Route::get('/hutang/data',                  [HutangController::class, 'data'])->name('hutang.data');
+    Route::get('/hutang/trash',                  [HutangController::class, 'trash'])->name('hutang.trash');
+    Route::get('/hutang/trash-data',             [HutangController::class, 'trashData'])->name('hutang.trash-data');
+    Route::post('/hutang/{id}/restore',          [HutangController::class, 'restore'])->name('hutang.restore');
+    Route::post('/hutang/{id}/force-delete',     [HutangController::class, 'forceDelete'])->name('hutang.force-delete');
+    Route::post('/hutang/{hutang}/approve',      [HutangController::class, 'approve'])->name('hutang.approve');
+    Route::post('/hutang/{hutang}/reject',       [HutangController::class, 'reject'])->name('hutang.reject');
+    Route::post('/hutang/{hutang}/paid',         [HutangController::class, 'paid'])->name('hutang.paid');
+    Route::resource('hutang', HutangController::class)->names('hutang')->except(['create', 'edit', 'show']);
 
     // Petty Cash Master
     Route::get('/petty-cash/list', [PettyCashController::class, 'list'])->name('petty-cash.list');

@@ -23,6 +23,14 @@
         tbody tr:nth-child(even) { background:#f8fafc; }
         td { padding:0.45rem 0.7rem; border-bottom:1px solid #f0f4f8; color:#374151; }
         tfoot td { padding:0.55rem 0.7rem; background:#eef2fb; border-top:2px solid #1a5cb8; font-weight:700; font-size:12px; color:#1a1a1a; }
+        td.r, tfoot td.r { white-space:nowrap; }
+        .summary-box { margin-top:1.25rem; padding-top:0.85rem; border-top:2px solid #1a5cb8; page-break-inside:avoid; display:flex; flex-direction:column; align-items:flex-end; gap:0.3rem; }
+        .summary-box .s-row { display:flex; justify-content:space-between; gap:3rem; font-size:11.5px; }
+        .summary-box .s-label { color:#374151; }
+        .summary-box .s-val { font-weight:700; white-space:nowrap; }
+        .summary-box .s-balance { border-top:1px solid #cbd5e1; padding-top:0.25rem; margin-top:0.1rem; }
+        .summary-box .s-balance .s-label,
+        .summary-box .s-balance .s-val { color:#1a5cb8; font-size:12.5px; }
         .badge { display:inline-block; padding:0.15rem 0.5rem; border-radius:9999px; font-size:0.68rem; font-weight:600; }
         .badge-approved { background:#dcfce7; color:#16a34a; }
         .badge-pending  { background:#fef9c3; color:#a16207; }
@@ -234,14 +242,21 @@
             @empty<tr><td colspan="6" style="text-align:center;color:#888;">Tidak ada data</td></tr>
             @endforelse
         </tbody>
-        <tfoot><tr>
-            <td colspan="4"><strong>Total</strong></td>
-            <td class="c" style="font-size:10px;">
-                In: Rp {{ $fmt($gIn) }}<br>Out: Rp {{ $fmt($gOut) }}
-            </td>
-            <td class="r">Rp {{ $fmt($gIn - $gOut) }}</td>
-        </tr></tfoot>
     </table>
+    <div class="summary-box">
+        <div class="s-row">
+            <span class="s-label">In (Kredit)</span>
+            <span class="s-val">Rp {{ $fmt($gIn) }}</span>
+        </div>
+        <div class="s-row">
+            <span class="s-label">Out (Debit)</span>
+            <span class="s-val">Rp {{ $fmt($gOut) }}</span>
+        </div>
+        <div class="s-row s-balance">
+            <span class="s-label">Balance</span>
+            <span class="s-val">Rp {{ $fmt($gIn - $gOut) }}</span>
+        </div>
+    </div>
 
     {{-- ── CAPITAL ─────────────────────────────────────────────────────── --}}
     @elseif($section === 'capital')
