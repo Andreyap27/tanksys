@@ -215,7 +215,8 @@
             },
             processing: true,
             columns: [{
-                    data: 'date'
+                    data: 'date',
+                    render: (d, t, row) => (t === 'sort' || t === 'type') ? row.date_raw : d,
                 },
                 {
                     data: 'type',
