@@ -27,15 +27,31 @@
 
 {{-- Summary Cards --}}
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.25rem;margin-bottom:1.5rem;">
-    <div class="dash-stat ds-capital">
+    <div class="dash-stat ds-profit">
         <div class="dash-stat__header">
-            <div class="dash-stat__icon"><i data-lucide="wallet" style="width:20px;height:20px;"></i></div>
+            <div class="dash-stat__icon"><i data-lucide="banknote" style="width:20px;height:20px;"></i></div>
             <div>
-                <div class="dash-stat__label">Capital</div>
-                <div class="dash-stat__value" id="expensesCapitalCard">Rp 0</div>
+                <div class="dash-stat__label">Total Paid</div>
+                <div class="dash-stat__value" id="expensesPaidCard">Rp 0</div>
+                <div class="dash-stat__trend flat">
+                    <i data-lucide="clipboard-list"></i> <span id="expensesPaidCountCard">0</span> transaksi
+                </div>
             </div>
         </div>
-        <div class="dash-stat__bg-icon"><i data-lucide="wallet" style="width:110px;height:110px;"></i></div>
+        <div class="dash-stat__bg-icon"><i data-lucide="banknote" style="width:110px;height:110px;"></i></div>
+    </div>
+    <div class="dash-stat ds-loss">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon"><i data-lucide="clock" style="width:20px;height:20px;"></i></div>
+            <div>
+                <div class="dash-stat__label">Total Unpaid</div>
+                <div class="dash-stat__value" id="expensesUnpaidCard">Rp 0</div>
+                <div class="dash-stat__trend flat">
+                    <i data-lucide="clipboard-list"></i> <span id="expensesUnpaidCountCard">0</span> transaksi
+                </div>
+            </div>
+        </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="clock" style="width:110px;height:110px;"></i></div>
     </div>
     <div class="dash-stat ds-expense">
         <div class="dash-stat__header">
@@ -49,16 +65,6 @@
             </div>
         </div>
         <div class="dash-stat__bg-icon"><i data-lucide="receipt" style="width:110px;height:110px;"></i></div>
-    </div>
-    <div class="dash-stat" id="expensesBalanceCardWrapper">
-        <div class="dash-stat__header">
-            <div class="dash-stat__icon"><i data-lucide="trending-up" style="width:20px;height:20px;"></i></div>
-            <div>
-                <div class="dash-stat__label">Balance</div>
-                <div class="dash-stat__value" id="expensesBalanceCard">Rp 0</div>
-            </div>
-        </div>
-        <div class="dash-stat__bg-icon"><i data-lucide="trending-up" style="width:110px;height:110px;"></i></div>
     </div>
 </div>
 
@@ -115,7 +121,6 @@
     let table;
     let editId = null;
     let activeExpenseKapalId = '';
-    let expensesCapital = 0;
     const createForm = document.getElementById('createForm');
     const editForm = document.getElementById('editForm');
     const createModal = document.getElementById('createModal');
@@ -158,29 +163,7 @@
         document.querySelectorAll('#expenseTabs .tab').forEach(t => t.classList.remove('active'));
         btn.classList.add('active');
         activeExpenseKapalId = kapalId;
-        refreshExpenseSummary(kapalId);
         table.ajax.reload(null, false);
-    }
-
-    function refreshExpenseSummary(kapalId) {
-        const params = {};
-        if (kapalId) params.kapal_id = kapalId;
-        axios.get('{{ route('expenses.capital-total') }}', {params}).then(res => {
-            expensesCapital = res.data.total || 0;
-            document.getElementById('expensesCapitalCard').textContent = 'Rp ' + Currency.number(expensesCapital);
-            updateBalance();
-        });
-    }
-
-    function updateBalance() {
-        const totalText = document.getElementById('expensesTotalCard').textContent.replace(/[^0-9]/g, '');
-        const balance = expensesCapital - (parseFloat(totalText) || 0);
-        document.getElementById('expensesBalanceCard').textContent = 'Rp ' + Currency.number(balance);
-
-        // Update balance card color based on value
-        const balanceWrapper = document.getElementById('expensesBalanceCardWrapper');
-        balanceWrapper.classList.remove('ds-profit', 'ds-loss');
-        balanceWrapper.classList.add(balance >= 0 ? 'ds-profit' : 'ds-loss');
     }
 
     // ── Input formatter ───────────────────────────────────────────────────────────
@@ -211,7 +194,6 @@
     // ── DataTable ─────────────────────────────────────────────────────────────────
     $(document).ready(function() {
         loadExpenseKapals();
-        refreshExpenseSummary('');
 
         table = $('#expensesTable').DataTable({
             ajax: {
@@ -322,20 +304,27 @@
     });
 
     function updateExpensesTotal(api) {
-        const rows = api.rows({
-            search: 'applied'
-        }).data();
-        let total = 0,
-            count = 0;
+        const rows = api.rows({ search: 'applied' }).data();
+        let totalPaid = 0, countPaid = 0;
+        let totalUnpaid = 0, countUnpaid = 0;
+        let totalAll = 0, countAll = 0;
         for (let i = 0; i < rows.length; i++) {
-            if (rows[i].status === 'approved' || rows[i].status === 'paid') {
-                total += parseFloat(rows[i].nominal_raw) || 0;
-                count++;
+            const nom = parseFloat(rows[i].nominal_raw) || 0;
+            const st  = rows[i].status;
+            if (st === 'paid') {
+                totalPaid += nom; countPaid++;
+                totalAll  += nom; countAll++;
+            } else if (st === 'approved' || st === 'pending') {
+                totalUnpaid += nom; countUnpaid++;
+                if (st === 'approved') { totalAll += nom; countAll++; }
             }
         }
-        document.getElementById('expensesTotalCard').textContent = 'Rp ' + Currency.number(total);
-        document.getElementById('expensesCountCard').textContent = count;
-        updateBalance();
+        document.getElementById('expensesPaidCard').textContent   = 'Rp ' + Currency.number(totalPaid);
+        document.getElementById('expensesPaidCountCard').textContent = countPaid;
+        document.getElementById('expensesUnpaidCard').textContent  = 'Rp ' + Currency.number(totalUnpaid);
+        document.getElementById('expensesUnpaidCountCard').textContent = countUnpaid;
+        document.getElementById('expensesTotalCard').textContent   = 'Rp ' + Currency.number(totalAll);
+        document.getElementById('expensesCountCard').textContent   = countAll;
     }
 
     function escHtml(str) {
