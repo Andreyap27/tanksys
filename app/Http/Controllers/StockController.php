@@ -39,7 +39,7 @@ class StockController extends Controller
     {
         $result = [];
         foreach (['merah', 'biru', 'kuning'] as $w) {
-            $q = Purchase::where('status', 'approved')->where('warna', $w);
+            $q = Purchase::whereIn('status', ['approved', 'paid'])->where('warna', $w);
             if ($kapalId) $q->where('kapal_id', $kapalId);
             $result[$w] = [
                 'qty'   => (float) (clone $q)->sum('quantity'),
@@ -52,16 +52,23 @@ class StockController extends Controller
     public function data()
     {
         $kapalId = request('kapal_id');
-        $query   = Stock::orderBy('date', 'desc')->orderBy('created_at', 'desc');
+
+        // Tanggal sama: masuk (purchase/transfer_in) lebih dulu, baru keluar
+        $query = Stock::orderBy('date', 'asc')
+            ->orderByRaw("FIELD(type, 'purchase', 'transfer_in', 'sale', 'transfer_out', 'usage')")
+            ->orderBy('created_at', 'asc');
         if ($kapalId) $query->where('kapal_id', $kapalId);
+
         $running = 0;
         $stocks  = $query->get()
             ->map(function ($s) use (&$running) {
                 $running += (float) $s->qty_in - (float) $s->qty_out;
                 return [
-                    'date'    => $s->date->translatedFormat('d M Y'),
-                    'party'   => $s->party,
-                    'type'    => match($s->type) {
+                    'date'     => $s->date->translatedFormat('d M Y'),
+                    'date_raw' => $s->date->format('Y-m-d'),
+                    'party'    => $s->party,
+                    'warna'    => $s->warna ?? '',
+                    'type'     => match($s->type) {
                         'purchase'     => 'Pembelian',
                         'sale'         => 'Penjualan',
                         'transfer_in'  => 'Transfer Masuk',
@@ -73,7 +80,9 @@ class StockController extends Controller
                     'qty_out' => $s->qty_out > 0 ? number_format($s->qty_out, 2, ',', '.') : null,
                     'balance' => number_format($running, 2, ',', '.'),
                 ];
-            });
+            })
+            ->reverse()  // balik urutan: baris terbaru di atas dengan saldo terkini
+            ->values();
 
         return response()->json(['data' => $stocks]);
     }

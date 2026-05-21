@@ -106,8 +106,8 @@
                 <td style="text-align:center;vertical-align:middle;">
                     <div class="rpt-company-name">PT. ANUGRAH ENERGI PETROLUM</div>
                     <div class="rpt-company-address">
-                        Komplek The Residence Blok A 22 RT 05/RW 07,<br>
-                        Kel. Patam Lestari, Kec. Sekupang, Kota Batam, Kepulauan Riau 29427
+                        Retail B.R-03 Baloi Apartment, Jl. Permata Baloi, RT/RW 004/008,<br>
+                        Kel. Baloi Indah, Kec. Lubuk Baja, Batam, 29444
                     </div>
                 </td>
                 <td style="width:20%;"></td>

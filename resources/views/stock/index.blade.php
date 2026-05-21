@@ -115,6 +115,7 @@
                         <th>Tanggal</th>
                         <th>Vendor / Customer</th>
                         <th>Tipe</th>
+                        <th>Warna</th>
                         <th>Qty (L)</th>
                         <th>Saldo (L)</th>
                     </tr>
@@ -171,7 +172,12 @@ $(document).ready(function () {
         },
         processing: true,
         columns: [
-            { data: 'date' },
+            {
+                data: 'date',
+                render: function (data, type, row) {
+                    return (type === 'sort' || type === 'type') ? row.date_raw : data;
+                }
+            },
             { data: 'party' },
             {
                 data: 'type',
@@ -187,6 +193,18 @@ $(document).ready(function () {
                 }
             },
             {
+                data: 'warna',
+                render: function (data) {
+                    if (!data) return '<span class="text-muted">-</span>';
+                    const map = {
+                        merah:   '<span class="badge" style="background:#dc2626;color:#fff;">Merah</span>',
+                        biru:    '<span class="badge" style="background:#2563eb;color:#fff;">Biru</span>',
+                        kuning:  '<span class="badge" style="background:#ca8a04;color:#fff;">Kuning</span>',
+                    };
+                    return map[data] || data;
+                }
+            },
+            {
                 data: null,
                 render: function (data, type, row) {
                     if (row.qty_in)  return `<span style="color:var(--success);font-weight:600;">+${row.qty_in}</span>`;
@@ -199,7 +217,7 @@ $(document).ready(function () {
                 render: function (data) { return `<span style="font-weight:600;">${data}</span>`; }
             },
         ],
-        order: [[0, 'desc']],
+        order: [],
         drawCallback: function () { lucide.createIcons(); }
     });
 });
