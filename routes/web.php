@@ -25,6 +25,10 @@ use App\Http\Controllers\PettyCashTransactionController;
 use App\Http\Controllers\StockTransferController;
 use App\Http\Controllers\StockUsageController;
 use App\Http\Controllers\TxPrintController;
+use App\Http\Controllers\GajiController;
+use App\Http\Controllers\GajiSlipController;
+use App\Http\Controllers\KaryawanPinjamanController;
+use App\Http\Controllers\UangKoordinasiController;
 
 // Guest routes
 Route::middleware('guest.jwt')->group(function () {
@@ -205,6 +209,38 @@ Route::middleware('auth.jwt')->group(function () {
 
     // Transaction Print
     Route::get('/tx-print', [TxPrintController::class, 'show'])->name('tx.print');
+
+    // Gaji (Karyawan Master)
+    Route::get('/gaji/data', [GajiController::class, 'data'])->name('gaji.data');
+    Route::get('/gaji/summary-stats', [GajiController::class, 'summaryStats'])->name('gaji.summary-stats');
+    Route::get('/gaji/trash', [GajiController::class, 'trash'])->name('gaji.trash');
+    Route::get('/gaji/trash-data', [GajiController::class, 'trashData'])->name('gaji.trash-data');
+    Route::post('/gaji/{id}/restore', [GajiController::class, 'restore'])->name('gaji.restore');
+    Route::post('/gaji/{id}/force-delete', [GajiController::class, 'forceDelete'])->name('gaji.force-delete');
+    Route::resource('gaji', GajiController::class)->names('gaji')->parameters(['gaji' => 'karyawan']);
+
+    // Pinjaman Karyawan
+    Route::post('/gaji/{karyawan}/pinjaman', [KaryawanPinjamanController::class, 'store'])->name('gaji.pinjaman.store');
+    Route::put('/gaji/pinjaman/{pinjaman}', [KaryawanPinjamanController::class, 'update'])->name('gaji.pinjaman.update');
+    Route::delete('/gaji/pinjaman/{pinjaman}', [KaryawanPinjamanController::class, 'destroy'])->name('gaji.pinjaman.destroy');
+
+    // Gaji Slip
+    Route::post('/gaji/{karyawan}/slip', [GajiSlipController::class, 'store'])->name('gaji.slip.store');
+    Route::put('/gaji/slip/{slip}', [GajiSlipController::class, 'update'])->name('gaji.slip.update');
+    Route::delete('/gaji/slip/{slip}', [GajiSlipController::class, 'destroy'])->name('gaji.slip.destroy');
+    Route::post('/gaji/slip/{slip}/approve', [GajiSlipController::class, 'approve'])->name('gaji.slip.approve');
+    Route::post('/gaji/slip/{slip}/reject', [GajiSlipController::class, 'reject'])->name('gaji.slip.reject');
+    Route::get('/gaji/slip/{slip}/print', [GajiSlipController::class, 'print'])->name('gaji.slip.print');
+
+    // Uang Koordinasi
+    Route::get('/uang-koordinasi/data', [UangKoordinasiController::class, 'data'])->name('uang-koordinasi.data');
+    Route::get('/uang-koordinasi/trash', [UangKoordinasiController::class, 'trash'])->name('uang-koordinasi.trash');
+    Route::get('/uang-koordinasi/trash-data', [UangKoordinasiController::class, 'trashData'])->name('uang-koordinasi.trash-data');
+    Route::post('/uang-koordinasi/{id}/restore', [UangKoordinasiController::class, 'restore'])->name('uang-koordinasi.restore');
+    Route::post('/uang-koordinasi/{id}/force-delete', [UangKoordinasiController::class, 'forceDelete'])->name('uang-koordinasi.force-delete');
+    Route::post('/uang-koordinasi/{uangKoordinasi}/approve', [UangKoordinasiController::class, 'approve'])->name('uang-koordinasi.approve');
+    Route::post('/uang-koordinasi/{uangKoordinasi}/reject', [UangKoordinasiController::class, 'reject'])->name('uang-koordinasi.reject');
+    Route::resource('uang-koordinasi', UangKoordinasiController::class)->names('uang-koordinasi')->except(['create', 'edit']);
 
     // Report
     Route::get('/report', fn() => redirect()->route('report.purchase'))->name('report.index');

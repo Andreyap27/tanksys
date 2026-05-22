@@ -17,7 +17,6 @@
 
 @php
     $warnaConfig = [
-        'merah'  => ['label' => 'Merah',  'color' => '#dc2626', 'bg' => 'rgba(220,38,38,0.08)',  'iconBg' => 'rgba(220,38,38,0.12)'],
         'biru'   => ['label' => 'Biru',   'color' => '#2563eb', 'bg' => 'rgba(37,99,235,0.08)',  'iconBg' => 'rgba(37,99,235,0.12)'],
         'kuning' => ['label' => 'Kuning', 'color' => '#ca8a04', 'bg' => 'rgba(202,138,4,0.08)', 'iconBg' => 'rgba(202,138,4,0.12)'],
     ];
@@ -58,34 +57,38 @@
     </div>
     @endforeach
 
-    {{-- Extra Card --}}
+    {{-- Extra & Short Card --}}
     <div style="background:rgba(124,58,237,0.08);border-radius:var(--radius-lg,0.75rem);padding:1.25rem;position:relative;overflow:hidden;">
         <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
             <div style="background:rgba(124,58,237,0.12);color:#7c3aed;border-radius:0.5rem;padding:0.5rem;display:flex;">
                 <i data-lucide="plus-circle" style="width:20px;height:20px;"></i>
             </div>
-            <span style="font-weight:700;font-size:1rem;color:#7c3aed;">Total Extra</span>
+            <span style="font-weight:700;font-size:1rem;color:#7c3aed;">Total Extra & Short</span>
         </div>
         <table style="width:100%;border-collapse:collapse;font-size:0.75rem;">
             <thead>
                 <tr style="color:var(--muted-foreground);">
                     <th style="text-align:left;font-weight:500;padding-bottom:0.4rem;">Warna</th>
-                    <th style="text-align:right;font-weight:500;padding-bottom:0.4rem;">Qty (L)</th>
                     <th style="text-align:right;font-weight:500;padding-bottom:0.4rem;">Extra (L)</th>
+                    <th style="text-align:right;font-weight:500;padding-bottom:0.4rem;">Short Beli (L)</th>
+                    <th style="text-align:right;font-weight:500;padding-bottom:0.4rem;">Short Jual (L)</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($warnaConfig as $key => $cfg)
                 <tr>
-                    <td style="padding:0.2rem 0;display:flex;align-items:center;gap:0.35rem;">
+                    <td style="padding:0.25rem 0;display:flex;align-items:center;gap:0.35rem;">
                         <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{{ $cfg['color'] }};flex-shrink:0;"></span>
                         <span style="color:{{ $cfg['color'] }};font-weight:600;">{{ $cfg['label'] }}</span>
                     </td>
-                    <td style="text-align:right;font-weight:600;color:#7c3aed;padding:0.2rem 0;">
-                        <span id="stock_qty_{{ $key }}">{{ number_format($extras[$key]['qty'] ?? 0, 2, ',', '.') }}</span>
-                    </td>
-                    <td style="text-align:right;font-weight:600;color:#7c3aed;padding:0.2rem 0;">
+                    <td style="text-align:right;font-weight:600;color:#7c3aed;padding:0.25rem 0;">
                         <span id="stock_extra_{{ $key }}">{{ number_format($extras[$key]['extra'] ?? 0, 2, ',', '.') }}</span>
+                    </td>
+                    <td style="text-align:right;font-weight:600;color:#dc2626;padding:0.25rem 0;">
+                        <span id="stock_short_purchase_{{ $key }}">{{ number_format($extras[$key]['short_purchase'] ?? 0, 2, ',', '.') }}</span>
+                    </td>
+                    <td style="text-align:right;font-weight:600;color:#ea580c;padding:0.25rem 0;">
+                        <span id="stock_short_sale_{{ $key }}">{{ number_format($extras[$key]['short_sale'] ?? 0, 2, ',', '.') }}</span>
                     </td>
                 </tr>
                 @endforeach
@@ -146,15 +149,16 @@ function refreshStockSummary(kapalId) {
     if (kapalId) params.kapal_id = kapalId;
     axios.get('{{ route('stock.summary') }}', { params }).then(res => {
         const fmt = n => new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
-        ['merah', 'biru', 'kuning'].forEach(w => {
+        ['biru', 'kuning'].forEach(w => {
             const d = res.data.byWarna?.[w] ?? { balance: 0, in: 0, out: 0 };
             document.getElementById(`stock_balance_${w}`).textContent = fmt(d.balance) + ' L';
             document.getElementById(`stock_in_${w}`).textContent      = '+' + fmt(d.in)  + ' L';
             document.getElementById(`stock_out_${w}`).textContent     = '-' + fmt(d.out) + ' L';
 
-            const ex = res.data.extras?.[w] ?? { qty: 0, extra: 0 };
-            document.getElementById(`stock_qty_${w}`).textContent   = fmt(ex.qty)   + ' L';
-            document.getElementById(`stock_extra_${w}`).textContent = fmt(ex.extra) + ' L';
+            const ex = res.data.extras?.[w] ?? { extra: 0, short_purchase: 0, short_sale: 0 };
+            document.getElementById(`stock_extra_${w}`).textContent          = fmt(ex.extra)          + ' L';
+            document.getElementById(`stock_short_purchase_${w}`).textContent = fmt(ex.short_purchase) + ' L';
+            document.getElementById(`stock_short_sale_${w}`).textContent     = fmt(ex.short_sale)     + ' L';
         });
     });
 }
@@ -197,7 +201,6 @@ $(document).ready(function () {
                 render: function (data) {
                     if (!data) return '<span class="text-muted">-</span>';
                     const map = {
-                        merah:   '<span class="badge" style="background:#dc2626;color:#fff;">Merah</span>',
                         biru:    '<span class="badge" style="background:#2563eb;color:#fff;">Biru</span>',
                         kuning:  '<span class="badge" style="background:#ca8a04;color:#fff;">Kuning</span>',
                     };

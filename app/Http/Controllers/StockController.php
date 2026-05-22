@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Purchase;
+use App\Models\Sale;
 use App\Models\Stock;
 use App\Models\Kapal;
 use App\Models\Mobil;
@@ -21,7 +22,7 @@ class StockController extends Controller
     private function warnaBalances(?string $kapalId): array
     {
         $result = [];
-        foreach (['merah', 'biru', 'kuning'] as $w) {
+        foreach (['biru', 'kuning'] as $w) {
             $q = Stock::where('warna', $w);
             if ($kapalId) $q->where('kapal_id', $kapalId);
             $in  = (float) (clone $q)->sum('qty_in');
@@ -38,12 +39,18 @@ class StockController extends Controller
     private function extraByWarna(?string $kapalId): array
     {
         $result = [];
-        foreach (['merah', 'biru', 'kuning'] as $w) {
-            $q = Purchase::whereIn('status', ['approved', 'paid'])->where('warna', $w);
-            if ($kapalId) $q->where('kapal_id', $kapalId);
+        foreach (['biru', 'kuning'] as $w) {
+            $qp = Purchase::whereIn('status', ['approved', 'paid'])->where('warna', $w);
+            $qs = Sale::whereIn('status', ['approved', 'paid'])->where('warna', $w);
+            if ($kapalId) {
+                $qp->where('kapal_id', $kapalId);
+                $qs->where('kapal_id', $kapalId);
+            }
             $result[$w] = [
-                'qty'   => (float) (clone $q)->sum('quantity'),
-                'extra' => (float) (clone $q)->sum('extra'),
+                'qty'         => (float) (clone $qp)->sum('quantity'),
+                'extra'       => (float) (clone $qp)->sum('extra'),
+                'short_purchase' => (float) (clone $qp)->sum('short'),
+                'short_sale'     => (float) (clone $qs)->sum('short'),
             ];
         }
         return $result;

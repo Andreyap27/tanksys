@@ -139,6 +139,9 @@
                 $gQtyUnpaid+=$r->quantity; $gExtraUnpaid+=$r->extra; $gShortUnpaid+=$r->short; $gAmtUnpaid+=$r->amount;
             }
         }
+        $gNetQty       = $gQty       + $gExtra       - $gShort;
+        $gNetQtyPaid   = $gQtyPaid   + $gExtraPaid   - $gShortPaid;
+        $gNetQtyUnpaid = $gQtyUnpaid + $gExtraUnpaid - $gShortUnpaid;
     @endphp
     <table>
         <thead><tr>
@@ -166,12 +169,18 @@
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="5"><strong>Total</strong></td>
+                <td colspan="5"><strong>Total Pembelian</strong></td>
                 <td class="r">{{ $fmtQty($gQty) }}</td>
                 <td class="r">{{ $fmtQty($gExtra) }}</td>
                 <td class="r">{{ $gShort > 0 ? $fmtQty($gShort) : '-' }}</td>
                 <td></td><td></td>
                 <td class="r">Rp {{ $fmt($gAmt) }}</td>
+            </tr>
+            <tr style="background:#dbeafe;">
+                <td colspan="5" style="color:#1a5cb8;"><strong>Total Stok</strong></td>
+                <td class="r" style="color:#1a5cb8;" colspan="3">{{ $fmtQty($gNetQty) }}</td>
+                <td></td><td></td>
+                <td class="r" style="color:#1a5cb8;">Rp {{ $fmt($gAmt) }}</td>
             </tr>
             <tr style="background:#dcfce7;">
                 <td colspan="5" style="color:#16a34a;"><strong>Total Paid</strong></td>

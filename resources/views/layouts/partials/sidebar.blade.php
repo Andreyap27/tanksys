@@ -113,6 +113,14 @@
             </div>
         </div>
 
+        <a href="{{ route('gaji.index') }}" class="nav-item {{ request()->routeIs('gaji.*') && !request()->routeIs('gaji.slip.*') ? 'active' : '' }}">
+            <i data-lucide="banknote"></i>
+            <span>Gaji</span>
+        </a>
+        <a href="{{ route('uang-koordinasi.index') }}" class="nav-item {{ request()->routeIs('uang-koordinasi.*') ? 'active' : '' }}">
+            <i data-lucide="handshake"></i>
+            <span>Uang Koordinasi</span>
+        </a>
         <a href="{{ route('hutang.index') }}" class="nav-item {{ request()->routeIs('hutang.*') ? 'active' : '' }}">
             <i data-lucide="hand-coins"></i>
             <span>Hutang</span>
