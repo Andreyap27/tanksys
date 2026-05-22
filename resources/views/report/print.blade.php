@@ -230,13 +230,14 @@
         {{-- ── Purchase ───────────────────────────────────────────── --}}
         @if($section === 'purchase')
             @php
-                $gQty = 0; $gExtra = 0; $gAmt = 0;
+                $gQty = 0; $gExtra = 0; $gShort = 0; $gAmt = 0;
                 foreach (range(1,12) as $m) {
                     $gQty   += (float)($purchases->get($m)->total_qty    ?? 0);
                     $gExtra += (float)($purchases->get($m)->total_extra  ?? 0);
+                    $gShort += (float)($purchases->get($m)->total_short  ?? 0);
                     $gAmt   += (float)($purchases->get($m)->total_amount ?? 0);
                 }
-                $gTotal = $gQty + $gExtra;
+                $gTotal = $gQty + $gExtra - $gShort;
             @endphp
             <table class="rpt-table">
                 <thead>
@@ -244,6 +245,7 @@
                         <th>Bulan</th>
                         <th class="r">Qty (L)</th>
                         <th class="r">Extra (L)</th>
+                        <th class="r">Short (L)</th>
                         <th class="r">Total Qty (L)</th>
                         <th class="r">Total Amount</th>
                     </tr>
@@ -253,13 +255,15 @@
                         @php
                             $qty   = (float)($purchases->get($m)->total_qty    ?? 0);
                             $extra = (float)($purchases->get($m)->total_extra  ?? 0);
+                            $short = (float)($purchases->get($m)->total_short  ?? 0);
                             $amt   = (float)($purchases->get($m)->total_amount ?? 0);
-                            $tot   = $qty + $extra;
+                            $tot   = $qty + $extra - $short;
                         @endphp
                         <tr>
                             <td>{{ $name }}</td>
                             <td class="r">{{ $qty   ? $fmtQty($qty)   : '-' }}</td>
                             <td class="r">{{ $extra ? $fmtQty($extra) : '-' }}</td>
+                            <td class="r">{{ $short ? $fmtQty($short) : '-' }}</td>
                             <td class="r">{{ $tot   ? $fmtQty($tot)   : '-' }}</td>
                             <td class="r">{{ $amt   ? 'Rp '.$fmt($amt) : '-' }}</td>
                         </tr>
@@ -270,6 +274,7 @@
                         <td>Total</td>
                         <td class="r">{{ $fmtQty($gQty) }}</td>
                         <td class="r">{{ $fmtQty($gExtra) }}</td>
+                        <td class="r">{{ $fmtQty($gShort) }}</td>
                         <td class="r">{{ $fmtQty($gTotal) }}</td>
                         <td class="r">Rp {{ $fmt($gAmt) }}</td>
                     </tr>
@@ -279,13 +284,14 @@
         {{-- ── Sale ───────────────────────────────────────────────── --}}
         @elseif($section === 'sale')
             @php
-                $gQty = 0; $gExtra = 0; $gAmt = 0;
+                $gQty = 0; $gExtra = 0; $gShort = 0; $gAmt = 0;
                 foreach (range(1,12) as $m) {
                     $gQty   += (float)($sales->get($m)->total_qty    ?? 0);
                     $gExtra += (float)($sales->get($m)->total_extra  ?? 0);
+                    $gShort += (float)($sales->get($m)->total_short  ?? 0);
                     $gAmt   += (float)($sales->get($m)->total_amount ?? 0);
                 }
-                $gTotal = $gQty + $gExtra;
+                $gTotal = $gQty + $gExtra - $gShort;
             @endphp
             <table class="rpt-table">
                 <thead>
@@ -293,6 +299,7 @@
                         <th>Bulan</th>
                         <th class="r">Qty (L)</th>
                         <th class="r">Extra (L)</th>
+                        <th class="r">Short (L)</th>
                         <th class="r">Total Qty (L)</th>
                         <th class="r">Total Amount</th>
                     </tr>
@@ -302,13 +309,15 @@
                         @php
                             $qty   = (float)($sales->get($m)->total_qty    ?? 0);
                             $extra = (float)($sales->get($m)->total_extra  ?? 0);
+                            $short = (float)($sales->get($m)->total_short  ?? 0);
                             $amt   = (float)($sales->get($m)->total_amount ?? 0);
-                            $tot   = $qty + $extra;
+                            $tot   = $qty + $extra - $short;
                         @endphp
                         <tr>
                             <td>{{ $name }}</td>
                             <td class="r">{{ $qty   ? $fmtQty($qty)   : '-' }}</td>
                             <td class="r">{{ $extra ? $fmtQty($extra) : '-' }}</td>
+                            <td class="r">{{ $short ? $fmtQty($short) : '-' }}</td>
                             <td class="r">{{ $tot   ? $fmtQty($tot)   : '-' }}</td>
                             <td class="r">{{ $amt   ? 'Rp '.$fmt($amt) : '-' }}</td>
                         </tr>
@@ -319,6 +328,7 @@
                         <td>Total</td>
                         <td class="r">{{ $fmtQty($gQty) }}</td>
                         <td class="r">{{ $fmtQty($gExtra) }}</td>
+                        <td class="r">{{ $fmtQty($gShort) }}</td>
                         <td class="r">{{ $fmtQty($gTotal) }}</td>
                         <td class="r">Rp {{ $fmt($gAmt) }}</td>
                     </tr>

@@ -11,13 +11,14 @@
     ];
     $fmt    = fn($n) => number_format((float)$n, 0, ',', '.');
     $fmtQty = fn($n) => number_format((float)$n, 2, ',', '.');
-    $gQty = 0; $gExtra = 0; $gAmt = 0;
+    $gQty = 0; $gExtra = 0; $gShort = 0; $gAmt = 0;
     foreach (range(1,12) as $m) {
         $gQty   += (float)($purchases->get($m)->total_qty    ?? 0);
         $gExtra += (float)($purchases->get($m)->total_extra  ?? 0);
+        $gShort += (float)($purchases->get($m)->total_short  ?? 0);
         $gAmt   += (float)($purchases->get($m)->total_amount ?? 0);
     }
-    $gTotal = $gQty + $gExtra;
+    $gTotal = $gQty + $gExtra - $gShort;
 @endphp
 
 @include('report._header')
@@ -32,6 +33,7 @@
                         <th>Bulan</th>
                         <th class="text-right">Qty (L)</th>
                         <th class="text-right">Extra (L)</th>
+                        <th class="text-right">Short (L)</th>
                         <th class="text-right">Total Qty (L)</th>
                         <th class="text-right">Total Amount</th>
                     </tr>
@@ -41,13 +43,15 @@
                         @php
                             $qty   = (float)($purchases->get($m)->total_qty    ?? 0);
                             $extra = (float)($purchases->get($m)->total_extra  ?? 0);
+                            $short = (float)($purchases->get($m)->total_short  ?? 0);
                             $amt   = (float)($purchases->get($m)->total_amount ?? 0);
-                            $tot   = $qty + $extra;
+                            $tot   = $qty + $extra - $short;
                         @endphp
                         <tr>
                             <td>{{ $name }}</td>
                             <td class="text-right">{{ $qty   ? $fmtQty($qty)   : '-' }}</td>
                             <td class="text-right">{{ $extra ? $fmtQty($extra) : '-' }}</td>
+                            <td class="text-right">{{ $short ? $fmtQty($short) : '-' }}</td>
                             <td class="text-right">{{ $tot   ? $fmtQty($tot)   : '-' }}</td>
                             <td class="text-right">{{ $amt   ? 'Rp '.$fmt($amt) : '-' }}</td>
                         </tr>
@@ -58,6 +62,7 @@
                         <td><strong>Total</strong></td>
                         <td class="text-right"><strong>{{ $fmtQty($gQty) }}</strong></td>
                         <td class="text-right"><strong>{{ $fmtQty($gExtra) }}</strong></td>
+                        <td class="text-right"><strong>{{ $fmtQty($gShort) }}</strong></td>
                         <td class="text-right"><strong>{{ $fmtQty($gTotal) }}</strong></td>
                         <td class="text-right"><strong>Rp {{ $fmt($gAmt) }}</strong></td>
                     </tr>

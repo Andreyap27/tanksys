@@ -43,7 +43,7 @@ class ReportController extends Controller
         $kapals   = Kapal::orderBy('code')->get();
 
         $purchases = Purchase::where('status', 'paid')
-            ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(amount) as total_amount')
+            ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(short) as total_short, SUM(amount) as total_amount')
             ->whereYear('date', $year)
             ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
             ->groupBy('month')
@@ -60,7 +60,7 @@ class ReportController extends Controller
         $kapals  = Kapal::orderBy('code')->get();
 
         $sales = Sale::where('status', 'paid')
-            ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(amount) as total_amount')
+            ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(short) as total_short, SUM(amount) as total_amount')
             ->whereYear('date', $year)
             ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
             ->groupBy('month')
@@ -229,7 +229,7 @@ class ReportController extends Controller
         $kapals   = Kapal::orderBy('code')->get();
 
         $purchases = Purchase::onlyTrashed()
-            ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(amount) as total_amount')
+            ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(short) as total_short, SUM(amount) as total_amount')
             ->whereYear('date', $year)
             ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
             ->groupBy('month')
@@ -246,7 +246,7 @@ class ReportController extends Controller
         $kapals  = Kapal::orderBy('code')->get();
 
         $sales = Sale::onlyTrashed()
-            ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(amount) as total_amount')
+            ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(short) as total_short, SUM(amount) as total_amount')
             ->whereYear('date', $year)
             ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
             ->groupBy('month')
@@ -369,7 +369,7 @@ class ReportController extends Controller
             case 'purchase':
                 $query = $isTrash ? Purchase::onlyTrashed() : Purchase::where('status', 'paid');
                 $data['purchases'] = $query
-                    ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(amount) as total_amount')
+                    ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(short) as total_short, SUM(amount) as total_amount')
                     ->whereYear('date', $year)
                     ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
                     ->groupBy('month')->get()->keyBy('month');
@@ -378,7 +378,7 @@ class ReportController extends Controller
             case 'sale':
                 $query = $isTrash ? Sale::onlyTrashed() : Sale::where('status', 'paid');
                 $data['sales'] = $query
-                    ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(amount) as total_amount')
+                    ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(short) as total_short, SUM(amount) as total_amount')
                     ->whereYear('date', $year)
                     ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
                     ->groupBy('month')->get()->keyBy('month');
