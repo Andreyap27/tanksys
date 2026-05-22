@@ -12,7 +12,10 @@
       "PowerShell(Get-Process -Name \"mysqld\" -ErrorAction SilentlyContinue)",
       "PowerShell(netstat -an)",
       "PowerShell(New-Item -ItemType Directory -Force \"d:\\\\xampp\\\\htdocs\\\\tanksys\\\\resources\\\\views\\\\operasional\\\\transfer\")",
-      "PowerShell(New-Item -ItemType Directory -Force \"d:\\\\xampp\\\\htdocs\\\\tanksys\\\\resources\\\\views\\\\operasional\\\\usage\")"
+      "PowerShell(New-Item -ItemType Directory -Force \"d:\\\\xampp\\\\htdocs\\\\tanksys\\\\resources\\\\views\\\\operasional\\\\usage\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }
