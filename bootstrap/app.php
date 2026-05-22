@@ -12,8 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'auth.jwt'  => \App\Http\Middleware\JwtMiddleware::class,
-            'guest.jwt' => \App\Http\Middleware\GuestJwtMiddleware::class,
+            'auth.jwt'     => \App\Http\Middleware\JwtMiddleware::class,
+            'guest.jwt'    => \App\Http\Middleware\GuestJwtMiddleware::class,
+            'finance.only' => \App\Http\Middleware\FinanceOnly::class,
+            'not.finance'  => \App\Http\Middleware\NotFinance::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

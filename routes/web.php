@@ -44,6 +44,9 @@ Route::middleware('auth.jwt')->group(function () {
     Route::get('/reset-password', [AuthController::class, 'showResetForm'])->name('password.reset.form');
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.reset');
 
+    // ── Routes NOT accessible by Finance ────────────────────────────────────────
+    Route::middleware('not.finance')->group(function () {
+
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -210,6 +213,11 @@ Route::middleware('auth.jwt')->group(function () {
     // Transaction Print
     Route::get('/tx-print', [TxPrintController::class, 'show'])->name('tx.print');
 
+    }); // end not.finance
+
+    // ── Routes accessible by Finance and Super Admin only ───────────────────────
+    Route::middleware('finance.only')->group(function () {
+
     // Gaji (Karyawan Master)
     Route::get('/gaji/data', [GajiController::class, 'data'])->name('gaji.data');
     Route::get('/gaji/summary-stats', [GajiController::class, 'summaryStats'])->name('gaji.summary-stats');
@@ -242,6 +250,11 @@ Route::middleware('auth.jwt')->group(function () {
     Route::post('/uang-koordinasi/{uangKoordinasi}/reject', [UangKoordinasiController::class, 'reject'])->name('uang-koordinasi.reject');
     Route::resource('uang-koordinasi', UangKoordinasiController::class)->names('uang-koordinasi')->except(['create', 'edit']);
 
+    }); // end finance.only
+
+    // ── Report (not.finance) ─────────────────────────────────────────────────────
+    Route::middleware('not.finance')->group(function () {
+
     // Report
     Route::get('/report', fn() => redirect()->route('report.purchase'))->name('report.index');
     Route::get('/report/print',         [ReportController::class, 'printReport'])->name('report.print');
@@ -260,4 +273,6 @@ Route::middleware('auth.jwt')->group(function () {
     Route::get('/report/lori/trash',    [ReportController::class, 'loriTrash'])->name('report.lori.trash');
     Route::get('/report/profit-loss',   [ReportController::class, 'profitLoss'])->name('report.profit-loss');
     Route::get('/report/petty-cash',    [ReportController::class, 'pettyCash'])->name('report.petty-cash');
+
+    }); // end not.finance (report)
 });

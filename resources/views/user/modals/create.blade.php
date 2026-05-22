@@ -22,6 +22,7 @@
                             <option value="" disabled hidden selected>-- Pilih Jabatan --</option>
                             <option value="Admin">Admin</option>
                             <option value="SPV">SPV</option>
+                            <option value="Finance">Finance</option>
                         </select>
                     </div>
                     <div class="form-group full">

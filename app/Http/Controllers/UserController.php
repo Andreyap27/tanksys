@@ -52,7 +52,7 @@ class UserController extends Controller
     {
         $request->validate([
             'name'     => 'required|string|max:255',
-            'role'     => 'required|in:SPV,Admin',
+            'role'     => 'required|in:SPV,Admin,Finance',
             'username' => 'required|string|unique:users',
             'password' => 'required|string|min:6',
         ]);
@@ -73,7 +73,7 @@ class UserController extends Controller
     {
         $request->validate([
             'name'     => 'required|string|max:255',
-            'role'     => 'required|in:SPV,Admin',
+            'role'     => 'required|in:SPV,Admin,Finance',
             'username' => 'required|string|unique:users,username,' . $user->id,
         ]);
 

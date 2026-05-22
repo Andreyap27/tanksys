@@ -15,13 +15,21 @@
 
     <!-- Navigation -->
     <nav class="sidebar-nav">
+        @php
+            $isFinance    = auth()->user()->isFinance();
+            $isSuperAdmin = auth()->user()->role === 'Super Admin';
+        @endphp
+
+        {{-- ── Non-Finance menus ────────────────────────────────────────── --}}
+        @if(!$isFinance)
+
         <!-- Master -->
         <div class="nav-section">Master</div>
         <a href="{{ route('dashboard') }}" class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
             <i data-lucide="layout-dashboard"></i>
             <span>Dashboard</span>
         </a>
-        @if(auth()->user()->role === 'Super Admin')
+        @if($isSuperAdmin)
         <a href="{{ route('user.index') }}" class="nav-item {{ request()->routeIs('user.*') ? 'active' : '' }}">
             <i data-lucide="users"></i>
             <span>User</span>
@@ -34,7 +42,7 @@
             <i data-lucide="car"></i>
             <span>Mobil</span>
         </a>
-        <a href="{{ route('petty-cash.index') }}" class="nav-item {{ request()->routeIs('petty-cash.index') || request()->routeIs('petty-cash.index') ? 'active' : '' }}">
+        <a href="{{ route('petty-cash.index') }}" class="nav-item {{ request()->routeIs('petty-cash.index') ? 'active' : '' }}">
             <i data-lucide="wallet"></i>
             <span>Petty Cash</span>
         </a>
@@ -94,9 +102,7 @@
             <span>Capital</span>
             <span class="sidebar-notif-badge" id="sidebarBadge-capital" style="display:none;"></span>
         </a>
-        @php
-        $loriActive = request()->routeIs('lori.index') || request()->routeIs('lori-expense.*') || (request()->routeIs('lori.*') && !request()->routeIs('lori-expense.*'));
-        @endphp
+        @php $loriActive = request()->routeIs('lori.index') || request()->routeIs('lori-expense.*') || (request()->routeIs('lori.*') && !request()->routeIs('lori-expense.*')); @endphp
         <div class="nav-group">
             <div class="nav-group-header {{ $loriActive ? 'open' : '' }}" onclick="toggleNavGroup(this)">
                 <i data-lucide="truck"></i>
@@ -112,15 +118,6 @@
                 </a>
             </div>
         </div>
-
-        <a href="{{ route('gaji.index') }}" class="nav-item {{ request()->routeIs('gaji.*') && !request()->routeIs('gaji.slip.*') ? 'active' : '' }}">
-            <i data-lucide="banknote"></i>
-            <span>Gaji</span>
-        </a>
-        <a href="{{ route('uang-koordinasi.index') }}" class="nav-item {{ request()->routeIs('uang-koordinasi.*') ? 'active' : '' }}">
-            <i data-lucide="handshake"></i>
-            <span>Uang Koordinasi</span>
-        </a>
         <a href="{{ route('hutang.index') }}" class="nav-item {{ request()->routeIs('hutang.*') ? 'active' : '' }}">
             <i data-lucide="hand-coins"></i>
             <span>Hutang</span>
@@ -130,15 +127,29 @@
             <span>Piutang</span>
         </a>
 
-        <!-- Report -->
+        @endif {{-- !isFinance --}}
+
+        {{-- ── Gaji & Uang Koordinasi: Finance + Super Admin only ─────────── --}}
+        @if($isFinance || $isSuperAdmin)
+        @if($isFinance)<div class="nav-section">Transaksi</div>@endif
+        <a href="{{ route('gaji.index') }}" class="nav-item {{ request()->routeIs('gaji.*') && !request()->routeIs('gaji.slip.*') ? 'active' : '' }}">
+            <i data-lucide="banknote"></i>
+            <span>Gaji</span>
+        </a>
+        <a href="{{ route('uang-koordinasi.index') }}" class="nav-item {{ request()->routeIs('uang-koordinasi.*') ? 'active' : '' }}">
+            <i data-lucide="handshake"></i>
+            <span>Uang Koordinasi</span>
+        </a>
+        @endif
+
+        {{-- ── Report: non-Finance only ─────────────────────────────────── --}}
+        @if(!$isFinance)
         <div class="nav-section">Report</div>
         <a href="{{ route('bank.index') }}" class="nav-item {{ request()->routeIs('bank.*') ? 'active' : '' }}">
             <i data-lucide="landmark"></i>
             <span>Bank In/Out</span>
         </a>
-        @php
-        $laporanActive = request()->routeIs('report.*');
-        @endphp
+        @php $laporanActive = request()->routeIs('report.*'); @endphp
         <div class="nav-group">
             <div class="nav-group-header {{ $laporanActive ? 'open' : '' }}" onclick="toggleNavGroup(this)">
                 <i data-lucide="file-bar-chart"></i>
@@ -175,6 +186,8 @@
                 </a>
             </div>
         </div>
+        @endif {{-- !isFinance --}}
+
     </nav>
 
     <!-- User Profile Strip -->
