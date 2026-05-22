@@ -42,15 +42,15 @@
         </div>
         <div class="dash-stat__bg-icon"><i data-lucide="wallet" style="width:110px;height:110px;"></i></div>
     </div>
-    <div class="dash-stat" style="background:rgba(220,38,38,0.08);border-radius:var(--radius-lg,0.75rem);padding:1.25rem;position:relative;overflow:hidden;">
+    <div class="dash-stat ds-stock" style="border-radius:var(--radius-lg,0.75rem);padding:1.25rem;position:relative;overflow:hidden;">
         <div class="dash-stat__header">
-            <div class="dash-stat__icon" style="background:rgba(220,38,38,0.12);color:#dc2626;"><i data-lucide="fuel" style="width:20px;height:20px;"></i></div>
+            <div class="dash-stat__icon"><i data-lucide="fuel" style="width:20px;height:20px;"></i></div>
             <div>
-                <div class="dash-stat__label">Qty Merah (Approved)</div>
-                <div class="dash-stat__value" id="purchaseQtyMerah" style="color:#dc2626;">0 L</div>
+                <div class="dash-stat__label">Total Qty (Approved)</div>
+                <div class="dash-stat__value" id="purchaseQtyTotal">0 L</div>
             </div>
         </div>
-        <div class="dash-stat__bg-icon" style="color:#dc2626;"><i data-lucide="fuel" style="width:110px;height:110px;"></i></div>
+        <div class="dash-stat__bg-icon"><i data-lucide="fuel" style="width:110px;height:110px;"></i></div>
     </div>
     <div class="dash-stat" style="background:rgba(37,99,235,0.08);border-radius:var(--radius-lg,0.75rem);padding:1.25rem;position:relative;overflow:hidden;">
         <div class="dash-stat__header">
@@ -101,6 +101,7 @@
                         <th>Warna</th>
                         <th>Qty (L)</th>
                         <th>Extra (L)</th>
+                        <th>Short (L)</th>
                         <th>Harga/L</th>
                         <th>Amount</th>
                         <th>Status</th>
@@ -260,6 +261,7 @@
 
     attachDecimalInput('.fmt-qty', function(el) { triggerAmountCalc(el); });
     attachDecimalInput('.fmt-extra');
+    attachDecimalInput('.fmt-short');
 
     document.querySelectorAll('.fmt-price').forEach(el => {
         el.addEventListener('input', function() {
@@ -289,18 +291,18 @@
     // ── Summary card ─────────────────────────────────────────────────────────────
     function updatePurchaseSummary(api) {
         const rows = api.rows({ search: 'applied' }).data();
-        let totalAmount = 0, qtyMerah = 0, qtyBiru = 0, qtyKuning = 0;
+        let totalAmount = 0, qtyTotal = 0, qtyBiru = 0, qtyKuning = 0;
         for (let i = 0; i < rows.length; i++) {
             if (rows[i].status === 'approved' || rows[i].status === 'paid') {
                 totalAmount += parseFloat(rows[i].amount_raw) || 0;
-                const qty = (parseFloat(rows[i].quantity_raw) || 0) + (parseFloat(rows[i].extra_raw) || 0);
-                if (rows[i].warna === 'merah') qtyMerah += qty;
-                else if (rows[i].warna === 'biru') qtyBiru += qty;
+                const qty = (parseFloat(rows[i].quantity_raw) || 0) + (parseFloat(rows[i].extra_raw) || 0) - (parseFloat(rows[i].short_raw) || 0);
+                qtyTotal += qty;
+                if (rows[i].warna === 'biru') qtyBiru += qty;
                 else if (rows[i].warna === 'kuning') qtyKuning += qty;
             }
         }
         document.getElementById('purchaseTotalAmount').textContent = 'Rp ' + Currency.number(totalAmount);
-        document.getElementById('purchaseQtyMerah').textContent = Currency.number(qtyMerah) + ' L';
+        document.getElementById('purchaseQtyTotal').textContent = Currency.number(qtyTotal) + ' L';
         document.getElementById('purchaseQtyBiru').textContent = Currency.number(qtyBiru) + ' L';
         document.getElementById('purchaseQtyKuning').textContent = Currency.number(qtyKuning) + ' L';
     }
@@ -334,7 +336,6 @@
                     render: function(data) {
                         if (!data) return '<span class="text-muted">-</span>';
                         const map = {
-                            merah:   '<span class="badge" style="background:#dc2626;color:#fff;">Merah</span>',
                             biru:    '<span class="badge" style="background:#2563eb;color:#fff;">Biru</span>',
                             kuning:  '<span class="badge" style="background:#ca8a04;color:#fff;">Kuning</span>',
                         };
@@ -346,7 +347,11 @@
                 },
                 {
                     data: 'extra',
-                    render: (data) => data && data !== '0,00' ? data : '<span class="text-muted">0</span>'
+                    render: (data) => data && data !== '0' ? data : '<span class="text-muted">0</span>'
+                },
+                {
+                    data: 'short',
+                    render: (data) => data && data !== '0' ? `<span style="color:#dc2626;">${data}</span>` : '<span class="text-muted">0</span>'
                 },
                 {
                     data: 'price',
@@ -390,6 +395,7 @@
                                     '${row.warna || ''}',
                                     '${row.quantity_raw}',
                                     '${row.extra_raw}',
+                                    '${row.short_raw}',
                                     '${row.price_raw}',
                                     '${escHtml(row.noted)}',
                                     '${row.kapal_id || ''}'
@@ -472,6 +478,8 @@
         document.getElementById('createAmountDisplay').value = '';
         setRaw(createForm.extra, 0);
         createForm.extra.value = '';
+        setRaw(createForm.short, 0);
+        createForm.short.value = '';
         if (activeKapalId) document.getElementById('createKapalSelect').value = activeKapalId;
         loadVendorOptions();
         createModal.classList.add('active');
@@ -496,6 +504,7 @@
             warna: createForm.warna.value || null,
             quantity: getRaw(createForm.quantity),
             extra: getRaw(createForm.extra) || 0,
+            short: getRaw(createForm.short) || 0,
             price: getRaw(createForm.price),
             noted: createForm.noted.value,
         };
@@ -524,7 +533,7 @@
         document.getElementById('editAmountDisplay').value = Currency.format(qty * price);
     }
 
-    function openEditModal(id, date, vendor, description, warna, quantity, extra, price, noted, kapalId) {
+    function openEditModal(id, date, vendor, description, warna, quantity, extra, short, price, noted, kapalId) {
         editId = id;
         editForm.date.value = date;
         editForm.description.value = description;
@@ -539,6 +548,10 @@
         setRaw(editForm.extra, extra);
         editForm.extra.value = parseFloat(extra) ?
             parseFloat(extra).toLocaleString('id-ID', { maximumFractionDigits: 3 }) : '';
+
+        setRaw(editForm.short, short);
+        editForm.short.value = parseFloat(short) ?
+            parseFloat(short).toLocaleString('id-ID', { maximumFractionDigits: 3 }) : '';
 
         setRaw(editForm.price, price);
         editForm.price.value = parseInt(price) ? Currency.format(price) : '';
@@ -568,6 +581,7 @@
             warna: editForm.warna.value || null,
             quantity: getRaw(editForm.quantity),
             extra: getRaw(editForm.extra) || 0,
+            short: getRaw(editForm.short) || 0,
             price: getRaw(editForm.price),
             noted: editForm.noted.value,
         };

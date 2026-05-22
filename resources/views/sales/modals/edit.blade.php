@@ -42,20 +42,24 @@
                         <label class="form-label">Warna <span class="text-danger">*</span></label>
                         <select name="warna" id="editSaleWarnaSelect" class="form-select" required>
                             <option value="">-- Pilih Warna --</option>
-                            <option value="merah">Merah</option>
                             <option value="biru">Biru</option>
                             <option value="kuning">Kuning</option>
                         </select>
                     </div>
+                    <div class="form-group full">
+                        <label class="form-label">Qty (Liter) <span class="text-danger">*</span></label>
+                        <input type="text" name="quantity" class="form-input fmt-qty" inputmode="decimal"
+                            placeholder="0" required>
+                    </div>
                     <div class="form-group full" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-                        <div class="form-group full" style="margin:0;">
-                            <label class="form-label">Qty (Liter) <span class="text-danger">*</span></label>
-                            <input type="text" name="quantity" class="form-input fmt-qty" inputmode="decimal"
-                                placeholder="0" required>
-                        </div>
-                        <div class="form-group full" style="margin:0;">
+                        <div style="margin:0;">
                             <label class="form-label">Extra (Liter)</label>
                             <input type="text" name="extra" class="form-input fmt-extra" inputmode="decimal"
+                                placeholder="0">
+                        </div>
+                        <div style="margin:0;">
+                            <label class="form-label">Short (Liter)</label>
+                            <input type="text" name="short" class="form-input fmt-short" inputmode="decimal"
                                 placeholder="0">
                         </div>
                     </div>
@@ -68,7 +72,6 @@
                         <div class="form-group full" style="margin:0;">
                             <label class="form-label">Amount (otomatis)</label>
                             <input type="text" id="editAmountDisplay" class="form-input" readonly placeholder="Rp 0" style="background:var(--muted);cursor:not-allowed;">
-                            <small class="text-muted">* Extra tidak dihitung dalam Amount, namun ditambahkan ke stok.</small>
                         </div>
                     </div>
                     <div class="form-group full">

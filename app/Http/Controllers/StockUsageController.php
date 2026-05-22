@@ -25,7 +25,7 @@ class StockUsageController extends Controller
                 'date_raw'     => $u->date->format('Y-m-d'),
                 'kapal'        => $u->kapal?->name ?? '-',
                 'warna'        => $u->warna,
-                'quantity'     => number_format($u->quantity, 2, ',', '.'),
+                'quantity'     => number_format($u->quantity, 0, ',', '.'),
                 'quantity_raw' => $u->quantity,
                 'keperluan'    => $u->keperluan,
                 'created_by'   => $u->creator?->name ?? '-',
@@ -39,7 +39,7 @@ class StockUsageController extends Controller
         $request->validate([
             'date'      => 'required|date',
             'kapal_id'  => 'nullable|exists:kapals,id',
-            'warna'     => 'required|in:merah,biru,kuning',
+            'warna'     => 'required|in:biru,kuning',
             'quantity'  => 'required|numeric|min:0.01',
             'keperluan' => 'required|string|max:255',
         ]);

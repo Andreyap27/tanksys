@@ -38,7 +38,7 @@ class TxPrintController extends Controller
                         'kapalName', 'mobilName', 'pcName');
 
         $fmt    = fn($n) => number_format((float) $n, 0, ',', '.');
-        $fmtQty = fn($n) => number_format((float) $n, 2, ',', '.');
+        $fmtQty = fn($n) => number_format((float) $n, 0, ',', '.');
         $data['fmt']    = $fmt;
         $data['fmtQty'] = $fmtQty;
 

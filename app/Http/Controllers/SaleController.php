@@ -68,10 +68,12 @@ class SaleController extends Controller
                 'customer_name'  => $s->customer->name,
                 'description'    => $s->description ?? '-',
                 'warna'          => $s->warna ?? '',
-                'quantity'       => number_format($s->quantity, 2),
+                'quantity'       => number_format($s->quantity, 0, ',', '.'),
                 'quantity_raw'   => $s->quantity,
-                'extra'          => number_format($s->extra, 2, ',', '.'),
+                'extra'          => number_format($s->extra, 0, ',', '.'),
                 'extra_raw'      => $s->extra,
+                'short'          => number_format($s->short, 0, ',', '.'),
+                'short_raw'      => $s->short,
                 'price'          => number_format($s->price, 0, ',', '.'),
                 'price_raw'      => $s->price,
                 'amount'         => number_format($s->amount, 0, ',', '.'),
@@ -93,15 +95,17 @@ class SaleController extends Controller
             'invoice_number' => 'required|string|unique:sales,invoice_number,NULL,id,deleted_at,NULL',
             'customer_id'    => 'required|exists:customers,id',
             'description'    => 'nullable|string|max:255',
-            'warna'          => 'required|in:merah,biru,kuning',
+            'warna'          => 'required|in:biru,kuning',
             'quantity'       => 'required|numeric|min:0.01',
             'extra'          => 'nullable|numeric|min:0',
+            'short'          => 'nullable|numeric|min:0',
             'price'          => 'required|numeric|min:0',
             'noted'          => 'nullable|string',
         ]);
 
         $extra    = (float) ($request->extra ?? 0);
-        $totalOut = (float) $request->quantity + $extra;
+        $short    = (float) ($request->short ?? 0);
+        $totalOut = (float) $request->quantity + $extra - $short;
         $warna    = $request->warna ?: null;
         $currentBalance = Stock::currentBalance(null, $warna);
         if ($totalOut > $currentBalance) {
@@ -111,7 +115,7 @@ class SaleController extends Controller
             ], 422);
         }
 
-        DB::transaction(function () use ($request, $extra) {
+        DB::transaction(function () use ($request, $extra, $short) {
             $sale = Sale::create([
                 'kapal_id'       => $request->kapal_id ?: null,
                 'date'           => $request->date,
@@ -121,6 +125,7 @@ class SaleController extends Controller
                 'warna'          => $request->warna ?: null,
                 'quantity'       => $request->quantity,
                 'extra'          => $extra,
+                'short'          => $short,
                 'price'          => $request->price,
                 'amount'         => $request->quantity * $request->price,
                 'noted'          => $request->noted,
@@ -139,7 +144,7 @@ class SaleController extends Controller
                 'party'          => $sale->customer->name,
                 'warna'          => $sale->warna,
                 'qty_in'         => 0,
-                'qty_out'        => (float) $sale->quantity + (float) $sale->extra,
+                'qty_out'        => (float) $sale->quantity + (float) $sale->extra - (float) $sale->short,
             ]);
         });
 
@@ -158,9 +163,10 @@ class SaleController extends Controller
             'invoice_number' => 'required|string|unique:sales,invoice_number,' . $sale->id . ',id,deleted_at,NULL',
             'customer_id'    => 'required|exists:customers,id',
             'description'    => 'nullable|string|max:255',
-            'warna'          => 'required|in:merah,biru,kuning',
+            'warna'          => 'required|in:biru,kuning',
             'quantity'       => 'required|numeric|min:0.01',
             'extra'          => 'nullable|numeric|min:0',
+            'short'          => 'nullable|numeric|min:0',
             'price'          => 'required|numeric|min:0',
             'noted'          => 'nullable|string',
         ]);
@@ -179,6 +185,7 @@ class SaleController extends Controller
                 'warna'          => $request->warna ?: null,
                 'quantity'       => $request->quantity,
                 'extra'          => (float) ($request->extra ?? 0),
+                'short'          => (float) ($request->short ?? 0),
                 'price'          => $request->price,
                 'amount'         => $request->quantity * $request->price,
                 'noted'          => $request->noted,
@@ -221,7 +228,7 @@ class SaleController extends Controller
             return response()->json(['message' => 'Penjualan ini sudah diproses sebelumnya.'], 422);
         }
 
-        $totalOut = (float) $sale->quantity + (float) $sale->extra;
+        $totalOut = (float) $sale->quantity + (float) $sale->extra - (float) $sale->short;
         $warna    = $sale->warna ?: null;
         $currentBalance = Stock::currentBalance(null, $warna);
         if ($totalOut > $currentBalance) {
@@ -247,7 +254,7 @@ class SaleController extends Controller
                 'party'          => $sale->customer->name,
                 'warna'          => $sale->warna,
                 'qty_in'         => 0,
-                'qty_out'        => (float) $sale->quantity + (float) $sale->extra,
+                'qty_out'        => (float) $sale->quantity + (float) $sale->extra - (float) $sale->short,
             ]);
         });
 
@@ -316,7 +323,7 @@ class SaleController extends Controller
             'invoice_number'  => $s->invoice_number,
             'customer_name'   => $s->customer->name ?? '-',
             'description'     => $s->description ?? '',
-            'quantity'        => number_format($s->quantity, 2, ',', '.'),
+            'quantity'        => number_format($s->quantity, 0, ',', '.'),
             'quantity_raw'    => $s->quantity,
             'price'           => number_format($s->price, 0, ',', '.'),
             'price_raw'       => $s->price,

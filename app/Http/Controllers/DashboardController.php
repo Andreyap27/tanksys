@@ -39,7 +39,7 @@ class DashboardController extends Controller
             ->groupBy('warna')->pluck('total', 'warna');
         $saleLtr = (float) $saleByWarna->sum();
 
-        $saldoByWarna = collect(['merah', 'biru', 'kuning'])->mapWithKeys(function ($w) {
+        $saldoByWarna = collect(['biru', 'kuning'])->mapWithKeys(function ($w) {
             $in  = (float) Stock::where('warna', $w)->sum('qty_in');
             $out = (float) Stock::where('warna', $w)->sum('qty_out');
             return [$w => $in - $out];

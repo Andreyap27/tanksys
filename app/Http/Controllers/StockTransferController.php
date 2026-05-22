@@ -27,7 +27,7 @@ class StockTransferController extends Controller
                 'from_kapal'    => $t->fromKapal?->name ?? '-',
                 'to_kapal'      => $t->toKapal?->name ?? '-',
                 'warna'         => $t->warna,
-                'quantity'      => number_format($t->quantity, 2, ',', '.'),
+                'quantity'      => number_format($t->quantity, 0, ',', '.'),
                 'quantity_raw'  => $t->quantity,
                 'note'          => $t->note ?? '',
                 'created_by'    => $t->creator?->name ?? '-',
@@ -42,7 +42,7 @@ class StockTransferController extends Controller
             'date'          => 'required|date',
             'from_kapal_id' => 'nullable|exists:kapals,id',
             'to_kapal_id'   => 'nullable|exists:kapals,id|different:from_kapal_id',
-            'warna'         => 'required|in:merah,biru,kuning',
+            'warna'         => 'required|in:biru,kuning',
             'quantity'      => 'required|numeric|min:0.01',
             'note'          => 'nullable|string',
         ], [

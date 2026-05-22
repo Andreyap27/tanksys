@@ -23,7 +23,17 @@
 
 {{-- Summary Cards --}}
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.25rem;margin-bottom:1.5rem;">
-    @foreach(['merah'=>['#dc2626','rgba(220,38,38,0.08)'],'biru'=>['#2563eb','rgba(37,99,235,0.08)'],'kuning'=>['#ca8a04','rgba(202,138,4,0.08)']] as $w=>[$color,$bg])
+    <div class="dash-stat ds-stock" style="border-radius:var(--radius-lg,.75rem);padding:1.25rem;position:relative;overflow:hidden;">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon"><i data-lucide="flame" style="width:20px;height:20px;"></i></div>
+            <div>
+                <div class="dash-stat__label">Total Pemakaian</div>
+                <div class="dash-stat__value" id="usageTotal_all">0 L</div>
+            </div>
+        </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="flame" style="width:110px;height:110px;"></i></div>
+    </div>
+    @foreach(['biru'=>['#2563eb','rgba(37,99,235,0.08)'],'kuning'=>['#ca8a04','rgba(202,138,4,0.08)']] as $w=>[$color,$bg])
     <div class="dash-stat" style="background:{{$bg}};border-radius:var(--radius-lg,.75rem);padding:1.25rem;position:relative;overflow:hidden;">
         <div class="dash-stat__header">
             <div class="dash-stat__icon" style="background:{{$bg}};color:{{$color}};"><i data-lucide="flame" style="width:20px;height:20px;"></i></div>
@@ -82,7 +92,6 @@
                         <label class="form-label">Warna BBM <span class="text-danger">*</span></label>
                         <select name="warna" class="form-select" required>
                             <option value="">-- Pilih Warna --</option>
-                            <option value="merah">Merah</option>
                             <option value="biru">Biru</option>
                             <option value="kuning">Kuning</option>
                         </select>
@@ -119,7 +128,6 @@ const createForm = document.getElementById('createForm');
 const createModal = document.getElementById('createModal');
 
 const WARNA_BADGE = {
-    merah:  '<span class="badge" style="background:#dc2626;color:#fff;">Merah</span>',
     biru:   '<span class="badge" style="background:#2563eb;color:#fff;">Biru</span>',
     kuning: '<span class="badge" style="background:#ca8a04;color:#fff;">Kuning</span>',
 };
@@ -137,15 +145,19 @@ function loadKapals() {
 }
 
 function updateSummary(api) {
-    const totals = { merah: 0, biru: 0, kuning: 0 };
+    const totals = { biru: 0, kuning: 0 };
     const rows = api.rows({ search: 'applied' }).data();
+    let total = 0;
     for (let i = 0; i < rows.length; i++) {
+        const qty = parseFloat(rows[i].quantity_raw) || 0;
+        total += qty;
         const w = rows[i].warna;
-        if (totals[w] !== undefined) totals[w] += parseFloat(rows[i].quantity_raw) || 0;
+        if (totals[w] !== undefined) totals[w] += qty;
     }
-    ['merah','biru','kuning'].forEach(w => {
-        document.getElementById(`usageTotal_${w}`).textContent =
-            new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2 }).format(totals[w]) + ' L';
+    const fmt = n => new Intl.NumberFormat('id-ID').format(Math.round(n));
+    document.getElementById('usageTotal_all').textContent = fmt(total) + ' L';
+    ['biru','kuning'].forEach(w => {
+        document.getElementById(`usageTotal_${w}`).textContent = fmt(totals[w]) + ' L';
     });
 }
 

@@ -18,6 +18,7 @@ class Purchase extends Model
         'warna',
         'quantity',
         'extra',
+        'short',
         'price',
         'amount',
         'noted',
@@ -34,6 +35,7 @@ class Purchase extends Model
             'date'     => 'date',
             'quantity' => 'decimal:2',
             'extra'    => 'decimal:2',
+            'short'    => 'decimal:2',
             'price'    => 'decimal:2',
             'amount'   => 'decimal:2',
         ];

@@ -99,7 +99,7 @@
 function openTxPrintModal() {
     const today = new Date().toISOString().split('T')[0];
     const dtEl = document.getElementById('txPrintDateTo');
-    if (dtEl && !dtEl.value) dtEl.value = today;
+    if (dtEl) dtEl.value = today;
     document.getElementById('txPrintModal').classList.add('active');
     if (typeof lucide !== 'undefined') lucide.createIcons();
 }

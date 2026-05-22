@@ -22,7 +22,7 @@ $profitIcon = $isProfit ? 'trending-up' : 'trending-down';
 
 {{-- ── Section: Keuangan ────────────────────────────────────────────────────── --}}
 @php
-$warnaMap = ['merah' => ['#dc2626','Merah'], 'biru' => ['#2563eb','Biru'], 'kuning' => ['#ca8a04','Kuning']];
+$warnaMap = ['biru' => ['#2563eb','Biru'], 'kuning' => ['#ca8a04','Kuning']];
 @endphp
 
 <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
@@ -156,7 +156,7 @@ $warnaMap = ['merah' => ['#dc2626','Merah'], 'biru' => ['#2563eb','Biru'], 'kuni
             </div>
             <div>
                 <div class="dash-stat__label">Total Purchase BBM</div>
-                <div class="dash-stat__value">{{ $fmtQty($purchaseLtr) }} <span style="font-size:0.85rem;font-weight:500;color:var(--muted-foreground);">L</span></div>
+                <div class="dash-stat__value">{{ $fmt($purchaseLtr) }} <span style="font-size:0.85rem;font-weight:500;color:var(--muted-foreground);">L</span></div>
             </div>
         </div>
         <div style="border-top:1px solid rgba(37,99,235,0.15);padding-top:0.6rem;display:flex;flex-direction:column;gap:0.35rem;position:relative;z-index:1;">
@@ -166,7 +166,7 @@ $warnaMap = ['merah' => ['#dc2626','Merah'], 'biru' => ['#2563eb','Biru'], 'kuni
                     <span style="width:8px;height:8px;border-radius:50%;background:{{ $c }};flex-shrink:0;"></span>
                     <span style="font-size:0.72rem;color:var(--muted-foreground);">{{ $l }}</span>
                 </div>
-                <span style="font-size:0.78rem;font-weight:600;color:{{ $c }};">{{ $fmtQty($purchaseByWarna[$w] ?? 0) }} L</span>
+                <span style="font-size:0.78rem;font-weight:600;color:{{ $c }};">{{ $fmt($purchaseByWarna[$w] ?? 0) }} L</span>
             </div>
             @endforeach
         </div>
@@ -181,7 +181,7 @@ $warnaMap = ['merah' => ['#dc2626','Merah'], 'biru' => ['#2563eb','Biru'], 'kuni
             </div>
             <div>
                 <div class="dash-stat__label">Total Sale BBM</div>
-                <div class="dash-stat__value">{{ $fmtQty($saleLtr) }} <span style="font-size:0.85rem;font-weight:500;color:var(--muted-foreground);">L</span></div>
+                <div class="dash-stat__value">{{ $fmt($saleLtr) }} <span style="font-size:0.85rem;font-weight:500;color:var(--muted-foreground);">L</span></div>
             </div>
         </div>
         <div style="border-top:1px solid rgba(217,119,6,0.15);padding-top:0.6rem;display:flex;flex-direction:column;gap:0.35rem;position:relative;z-index:1;">
@@ -191,7 +191,7 @@ $warnaMap = ['merah' => ['#dc2626','Merah'], 'biru' => ['#2563eb','Biru'], 'kuni
                     <span style="width:8px;height:8px;border-radius:50%;background:{{ $c }};flex-shrink:0;"></span>
                     <span style="font-size:0.72rem;color:var(--muted-foreground);">{{ $l }}</span>
                 </div>
-                <span style="font-size:0.78rem;font-weight:600;color:{{ $c }};">{{ $fmtQty($saleByWarna[$w] ?? 0) }} L</span>
+                <span style="font-size:0.78rem;font-weight:600;color:{{ $c }};">{{ $fmt($saleByWarna[$w] ?? 0) }} L</span>
             </div>
             @endforeach
         </div>
@@ -206,7 +206,7 @@ $warnaMap = ['merah' => ['#dc2626','Merah'], 'biru' => ['#2563eb','Biru'], 'kuni
             </div>
             <div>
                 <div class="dash-stat__label">Saldo Stok BBM</div>
-                <div class="dash-stat__value">{{ $fmtQty($stockBal) }} <span style="font-size:0.85rem;font-weight:500;color:var(--muted-foreground);">L</span></div>
+                <div class="dash-stat__value">{{ $fmt($stockBal) }} <span style="font-size:0.85rem;font-weight:500;color:var(--muted-foreground);">L</span></div>
             </div>
         </div>
         <div style="border-top:1px solid rgba(0,0,0,0.08);padding-top:0.6rem;display:flex;flex-direction:column;gap:0.35rem;position:relative;z-index:1;">
@@ -216,7 +216,7 @@ $warnaMap = ['merah' => ['#dc2626','Merah'], 'biru' => ['#2563eb','Biru'], 'kuni
                     <span style="width:8px;height:8px;border-radius:50%;background:{{ $c }};flex-shrink:0;"></span>
                     <span style="font-size:0.72rem;color:var(--muted-foreground);">{{ $l }}</span>
                 </div>
-                <span style="font-size:0.78rem;font-weight:600;color:{{ $c }};">{{ $fmtQty($saldoByWarna[$w] ?? 0) }} L</span>
+                <span style="font-size:0.78rem;font-weight:600;color:{{ $c }};">{{ $fmt($saldoByWarna[$w] ?? 0) }} L</span>
             </div>
             @endforeach
         </div>
