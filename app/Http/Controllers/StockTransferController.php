@@ -22,7 +22,7 @@ class StockTransferController extends Controller
             ->get()
             ->map(fn($t) => [
                 'id'            => $t->id,
-                'date'          => $t->date->translatedFormat('d M Y H:i'),
+                'date'          => $this->resolveDate($t)->translatedFormat('d M Y H:i'),
                 'date_raw'      => $t->date->format('Y-m-d'),
                 'from_kapal'    => $t->fromKapal?->name ?? '-',
                 'to_kapal'      => $t->toKapal?->name ?? '-',

@@ -18,7 +18,7 @@ class UangKoordinasiController extends Controller
         try {
             $items = UangKoordinasi::orderBy('date', 'desc')->get()->map(fn($u) => [
                 'id'          => $u->id,
-                'date'        => $u->date->translatedFormat('d M Y H:i'),
+                'date'        => $this->resolveDate($u)->translatedFormat('d M Y H:i'),
                 'date_raw'    => $u->date->format('Y-m-d'),
                 'nama'        => $u->nama,
                 'jabatan'     => $u->jabatan ?? '-',
@@ -63,6 +63,7 @@ class UangKoordinasiController extends Controller
             'nominal'     => $nominal,
             'extra'       => $extra,
             'total'       => $nominal + $extra,
+            'date'        => $uangKoordinasi->date->toDateString() . ' ' . now()->format('H:i:s'),
             'status'      => 'approved',
             'approved_by' => auth()->id(),
             'approved_at' => now(),
@@ -144,6 +145,7 @@ class UangKoordinasiController extends Controller
         }
 
         $uangKoordinasi->update([
+            'date'        => $uangKoordinasi->date->toDateString() . ' ' . now()->format('H:i:s'),
             'status'      => 'approved',
             'approved_by' => auth()->id(),
             'approved_at' => now(),
@@ -187,7 +189,7 @@ class UangKoordinasiController extends Controller
             ->get()
             ->map(fn($u) => [
                 'id'         => $u->id,
-                'date'       => $u->date->translatedFormat('d M Y H:i'),
+                'date'       => $this->resolveDate($u)->translatedFormat('d M Y H:i'),
                 'date_raw'   => $u->date->format('Y-m-d'),
                 'nama'       => $u->nama,
                 'jabatan'    => $u->jabatan ?? '-',

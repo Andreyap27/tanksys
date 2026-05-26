@@ -71,7 +71,7 @@ class StockController extends Controller
             ->map(function ($s) use (&$running) {
                 $running += (float) $s->qty_in - (float) $s->qty_out;
                 return [
-                    'date'     => $s->date->translatedFormat('d M Y H:i'),
+                    'date'     => $this->resolveDate($s)->translatedFormat('d M Y H:i'),
                     'date_raw' => $s->date->format('Y-m-d'),
                     'party'    => $s->party,
                     'warna'    => $s->warna ?? '',

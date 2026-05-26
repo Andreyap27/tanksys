@@ -22,7 +22,7 @@ class ExpenseController extends Controller
             $expenses = $query->get()->map(fn($e) => [
                 'id'          => $e->id,
                 'kapal_id'    => $e->kapal_id,
-                'date'        => $e->date->translatedFormat('d M Y H:i'),
+                'date'        => $this->resolveDate($e)->translatedFormat('d M Y H:i'),
                 'date_raw'    => $e->date->format('Y-m-d'),
                 'description' => $e->description,
                 'category'    => $e->category,
@@ -63,6 +63,7 @@ class ExpenseController extends Controller
             'nominal'     => $request->nominal,
             'category'    => $request->category,
             'noted'       => $request->noted,
+            'date'        => $expense->date->toDateString() . ' ' . now()->format('H:i:s'),
             'status'      => 'approved',
             'approved_by' => auth()->id(),
             'approved_at' => now(),
@@ -102,6 +103,7 @@ class ExpenseController extends Controller
         }
 
         $expense->update([
+            'date'        => $expense->date->toDateString() . ' ' . now()->format('H:i:s'),
             'status'      => 'approved',
             'approved_by' => auth()->id(),
             'approved_at' => now(),
@@ -171,7 +173,7 @@ class ExpenseController extends Controller
         $expenses = $query->get()->map(fn($e) => [
             'id'         => $e->id,
             'kapal_id'   => $e->kapal_id,
-            'date'       => $e->date->translatedFormat('d M Y H:i'),
+            'date'       => $this->resolveDate($e)->translatedFormat('d M Y H:i'),
             'date_raw'   => $e->date->format('Y-m-d'),
             'description'=> $e->description,
             'category'   => $e->category,

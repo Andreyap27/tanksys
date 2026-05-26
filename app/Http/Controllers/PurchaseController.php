@@ -24,7 +24,7 @@ class PurchaseController extends Controller
             $purchases = $query->get()->map(fn($p) => [
                 'id'            => $p->id,
                 'kapal_id'      => $p->kapal_id,
-                'date'          => $p->date->translatedFormat('d M Y H:i'),
+                'date'          => $this->resolveDate($p)->translatedFormat('d M Y H:i'),
                 'date_raw'      => $p->date->format('Y-m-d'),
                 'vendor'        => $p->vendor,
                 'description'   => $p->description ?? '',
@@ -79,7 +79,8 @@ class PurchaseController extends Controller
                 'amount'      => $request->quantity * $request->price,
                 'noted'       => $request->noted,
                 'created_by'  => auth()->id(),
-                'status'      => 'approved',
+                'date'        => $purchase->date->toDateString() . ' ' . now()->format('H:i:s'),
+            'status'      => 'approved',
                 'approved_by' => auth()->id(),
                 'approved_at' => now(),
             ]);
@@ -177,7 +178,8 @@ class PurchaseController extends Controller
 
         DB::transaction(function () use ($purchase) {
             $purchase->update([
-                'status'      => 'approved',
+                'date'        => $purchase->date->toDateString() . ' ' . now()->format('H:i:s'),
+            'status'      => 'approved',
                 'approved_by' => auth()->id(),
                 'approved_at' => now(),
             ]);
@@ -250,7 +252,7 @@ class PurchaseController extends Controller
         $purchases = $query->get()->map(fn($p) => [
             'id'            => $p->id,
             'kapal_id'      => $p->kapal_id,
-            'date'          => $p->date->translatedFormat('d M Y H:i'),
+            'date'          => $this->resolveDate($p)->translatedFormat('d M Y H:i'),
             'date_raw'      => $p->date->format('Y-m-d'),
             'vendor'        => $p->vendor,
             'description'   => $p->description ?? '',

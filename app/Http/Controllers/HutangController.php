@@ -16,7 +16,7 @@ class HutangController extends Controller
     {
         $rows = Hutang::orderBy('date', 'desc')->get()->map(fn($h) => [
             'id'          => $h->id,
-            'date'        => $h->date->translatedFormat('d M Y H:i'),
+            'date'        => $this->resolveDate($h)->translatedFormat('d M Y H:i'),
             'date_raw'    => $h->date->format('Y-m-d'),
             'nama'        => $h->nama,
             'description' => $h->description,
@@ -46,6 +46,7 @@ class HutangController extends Controller
             'description' => $request->description,
             'nominal'     => $request->nominal,
             'note'        => $request->note,
+            'date'        => $hutang->date->toDateString() . ' ' . now()->format('H:i:s'),
             'status'      => 'approved',
             'approved_by' => auth()->id(),
             'approved_at' => now(),
@@ -90,6 +91,7 @@ class HutangController extends Controller
         }
 
         $hutang->update([
+            'date'        => $hutang->date->toDateString() . ' ' . now()->format('H:i:s'),
             'status'      => 'approved',
             'approved_by' => auth()->id(),
             'approved_at' => now(),
@@ -151,7 +153,7 @@ class HutangController extends Controller
     {
         $rows = Hutang::onlyTrashed()->orderBy('date', 'desc')->get()->map(fn($h) => [
             'id'          => $h->id,
-            'date'        => $h->date->translatedFormat('d M Y H:i'),
+            'date'        => $this->resolveDate($h)->translatedFormat('d M Y H:i'),
             'nama'        => $h->nama,
             'description' => $h->description,
             'nominal'     => number_format($h->nominal, 0, ',', '.'),

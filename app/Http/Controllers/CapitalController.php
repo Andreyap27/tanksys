@@ -22,7 +22,7 @@ class CapitalController extends Controller
             $capitals = $query->get()->map(fn($c) => [
                 'id'          => $c->id,
                 'kapal_id'    => $c->kapal_id,
-                'date'        => $c->date->translatedFormat('d M Y H:i'),
+                'date'        => $this->resolveDate($c)->translatedFormat('d M Y H:i'),
                 'date_raw'    => $c->date->format('Y-m-d'),
                 'name'        => $c->name,
                 'nominal'     => number_format($c->nominal, 0, ',', '.'),
@@ -121,6 +121,7 @@ class CapitalController extends Controller
         }
 
         $capital->update([
+            'date'        => $capital->date->toDateString() . ' ' . now()->format('H:i:s'),
             'status'      => 'approved',
             'approved_by' => auth()->id(),
             'approved_at' => now(),
@@ -165,7 +166,7 @@ class CapitalController extends Controller
         $capitals = $query->get()->map(fn($c) => [
             'id'         => $c->id,
             'kapal_id'   => $c->kapal_id,
-            'date'       => $c->date->translatedFormat('d M Y H:i'),
+            'date'       => $this->resolveDate($c)->translatedFormat('d M Y H:i'),
             'date_raw'   => $c->date->format('Y-m-d'),
             'name'       => $c->name,
             'nominal'    => number_format($c->nominal, 0, ',', '.'),

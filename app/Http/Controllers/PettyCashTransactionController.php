@@ -20,7 +20,7 @@ class PettyCashTransactionController extends Controller
         }
         $rows = $query->orderBy('date', 'desc')->orderBy('created_at', 'desc')->get()->map(fn($t) => [
             'id'              => $t->id,
-            'date'            => $t->date->translatedFormat('d M Y H:i'),
+            'date'            => $this->resolveDate($t)->translatedFormat('d M Y H:i'),
             'date_raw'        => $t->date->format('Y-m-d'),
             'type'            => $t->type,
             'description'     => $t->description,
@@ -117,7 +117,7 @@ class PettyCashTransactionController extends Controller
         $rows = PettyCashTransaction::onlyTrashed()->with(['pettyCash', 'deleter'])
             ->orderBy('date', 'desc')->get()->map(fn($t) => [
                 'id'              => $t->id,
-                'date'            => $t->date->translatedFormat('d M Y H:i'),
+                'date'            => $this->resolveDate($t)->translatedFormat('d M Y H:i'),
                 'date_raw'        => $t->date->format('Y-m-d'),
                 'type'            => $t->type,
                 'description'     => $t->description,

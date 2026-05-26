@@ -16,7 +16,7 @@ class PiutangController extends Controller
     {
         $rows = Piutang::orderBy('date', 'desc')->get()->map(fn($p) => [
             'id'          => $p->id,
-            'date'        => $p->date->translatedFormat('d M Y H:i'),
+            'date'        => $this->resolveDate($p)->translatedFormat('d M Y H:i'),
             'date_raw'    => $p->date->format('Y-m-d'),
             'nama'        => $p->nama,
             'description' => $p->description,
@@ -46,6 +46,7 @@ class PiutangController extends Controller
             'description' => $request->description,
             'nominal'     => $request->nominal,
             'note'        => $request->note,
+            'date'        => $piutang->date->toDateString() . ' ' . now()->format('H:i:s'),
             'status'      => 'approved',
             'approved_by' => auth()->id(),
             'approved_at' => now(),
@@ -90,6 +91,7 @@ class PiutangController extends Controller
         }
 
         $piutang->update([
+            'date'        => $piutang->date->toDateString() . ' ' . now()->format('H:i:s'),
             'status'      => 'approved',
             'approved_by' => auth()->id(),
             'approved_at' => now(),
@@ -151,7 +153,7 @@ class PiutangController extends Controller
     {
         $rows = Piutang::onlyTrashed()->orderBy('date', 'desc')->get()->map(fn($p) => [
             'id'          => $p->id,
-            'date'        => $p->date->translatedFormat('d M Y H:i'),
+            'date'        => $this->resolveDate($p)->translatedFormat('d M Y H:i'),
             'nama'        => $p->nama,
             'description' => $p->description,
             'nominal'     => number_format($p->nominal, 0, ',', '.'),

@@ -21,7 +21,7 @@ class StockUsageController extends Controller
             ->get()
             ->map(fn($u) => [
                 'id'           => $u->id,
-                'date'         => $u->date->translatedFormat('d M Y H:i'),
+                'date'         => $this->resolveDate($u)->translatedFormat('d M Y H:i'),
                 'date_raw'     => $u->date->format('Y-m-d'),
                 'kapal'        => $u->kapal?->name ?? '-',
                 'warna'        => $u->warna,

@@ -61,7 +61,7 @@ class SaleController extends Controller
             $sales = $query->get()->map(fn($s) => [
                 'id'             => $s->id,
                 'kapal_id'       => $s->kapal_id,
-                'date'           => $s->date->translatedFormat('d M Y H:i'),
+                'date'           => $this->resolveDate($s)->translatedFormat('d M Y H:i'),
                 'date_raw'       => $s->date->format('Y-m-d'),
                 'invoice_number' => $s->invoice_number,
                 'customer_id'    => $s->customer_id,
@@ -240,7 +240,8 @@ class SaleController extends Controller
 
         DB::transaction(function () use ($sale) {
             $sale->update([
-                'status'      => 'approved',
+                'date'        => $sale->date->toDateString() . ' ' . now()->format('H:i:s'),
+            'status'      => 'approved',
                 'approved_by' => auth()->id(),
                 'approved_at' => now(),
             ]);
@@ -318,7 +319,7 @@ class SaleController extends Controller
         $sales   = $query->get()->map(fn($s) => [
             'id'              => $s->id,
             'kapal_id'        => $s->kapal_id,
-            'date'            => $s->date->translatedFormat('d M Y H:i'),
+            'date'            => $this->resolveDate($s)->translatedFormat('d M Y H:i'),
             'date_raw'        => $s->date->format('Y-m-d'),
             'invoice_number'  => $s->invoice_number,
             'customer_name'   => $s->customer->name ?? '-',
