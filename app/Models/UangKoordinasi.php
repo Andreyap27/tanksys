@@ -28,7 +28,7 @@ class UangKoordinasi extends Model
     protected function casts(): array
     {
         return [
-            'date'    => 'date',
+            'date'    => 'datetime',
             'nominal' => 'decimal:2',
             'extra'   => 'decimal:2',
             'total'   => 'decimal:2',

@@ -32,7 +32,7 @@ class Purchase extends Model
     protected function casts(): array
     {
         return [
-            'date'     => 'date',
+            'date'     => 'datetime',
             'quantity' => 'decimal:2',
             'extra'    => 'decimal:2',
             'short'    => 'decimal:2',

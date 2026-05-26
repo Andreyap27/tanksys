@@ -21,7 +21,7 @@ class StockUsageController extends Controller
             ->get()
             ->map(fn($u) => [
                 'id'           => $u->id,
-                'date'         => $u->date->translatedFormat('d M Y'),
+                'date'         => $u->date->translatedFormat('d M Y H:i'),
                 'date_raw'     => $u->date->format('Y-m-d'),
                 'kapal'        => $u->kapal?->name ?? '-',
                 'warna'        => $u->warna,
@@ -46,7 +46,7 @@ class StockUsageController extends Controller
 
         DB::transaction(function () use ($request) {
             $usage = StockUsage::create([
-                'date'       => $request->date,
+                'date'       => $request->date . ' ' . now()->format('H:i:s'),
                 'kapal_id'   => $request->kapal_id ?: null,
                 'warna'      => $request->warna,
                 'quantity'   => $request->quantity,

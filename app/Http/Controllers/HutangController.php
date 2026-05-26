@@ -16,7 +16,7 @@ class HutangController extends Controller
     {
         $rows = Hutang::orderBy('date', 'desc')->get()->map(fn($h) => [
             'id'          => $h->id,
-            'date'        => $h->date->translatedFormat('d M Y'),
+            'date'        => $h->date->translatedFormat('d M Y H:i'),
             'date_raw'    => $h->date->format('Y-m-d'),
             'nama'        => $h->nama,
             'description' => $h->description,
@@ -41,7 +41,7 @@ class HutangController extends Controller
         ]);
 
         Hutang::create([
-            'date'        => $request->date,
+            'date'        => $request->date . ' ' . now()->format('H:i:s'),
             'nama'        => $request->nama,
             'description' => $request->description,
             'nominal'     => $request->nominal,
@@ -66,7 +66,7 @@ class HutangController extends Controller
         ]);
 
         $hutang->update([
-            'date'        => $request->date,
+            'date'        => $request->date . ' ' . now()->format('H:i:s'),
             'nama'        => $request->nama,
             'description' => $request->description,
             'nominal'     => $request->nominal,
@@ -151,7 +151,7 @@ class HutangController extends Controller
     {
         $rows = Hutang::onlyTrashed()->orderBy('date', 'desc')->get()->map(fn($h) => [
             'id'          => $h->id,
-            'date'        => $h->date->translatedFormat('d M Y'),
+            'date'        => $h->date->translatedFormat('d M Y H:i'),
             'nama'        => $h->nama,
             'description' => $h->description,
             'nominal'     => number_format($h->nominal, 0, ',', '.'),

@@ -13,7 +13,7 @@
             <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
             Kembali
         </a>
-        @if(auth()->user()->canManage())
+        @if(auth()->user()->canManagePayroll())
         <a href="{{ route('gaji.edit', $karyawan->id) }}" class="btn btn-secondary">
             <i data-lucide="pencil" style="width:16px;height:16px;"></i>
             Edit
@@ -79,7 +79,7 @@
                 <i data-lucide="credit-card" style="width:16px;height:16px;flex-shrink:0;"></i>
                 Pinjaman
             </h5>
-            @if(auth()->user()->canManage())
+            @if(auth()->user()->canManagePayroll())
             <button class="btn btn-sm btn-primary" onclick="openAddPinjamanModal()" style="font-size:0.75rem;padding:4px 10px;">
                 <i data-lucide="plus" style="width:13px;height:13px;"></i> Tambah
             </button>
@@ -96,7 +96,7 @@
                         <th style="padding:7px 12px;text-align:left;font-weight:600;color:var(--muted-foreground);">Angsuran</th>
                         <th style="padding:7px 12px;text-align:left;font-weight:600;color:var(--muted-foreground);">Sisa</th>
                         <th style="padding:7px 12px;text-align:left;font-weight:600;color:var(--muted-foreground);">Status</th>
-                        @if(auth()->user()->canManage())
+                        @if(auth()->user()->canManagePayroll())
                         <th style="padding:7px 12px;"></th>
                         @endif
                     </tr>
@@ -116,14 +116,14 @@
                                 <span class="badge badge-warning">Aktif</span>
                             @endif
                         </td>
-                        @if(auth()->user()->canManage())
+                        @if(auth()->user()->canManagePayroll())
                         <td style="padding:7px 12px;">
                             <div class="table-actions">
                                 <button class="icon-btn primary" title="Edit"
                                     onclick="openEditPinjamanModal('{{ $p['id'] }}', {{ $p['pokok_raw'] }}, {{ $p['angsuran'] }}, {{ $p['subsidi_raw'] }}, '{{ addslashes($p['noted']) }}')">
                                     <i data-lucide="pencil" style="width:13px;height:13px;"></i>
                                 </button>
-                                @if(auth()->user()->canDelete())
+                                @if(auth()->user()->canManagePayroll())
                                 <button class="icon-btn danger" title="Hapus" onclick="deletePinjaman('{{ $p['id'] }}')">
                                     <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
                                 </button>
@@ -190,7 +190,7 @@
                                 <button class="icon-btn secondary" title="Print Slip" onclick="openPrintModal('{{ $slip['id'] }}')">
                                     <i data-lucide="printer" style="width:14px;height:14px;"></i>
                                 </button>
-                                @if(auth()->user()->canApprove() && $slip['status'] === 'pending')
+                                @if(auth()->user()->canManagePayroll() && $slip['status'] === 'pending')
                                 <button class="icon-btn success" title="Approve" onclick="approveSlip('{{ $slip['id'] }}')">
                                     <i data-lucide="check-circle" style="width:14px;height:14px;"></i>
                                 </button>
@@ -198,12 +198,12 @@
                                     <i data-lucide="x-circle" style="width:14px;height:14px;"></i>
                                 </button>
                                 @endif
-                                @if(auth()->user()->canManage())
+                                @if(auth()->user()->canManagePayroll())
                                 <button class="icon-btn primary" title="Edit" onclick="openEditSlipModal('{{ $slip['id'] }}', '{{ $slip['period_raw'] }}', {{ $slip['extra_raw'] }}, {{ $slip['bonus_raw'] }}, {{ $slip['potongan_pinjaman_raw'] }}, {{ $slip['potongan_lain_raw'] }}, '{{ addslashes($slip['noted'] === '-' ? '' : $slip['noted']) }}')">
                                     <i data-lucide="pencil" style="width:14px;height:14px;"></i>
                                 </button>
                                 @endif
-                                @if(auth()->user()->canDelete())
+                                @if(auth()->user()->canManagePayroll())
                                 <button class="icon-btn danger" title="Hapus" onclick="deleteSlip('{{ $slip['id'] }}')">
                                     <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
                                 </button>

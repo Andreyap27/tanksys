@@ -24,7 +24,7 @@ class PurchaseController extends Controller
             $purchases = $query->get()->map(fn($p) => [
                 'id'            => $p->id,
                 'kapal_id'      => $p->kapal_id,
-                'date'          => $p->date->translatedFormat('d M Y'),
+                'date'          => $p->date->translatedFormat('d M Y H:i'),
                 'date_raw'      => $p->date->format('Y-m-d'),
                 'vendor'        => $p->vendor,
                 'description'   => $p->description ?? '',
@@ -68,7 +68,7 @@ class PurchaseController extends Controller
             $short  = (float) ($request->short ?? 0);
             $purchase = Purchase::create([
                 'kapal_id'    => $request->kapal_id ?: null,
-                'date'        => $request->date,
+                'date'        => $request->date . ' ' . now()->format('H:i:s'),
                 'vendor'      => $request->vendor,
                 'description' => $request->description,
                 'warna'       => $request->warna ?: null,
@@ -126,7 +126,7 @@ class PurchaseController extends Controller
 
             $purchase->update([
                 'kapal_id'    => $request->kapal_id ?: null,
-                'date'        => $request->date,
+                'date'        => $request->date . ' ' . now()->format('H:i:s'),
                 'vendor'      => $request->vendor,
                 'description' => $request->description,
                 'warna'       => $request->warna ?: null,
@@ -250,7 +250,7 @@ class PurchaseController extends Controller
         $purchases = $query->get()->map(fn($p) => [
             'id'            => $p->id,
             'kapal_id'      => $p->kapal_id,
-            'date'          => $p->date->translatedFormat('d M Y'),
+            'date'          => $p->date->translatedFormat('d M Y H:i'),
             'date_raw'      => $p->date->format('Y-m-d'),
             'vendor'        => $p->vendor,
             'description'   => $p->description ?? '',

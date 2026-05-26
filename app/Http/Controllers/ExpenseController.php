@@ -22,7 +22,7 @@ class ExpenseController extends Controller
             $expenses = $query->get()->map(fn($e) => [
                 'id'          => $e->id,
                 'kapal_id'    => $e->kapal_id,
-                'date'        => $e->date->translatedFormat('d M Y'),
+                'date'        => $e->date->translatedFormat('d M Y H:i'),
                 'date_raw'    => $e->date->format('Y-m-d'),
                 'description' => $e->description,
                 'category'    => $e->category,
@@ -58,7 +58,7 @@ class ExpenseController extends Controller
 
         Expense::create([
             'kapal_id'    => $request->kapal_id ?: null,
-            'date'        => $request->date,
+            'date'        => $request->date . ' ' . now()->format('H:i:s'),
             'description' => $request->description,
             'nominal'     => $request->nominal,
             'category'    => $request->category,
@@ -171,7 +171,7 @@ class ExpenseController extends Controller
         $expenses = $query->get()->map(fn($e) => [
             'id'         => $e->id,
             'kapal_id'   => $e->kapal_id,
-            'date'       => $e->date->translatedFormat('d M Y'),
+            'date'       => $e->date->translatedFormat('d M Y H:i'),
             'date_raw'   => $e->date->format('Y-m-d'),
             'description'=> $e->description,
             'category'   => $e->category,

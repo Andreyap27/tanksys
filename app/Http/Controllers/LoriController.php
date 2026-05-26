@@ -22,7 +22,7 @@ class LoriController extends Controller
             $loris = $query->get()->map(fn($l) => [
                 'id'            => $l->id,
                 'mobil_id'      => $l->mobil_id,
-                'date'          => $l->date->translatedFormat('d M Y'),
+                'date'          => $l->date->translatedFormat('d M Y H:i'),
                 'date_raw'      => $l->date->format('Y-m-d'),
                 'customer_name' => $l->customer->name,
                 'customer_id'   => $l->customer_id,
@@ -50,7 +50,7 @@ class LoriController extends Controller
 
         Lori::create([
             'mobil_id'    => $request->mobil_id ?: null,
-            'date'        => $request->date,
+            'date'        => $request->date . ' ' . now()->format('H:i:s'),
             'customer_id' => $request->customer_id,
             'from'        => $request->from,
             'to'          => $request->to,
@@ -103,7 +103,7 @@ class LoriController extends Controller
         $loris   = $query->get()->map(fn($l) => [
             'id'         => $l->id,
             'mobil_id'   => $l->mobil_id,
-            'date'       => $l->date->translatedFormat('d M Y'),
+            'date'       => $l->date->translatedFormat('d M Y H:i'),
             'date_raw'   => $l->date->format('Y-m-d'),
             'customer'   => $l->customer->name ?? '-',
             'from'       => $l->from,

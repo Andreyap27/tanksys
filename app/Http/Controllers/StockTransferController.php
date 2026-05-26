@@ -22,7 +22,7 @@ class StockTransferController extends Controller
             ->get()
             ->map(fn($t) => [
                 'id'            => $t->id,
-                'date'          => $t->date->translatedFormat('d M Y'),
+                'date'          => $t->date->translatedFormat('d M Y H:i'),
                 'date_raw'      => $t->date->format('Y-m-d'),
                 'from_kapal'    => $t->fromKapal?->name ?? '-',
                 'to_kapal'      => $t->toKapal?->name ?? '-',
@@ -51,7 +51,7 @@ class StockTransferController extends Controller
 
         DB::transaction(function () use ($request) {
             $transfer = StockTransfer::create([
-                'date'          => $request->date,
+                'date'          => $request->date . ' ' . now()->format('H:i:s'),
                 'from_kapal_id' => $request->from_kapal_id ?: null,
                 'to_kapal_id'   => $request->to_kapal_id ?: null,
                 'warna'         => $request->warna,

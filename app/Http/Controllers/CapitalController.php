@@ -22,7 +22,7 @@ class CapitalController extends Controller
             $capitals = $query->get()->map(fn($c) => [
                 'id'          => $c->id,
                 'kapal_id'    => $c->kapal_id,
-                'date'        => $c->date->translatedFormat('d M Y'),
+                'date'        => $c->date->translatedFormat('d M Y H:i'),
                 'date_raw'    => $c->date->format('Y-m-d'),
                 'name'        => $c->name,
                 'nominal'     => number_format($c->nominal, 0, ',', '.'),
@@ -65,7 +65,7 @@ class CapitalController extends Controller
 
         Capital::create([
             'kapal_id'   => $request->kapal_id ?: null,
-            'date'       => $request->date,
+            'date'       => $request->date . ' ' . now()->format('H:i:s'),
             'name'       => $request->name,
             'nominal'    => $request->nominal,
             'note'       => $request->note,
@@ -165,7 +165,7 @@ class CapitalController extends Controller
         $capitals = $query->get()->map(fn($c) => [
             'id'         => $c->id,
             'kapal_id'   => $c->kapal_id,
-            'date'       => $c->date->translatedFormat('d M Y'),
+            'date'       => $c->date->translatedFormat('d M Y H:i'),
             'date_raw'   => $c->date->format('Y-m-d'),
             'name'       => $c->name,
             'nominal'    => number_format($c->nominal, 0, ',', '.'),

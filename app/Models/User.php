@@ -56,6 +56,11 @@ class User extends Authenticatable implements JWTSubject
         return $this->role === 'Finance';
     }
 
+    public function canManagePayroll(): bool
+    {
+        return in_array($this->role, ['Finance', 'Super Admin']);
+    }
+
     public function canApprove(): bool
     {
         return in_array($this->role, ['SPV', 'Super Admin']);

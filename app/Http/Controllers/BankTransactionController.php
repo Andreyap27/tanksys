@@ -17,7 +17,7 @@ class BankTransactionController extends Controller
         try {
             $transactions = BankTransaction::orderBy('date', 'desc')->orderBy('created_at', 'desc')->get()->map(fn($t) => [
                 'id'             => $t->id,
-                'date'           => $t->date->translatedFormat('d M Y'),
+                'date'           => $t->date->translatedFormat('d M Y H:i'),
                 'date_raw'       => $t->date->format('Y-m-d'),
                 'created_at_raw' => $t->created_at->format('Y-m-d H:i:s'),
                 'type'           => $t->type,
@@ -45,7 +45,7 @@ class BankTransactionController extends Controller
         ]);
 
         BankTransaction::create([
-            'date'        => $request->date,
+            'date'        => $request->date . ' ' . now()->format('H:i:s'),
             'type'        => $request->type,
             'amount'      => $request->amount,
             'description' => $request->description,
@@ -113,7 +113,7 @@ class BankTransactionController extends Controller
         $transactions = BankTransaction::onlyTrashed()->with(['creator', 'deleter'])->orderBy('date', 'desc')
             ->get()->map(fn($t) => [
                 'id'          => $t->id,
-                'date'        => $t->date->translatedFormat('d M Y'),
+                'date'        => $t->date->translatedFormat('d M Y H:i'),
                 'date_raw'    => $t->date->format('Y-m-d'),
                 'type'        => $t->type,
                 'amount'      => number_format($t->amount, 0, ',', '.'),

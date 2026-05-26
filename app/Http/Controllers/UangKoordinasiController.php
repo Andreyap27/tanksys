@@ -18,7 +18,7 @@ class UangKoordinasiController extends Controller
         try {
             $items = UangKoordinasi::orderBy('date', 'desc')->get()->map(fn($u) => [
                 'id'          => $u->id,
-                'date'        => $u->date->translatedFormat('d M Y'),
+                'date'        => $u->date->translatedFormat('d M Y H:i'),
                 'date_raw'    => $u->date->format('Y-m-d'),
                 'nama'        => $u->nama,
                 'jabatan'     => $u->jabatan ?? '-',
@@ -51,8 +51,12 @@ class UangKoordinasiController extends Controller
         $nominal = (float) $request->nominal;
         $extra   = (float) ($request->extra ?? 0);
 
+        if (!auth()->user()->canManagePayroll()) {
+            return response()->json(['message' => 'Anda tidak memiliki izin untuk menambah data.'], 403);
+        }
+
         UangKoordinasi::create([
-            'date'        => $request->date,
+            'date'        => $request->date . ' ' . now()->format('H:i:s'),
             'nama'        => $request->nama,
             'jabatan'     => $request->jabatan,
             'noted'       => $request->noted,
@@ -83,7 +87,7 @@ class UangKoordinasiController extends Controller
 
     public function update(Request $request, UangKoordinasi $uangKoordinasi)
     {
-        if (!auth()->user()->canManage()) {
+        if (!auth()->user()->canManagePayroll()) {
             return response()->json(['message' => 'Anda tidak memiliki izin untuk mengedit.'], 403);
         }
 
@@ -100,7 +104,7 @@ class UangKoordinasiController extends Controller
         $extra   = (float) ($request->extra ?? 0);
 
         $uangKoordinasi->update([
-            'date'        => $request->date,
+            'date'        => $request->date . ' ' . now()->format('H:i:s'),
             'nama'        => $request->nama,
             'jabatan'     => $request->jabatan,
             'noted'       => $request->noted,
@@ -131,7 +135,7 @@ class UangKoordinasiController extends Controller
 
     public function approve(UangKoordinasi $uangKoordinasi)
     {
-        if (!auth()->user()->canApprove()) {
+        if (!auth()->user()->canManagePayroll()) {
             return response()->json(['message' => 'Tidak memiliki akses untuk menyetujui.'], 403);
         }
 
@@ -154,7 +158,7 @@ class UangKoordinasiController extends Controller
 
     public function reject(UangKoordinasi $uangKoordinasi)
     {
-        if (!auth()->user()->canApprove()) {
+        if (!auth()->user()->canManagePayroll()) {
             return response()->json(['message' => 'Tidak memiliki akses.'], 403);
         }
 
@@ -183,7 +187,7 @@ class UangKoordinasiController extends Controller
             ->get()
             ->map(fn($u) => [
                 'id'         => $u->id,
-                'date'       => $u->date->translatedFormat('d M Y'),
+                'date'       => $u->date->translatedFormat('d M Y H:i'),
                 'date_raw'   => $u->date->format('Y-m-d'),
                 'nama'       => $u->nama,
                 'jabatan'    => $u->jabatan ?? '-',

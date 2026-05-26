@@ -11,7 +11,7 @@ class FinanceOnly
     {
         $role = auth()->user()?->role;
 
-        if (!in_array($role, ['Finance', 'Super Admin'])) {
+        if (!in_array($role, ['Finance', 'Super Admin', 'SPV'])) {
             abort(403, 'Akses ditolak.');
         }
 

@@ -119,6 +119,10 @@ class GajiController extends Controller
 
     public function store(Request $request)
     {
+        if (!auth()->user()->canManagePayroll()) {
+            return response()->json(['message' => 'Anda tidak memiliki izin untuk menambah data.'], 403);
+        }
+
         $request->validate([
             'nama_karyawan' => 'required|string|max:255',
             'no_ktp'        => 'nullable|string|max:16',
@@ -145,7 +149,7 @@ class GajiController extends Controller
 
     public function update(Request $request, Karyawan $karyawan)
     {
-        if (!auth()->user()->canManage()) {
+        if (!auth()->user()->canManagePayroll()) {
             return response()->json(['message' => 'Anda tidak memiliki izin untuk mengedit.'], 403);
         }
 
@@ -174,7 +178,7 @@ class GajiController extends Controller
 
     public function destroy(Karyawan $karyawan)
     {
-        if (!auth()->user()->canDelete()) {
+        if (!auth()->user()->canManagePayroll()) {
             return response()->json(['message' => 'Anda tidak memiliki izin untuk menghapus data.'], 403);
         }
 

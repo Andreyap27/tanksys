@@ -24,7 +24,7 @@ class Lori extends Model
     protected function casts(): array
     {
         return [
-            'date'  => 'date',
+            'date'  => 'datetime',
             'price' => 'decimal:2',
         ];
     }

@@ -18,6 +18,7 @@
         @php
             $isFinance    = auth()->user()->isFinance();
             $isSuperAdmin = auth()->user()->role === 'Super Admin';
+            $isSPV        = auth()->user()->isSPV();
         @endphp
 
         {{-- ── Non-Finance menus ────────────────────────────────────────── --}}
@@ -129,8 +130,8 @@
 
         @endif {{-- !isFinance --}}
 
-        {{-- ── Gaji & Uang Koordinasi: Finance + Super Admin only ─────────── --}}
-        @if($isFinance || $isSuperAdmin)
+        {{-- ── Gaji & Uang Koordinasi: Finance + Super Admin + SPV ────────── --}}
+        @if($isFinance || $isSuperAdmin || $isSPV)
         @if($isFinance)<div class="nav-section">Transaksi</div>@endif
         <a href="{{ route('gaji.index') }}" class="nav-item {{ request()->routeIs('gaji.*') && !request()->routeIs('gaji.slip.*') ? 'active' : '' }}">
             <i data-lucide="banknote"></i>

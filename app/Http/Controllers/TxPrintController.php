@@ -52,7 +52,7 @@ class TxPrintController extends Controller
                 $data['rows'] = $q->get()->map(function ($s) use (&$running, $fmtQty) {
                     $running += (float) $s->qty_in - (float) $s->qty_out;
                     return [
-                        'date'    => $s->date->translatedFormat('d M Y'),
+                        'date'    => $s->date->translatedFormat('d M Y H:i'),
                         'party'   => $s->party,
                         'type'    => match($s->type) {
                             'purchase'     => 'Pembelian',

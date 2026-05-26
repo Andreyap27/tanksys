@@ -14,7 +14,7 @@ class PettyCashTransaction extends Model
         'petty_cash_id', 'type', 'date', 'description', 'amount', 'note', 'created_by', 'deleted_by',
     ];
 
-    protected $casts = ['date' => 'date'];
+    protected $casts = ['date' => 'datetime'];
 
     public function pettyCash()
     {

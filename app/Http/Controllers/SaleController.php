@@ -61,7 +61,7 @@ class SaleController extends Controller
             $sales = $query->get()->map(fn($s) => [
                 'id'             => $s->id,
                 'kapal_id'       => $s->kapal_id,
-                'date'           => $s->date->translatedFormat('d M Y'),
+                'date'           => $s->date->translatedFormat('d M Y H:i'),
                 'date_raw'       => $s->date->format('Y-m-d'),
                 'invoice_number' => $s->invoice_number,
                 'customer_id'    => $s->customer_id,
@@ -118,7 +118,7 @@ class SaleController extends Controller
         DB::transaction(function () use ($request, $extra, $short) {
             $sale = Sale::create([
                 'kapal_id'       => $request->kapal_id ?: null,
-                'date'           => $request->date,
+                'date'           => $request->date . ' ' . now()->format('H:i:s'),
                 'invoice_number' => $request->invoice_number,
                 'customer_id'    => $request->customer_id,
                 'description'    => $request->description,
@@ -178,7 +178,7 @@ class SaleController extends Controller
 
             $sale->update([
                 'kapal_id'       => $request->kapal_id ?: null,
-                'date'           => $request->date,
+                'date'           => $request->date . ' ' . now()->format('H:i:s'),
                 'invoice_number' => $request->invoice_number,
                 'customer_id'    => $request->customer_id,
                 'description'    => $request->description,
@@ -318,7 +318,7 @@ class SaleController extends Controller
         $sales   = $query->get()->map(fn($s) => [
             'id'              => $s->id,
             'kapal_id'        => $s->kapal_id,
-            'date'            => $s->date->translatedFormat('d M Y'),
+            'date'            => $s->date->translatedFormat('d M Y H:i'),
             'date_raw'        => $s->date->format('Y-m-d'),
             'invoice_number'  => $s->invoice_number,
             'customer_name'   => $s->customer->name ?? '-',

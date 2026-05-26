@@ -69,7 +69,7 @@ class GajiSlipController extends Controller
 
     public function update(Request $request, GajiSlip $slip)
     {
-        if (!auth()->user()->canManage()) {
+        if (!auth()->user()->canManagePayroll()) {
             return response()->json(['message' => 'Anda tidak memiliki izin untuk mengedit.'], 403);
         }
 
@@ -108,7 +108,7 @@ class GajiSlipController extends Controller
 
     public function destroy(GajiSlip $slip)
     {
-        if (!auth()->user()->canDelete()) {
+        if (!auth()->user()->canManagePayroll()) {
             return response()->json(['message' => 'Anda tidak memiliki izin untuk menghapus data.'], 403);
         }
 
@@ -118,7 +118,7 @@ class GajiSlipController extends Controller
 
     public function approve(GajiSlip $slip)
     {
-        if (!auth()->user()->canApprove()) {
+        if (!auth()->user()->canManagePayroll()) {
             return response()->json(['message' => 'Tidak memiliki akses untuk menyetujui.'], 403);
         }
 
@@ -141,7 +141,7 @@ class GajiSlipController extends Controller
 
     public function reject(GajiSlip $slip)
     {
-        if (!auth()->user()->canApprove()) {
+        if (!auth()->user()->canManagePayroll()) {
             return response()->json(['message' => 'Tidak memiliki akses.'], 403);
         }
 

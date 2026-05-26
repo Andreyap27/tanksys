@@ -17,7 +17,7 @@ class Piutang extends Model
     ];
 
     protected $casts = [
-        'date'        => 'date',
+        'date'        => 'datetime',
         'nominal'     => 'decimal:2',
         'approved_at' => 'datetime',
     ];

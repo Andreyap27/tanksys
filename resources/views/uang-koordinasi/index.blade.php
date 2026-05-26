@@ -13,7 +13,7 @@
             <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
             Trash
         </a>
-        @if(auth()->user()->canManage())
+        @if(auth()->user()->canManagePayroll())
         <button class="btn btn-primary" onclick="openCreateModal()">
             <i data-lucide="plus" style="width:16px;height:16px;"></i>
             Tambah
@@ -235,12 +235,12 @@
                 {
                     data: null, orderable: false, searchable: false,
                     render: function(data, type, row) {
-                        const editBtn = canManage ? `<button class="icon-btn primary" title="Edit"
+                        const editBtn = canManagePayroll ? `<button class="icon-btn primary" title="Edit"
                             onclick="openEditModal('${row.id}','${row.date_raw}','${escHtml(row.nama)}','${row.jabatan === '-' ? '' : escHtml(row.jabatan)}','${row.nominal_raw}','${row.extra_raw}','${escHtml(row.noted === '-' ? '' : row.noted)}')">
                             <i data-lucide="pencil" style="width:14px;height:14px;"></i>
                         </button>` : '';
 
-                        const approveBtn = canApprove && row.status === 'pending' ?
+                        const approveBtn = canManagePayroll && row.status === 'pending' ?
                             `<button class="icon-btn success" title="Approve" onclick="approveUK('${row.id}')">
                                 <i data-lucide="check-circle" style="width:14px;height:14px;"></i>
                             </button>

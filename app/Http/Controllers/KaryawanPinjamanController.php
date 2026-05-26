@@ -10,7 +10,7 @@ class KaryawanPinjamanController extends Controller
 {
     public function store(Request $request, Karyawan $karyawan)
     {
-        if (!auth()->user()->canManage()) {
+        if (!auth()->user()->canManagePayroll()) {
             return response()->json(['message' => 'Tidak memiliki izin.'], 403);
         }
 
@@ -34,7 +34,7 @@ class KaryawanPinjamanController extends Controller
 
     public function update(Request $request, KaryawanPinjaman $pinjaman)
     {
-        if (!auth()->user()->canManage()) {
+        if (!auth()->user()->canManagePayroll()) {
             return response()->json(['message' => 'Tidak memiliki izin.'], 403);
         }
 
@@ -57,7 +57,7 @@ class KaryawanPinjamanController extends Controller
 
     public function destroy(KaryawanPinjaman $pinjaman)
     {
-        if (!auth()->user()->canDelete()) {
+        if (!auth()->user()->canManagePayroll()) {
             return response()->json(['message' => 'Tidak memiliki izin untuk menghapus.'], 403);
         }
 

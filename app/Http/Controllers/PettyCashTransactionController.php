@@ -20,7 +20,7 @@ class PettyCashTransactionController extends Controller
         }
         $rows = $query->orderBy('date', 'desc')->orderBy('created_at', 'desc')->get()->map(fn($t) => [
             'id'              => $t->id,
-            'date'            => $t->date->translatedFormat('d M Y'),
+            'date'            => $t->date->translatedFormat('d M Y H:i'),
             'date_raw'        => $t->date->format('Y-m-d'),
             'type'            => $t->type,
             'description'     => $t->description,
@@ -65,7 +65,7 @@ class PettyCashTransactionController extends Controller
         PettyCashTransaction::create([
             'petty_cash_id' => $request->petty_cash_id ?: null,
             'type'          => $request->type,
-            'date'          => $request->date,
+            'date'          => $request->date . ' ' . now()->format('H:i:s'),
             'description'   => $request->description,
             'amount'        => $request->amount,
             'note'          => $request->note ?: null,
@@ -90,7 +90,7 @@ class PettyCashTransactionController extends Controller
         $pettyCashTransaction->update([
             'petty_cash_id' => $request->petty_cash_id ?: null,
             'type'          => $request->type,
-            'date'          => $request->date,
+            'date'          => $request->date . ' ' . now()->format('H:i:s'),
             'description'   => $request->description,
             'amount'        => $request->amount,
             'note'          => $request->note ?: null,
@@ -117,7 +117,7 @@ class PettyCashTransactionController extends Controller
         $rows = PettyCashTransaction::onlyTrashed()->with(['pettyCash', 'deleter'])
             ->orderBy('date', 'desc')->get()->map(fn($t) => [
                 'id'              => $t->id,
-                'date'            => $t->date->translatedFormat('d M Y'),
+                'date'            => $t->date->translatedFormat('d M Y H:i'),
                 'date_raw'        => $t->date->format('Y-m-d'),
                 'type'            => $t->type,
                 'description'     => $t->description,

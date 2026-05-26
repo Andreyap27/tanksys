@@ -264,6 +264,7 @@
         const canManage = @json(auth()->user() ?->canManage() ?? false);
         const canDelete = @json(auth()->user() ?->canDelete() ?? false);
         const canRestore = @json(auth()->user() ?->canRestore() ?? false);
+        const canManagePayroll = @json(auth()->user() ?->canManagePayroll() ?? false);
     </script>
 
     @stack('scripts')

@@ -13,7 +13,7 @@
             <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
             Trash
         </a>
-        @if(auth()->user()->canManage())
+        @if(auth()->user()->canManagePayroll())
         <a href="{{ route('gaji.create') }}" class="btn btn-primary">
             <i data-lucide="plus" style="width:16px;height:16px;"></i>
             Tambah Karyawan
@@ -121,11 +121,11 @@
                             <i data-lucide="eye" style="width:14px;height:14px;"></i>
                         </a>`;
 
-                        const editBtn = canManage ? `<a href="/gaji/${row.id}/edit" class="icon-btn primary" title="Edit">
+                        const editBtn = canManagePayroll ? `<a href="/gaji/${row.id}/edit" class="icon-btn primary" title="Edit">
                             <i data-lucide="pencil" style="width:14px;height:14px;"></i>
                         </a>` : '';
 
-                        const deleteBtn = canDelete ? `<button class="icon-btn danger" title="Hapus"
+                        const deleteBtn = canManagePayroll ? `<button class="icon-btn danger" title="Hapus"
                             onclick="deleteKaryawan('${row.id}', '${escHtml(row.nama_karyawan)}')">
                             <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
                         </button>` : '';
