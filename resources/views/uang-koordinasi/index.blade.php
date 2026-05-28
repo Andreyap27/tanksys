@@ -77,6 +77,7 @@
                         <th>Tanggal</th>
                         <th>Nama</th>
                         <th>Jabatan</th>
+                        <th>Kategori Biaya</th>
                         <th>Nominal</th>
                         <th>Extra</th>
                         <th>Total</th>
@@ -111,6 +112,16 @@
                     <div class="form-group full">
                         <label class="form-label">Jabatan</label>
                         <input type="text" name="jabatan" class="form-input">
+                    </div>
+                    <div class="form-group full">
+                        <label class="form-label">Kategori Biaya</label>
+                        <select name="kategori_biaya" class="form-input">
+                            <option value="">-- Pilih Kategori --</option>
+                            <option value="operational_koordinasi">Operational Koordinasi</option>
+                            <option value="operational_pengambilan">Operational Pengambilan</option>
+                            <option value="bantuan_operational">Bantuan Operational</option>
+                            <option value="operational_lainnya">Operational Lainnya</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Nominal <span class="text-danger">*</span></label>
@@ -155,6 +166,16 @@
                     <div class="form-group full">
                         <label class="form-label">Jabatan</label>
                         <input type="text" name="jabatan" class="form-input">
+                    </div>
+                    <div class="form-group full">
+                        <label class="form-label">Kategori Biaya</label>
+                        <select name="kategori_biaya" class="form-input">
+                            <option value="">-- Pilih Kategori --</option>
+                            <option value="operational_koordinasi">Operational Koordinasi</option>
+                            <option value="operational_pengambilan">Operational Pengambilan</option>
+                            <option value="bantuan_operational">Bantuan Operational</option>
+                            <option value="operational_lainnya">Operational Lainnya</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Nominal <span class="text-danger">*</span></label>
@@ -211,6 +232,13 @@
         rejected: '<span class="badge badge-danger">Rejected</span>',
     };
 
+    const kategoriBiayaLabel = {
+        'operational_koordinasi':  'Operational koordinasi',
+        'operational_pengambilan': 'Operational pengambilan',
+        'bantuan_operational':     'Bantuan operational',
+        'operational_lainnya':     'Operational lainnya',
+    };
+
     $(document).ready(function() {
         $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
             if (settings.nTable.id !== 'ukTable') return true;
@@ -227,6 +255,7 @@
                 { data: 'date', render: (d, t, r) => t === 'sort' ? r.date_raw : d },
                 { data: 'nama' },
                 { data: 'jabatan' },
+                { data: 'kategori_biaya', render: d => d && d !== '-' ? (kategoriBiayaLabel[d] || d) : '-' },
                 { data: 'nominal' },
                 { data: 'extra' },
                 { data: 'total' },
@@ -236,7 +265,7 @@
                     data: null, orderable: false, searchable: false,
                     render: function(data, type, row) {
                         const editBtn = canManagePayroll ? `<button class="icon-btn primary" title="Edit"
-                            onclick="openEditModal('${row.id}','${row.date_raw}','${escHtml(row.nama)}','${row.jabatan === '-' ? '' : escHtml(row.jabatan)}','${row.nominal_raw}','${row.extra_raw}','${escHtml(row.noted === '-' ? '' : row.noted)}')">
+                            onclick="openEditModal('${row.id}','${row.date_raw}','${escHtml(row.nama)}','${row.jabatan === '-' ? '' : escHtml(row.jabatan)}','${row.kategori_biaya === '-' ? '' : row.kategori_biaya}','${row.nominal_raw}','${row.extra_raw}','${escHtml(row.noted === '-' ? '' : row.noted)}')">
                             <i data-lucide="pencil" style="width:14px;height:14px;"></i>
                         </button>` : '';
 
@@ -296,12 +325,13 @@
 
     function storeUK() {
         const payload = {
-            date:    createForm.date.value,
-            nama:    createForm.nama.value,
-            jabatan: createForm.jabatan.value,
-            nominal: getRaw(createForm.nominal),
-            extra:   getRaw(createForm.extra),
-            noted:   createForm.noted.value,
+            date:           createForm.date.value,
+            nama:           createForm.nama.value,
+            jabatan:        createForm.jabatan.value,
+            kategori_biaya: createForm.kategori_biaya.value,
+            nominal:        getRaw(createForm.nominal),
+            extra:          getRaw(createForm.extra),
+            noted:          createForm.noted.value,
         };
         axios.post('{{ route('uang-koordinasi.store') }}', payload)
             .then(res => {
@@ -316,12 +346,13 @@
     }
 
     // ── Edit ────────────────────────────────────────────────────────────────────
-    function openEditModal(id, date, nama, jabatan, nominal, extra, noted) {
+    function openEditModal(id, date, nama, jabatan, kategoriBiaya, nominal, extra, noted) {
         editId = id;
-        editForm.date.value    = date;
-        editForm.nama.value    = nama;
-        editForm.jabatan.value = jabatan;
-        editForm.noted.value   = noted;
+        editForm.date.value            = date;
+        editForm.nama.value            = nama;
+        editForm.jabatan.value         = jabatan;
+        editForm.kategori_biaya.value  = kategoriBiaya;
+        editForm.noted.value           = noted;
         document.getElementById('editNominal').value = nominal ? parseInt(nominal).toLocaleString('id-ID') : '';
         document.getElementById('editExtra').value   = extra   ? parseInt(extra).toLocaleString('id-ID')   : '';
         editModal.classList.add('active');
@@ -330,13 +361,14 @@
 
     function updateUK() {
         const payload = {
-            _method:  'PUT',
-            date:     editForm.date.value,
-            nama:     editForm.nama.value,
-            jabatan:  editForm.jabatan.value,
-            nominal:  getRaw(editForm.nominal),
-            extra:    getRaw(editForm.extra),
-            noted:    editForm.noted.value,
+            _method:         'PUT',
+            date:            editForm.date.value,
+            nama:            editForm.nama.value,
+            jabatan:         editForm.jabatan.value,
+            kategori_biaya:  editForm.kategori_biaya.value,
+            nominal:         getRaw(editForm.nominal),
+            extra:           getRaw(editForm.extra),
+            noted:           editForm.noted.value,
         };
         axios.post(`/uang-koordinasi/${editId}`, payload)
             .then(res => {

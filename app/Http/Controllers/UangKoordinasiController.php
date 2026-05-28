@@ -17,12 +17,13 @@ class UangKoordinasiController extends Controller
     {
         try {
             $items = UangKoordinasi::orderBy('date', 'desc')->get()->map(fn($u) => [
-                'id'          => $u->id,
-                'date'        => $this->resolveDate($u)->translatedFormat('d M Y H:i'),
-                'date_raw'    => $u->date->format('Y-m-d'),
-                'nama'        => $u->nama,
-                'jabatan'     => $u->jabatan ?? '-',
-                'noted'       => $u->noted ?? '-',
+                'id'             => $u->id,
+                'date'           => $this->resolveDate($u)->translatedFormat('d M Y H:i'),
+                'date_raw'       => $u->date->format('Y-m-d'),
+                'nama'           => $u->nama,
+                'jabatan'        => $u->jabatan ?? '-',
+                'kategori_biaya' => $u->kategori_biaya ?? '-',
+                'noted'          => $u->noted ?? '-',
                 'nominal'     => number_format($u->nominal, 0, ',', '.'),
                 'nominal_raw' => $u->nominal,
                 'extra'       => number_format($u->extra, 0, ',', '.'),
@@ -40,12 +41,13 @@ class UangKoordinasiController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'date'    => 'required|date',
-            'nama'    => 'required|string|max:255',
-            'jabatan' => 'nullable|string|max:100',
-            'noted'   => 'nullable|string',
-            'nominal' => 'required|numeric|min:0',
-            'extra'   => 'nullable|numeric|min:0',
+            'date'           => 'required|date',
+            'nama'           => 'required|string|max:255',
+            'jabatan'        => 'nullable|string|max:100',
+            'kategori_biaya' => 'nullable|in:operational_koordinasi,operational_pengambilan,bantuan_operational,operational_lainnya',
+            'noted'          => 'nullable|string',
+            'nominal'        => 'required|numeric|min:0',
+            'extra'          => 'nullable|numeric|min:0',
         ]);
 
         $nominal = (float) $request->nominal;
@@ -56,10 +58,11 @@ class UangKoordinasiController extends Controller
         }
 
         UangKoordinasi::create([
-            'date'        => $request->date . ' ' . now()->format('H:i:s'),
-            'nama'        => $request->nama,
-            'jabatan'     => $request->jabatan,
-            'noted'       => $request->noted,
+            'date'           => $request->date . ' ' . now()->format('H:i:s'),
+            'nama'           => $request->nama,
+            'jabatan'        => $request->jabatan,
+            'kategori_biaya' => $request->kategori_biaya,
+            'noted'          => $request->noted,
             'nominal'     => $nominal,
             'extra'       => $extra,
             'total'       => $nominal + $extra,
@@ -75,13 +78,14 @@ class UangKoordinasiController extends Controller
     public function show(UangKoordinasi $uangKoordinasi)
     {
         return response()->json([
-            'id'      => $uangKoordinasi->id,
-            'date'    => $uangKoordinasi->date->format('Y-m-d'),
-            'nama'    => $uangKoordinasi->nama,
-            'jabatan' => $uangKoordinasi->jabatan ?? '',
-            'noted'   => $uangKoordinasi->noted ?? '',
-            'nominal' => $uangKoordinasi->nominal,
-            'extra'   => $uangKoordinasi->extra,
+            'id'             => $uangKoordinasi->id,
+            'date'           => $uangKoordinasi->date->format('Y-m-d'),
+            'nama'           => $uangKoordinasi->nama,
+            'jabatan'        => $uangKoordinasi->jabatan ?? '',
+            'kategori_biaya' => $uangKoordinasi->kategori_biaya ?? '',
+            'noted'          => $uangKoordinasi->noted ?? '',
+            'nominal'        => $uangKoordinasi->nominal,
+            'extra'          => $uangKoordinasi->extra,
         ]);
     }
 
@@ -92,22 +96,24 @@ class UangKoordinasiController extends Controller
         }
 
         $request->validate([
-            'date'    => 'required|date',
-            'nama'    => 'required|string|max:255',
-            'jabatan' => 'nullable|string|max:100',
-            'noted'   => 'nullable|string',
-            'nominal' => 'required|numeric|min:0',
-            'extra'   => 'nullable|numeric|min:0',
+            'date'           => 'required|date',
+            'nama'           => 'required|string|max:255',
+            'jabatan'        => 'nullable|string|max:100',
+            'kategori_biaya' => 'nullable|in:operational_koordinasi,operational_pengambilan,bantuan_operational,operational_lainnya',
+            'noted'          => 'nullable|string',
+            'nominal'        => 'required|numeric|min:0',
+            'extra'          => 'nullable|numeric|min:0',
         ]);
 
         $nominal = (float) $request->nominal;
         $extra   = (float) ($request->extra ?? 0);
 
         $uangKoordinasi->update([
-            'date'        => $request->date . ' ' . now()->format('H:i:s'),
-            'nama'        => $request->nama,
-            'jabatan'     => $request->jabatan,
-            'noted'       => $request->noted,
+            'date'           => $request->date . ' ' . now()->format('H:i:s'),
+            'nama'           => $request->nama,
+            'jabatan'        => $request->jabatan,
+            'kategori_biaya' => $request->kategori_biaya,
+            'noted'          => $request->noted,
             'nominal'     => $nominal,
             'extra'       => $extra,
             'total'       => $nominal + $extra,

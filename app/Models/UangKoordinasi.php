@@ -14,6 +14,7 @@ class UangKoordinasi extends Model
         'date',
         'nama',
         'jabatan',
+        'kategori_biaya',
         'noted',
         'nominal',
         'extra',
