@@ -79,8 +79,7 @@ class PurchaseController extends Controller
                 'amount'      => $request->quantity * $request->price,
                 'noted'       => $request->noted,
                 'created_by'  => auth()->id(),
-                'date'        => $purchase->date->toDateString() . ' ' . now()->format('H:i:s'),
-            'status'      => 'approved',
+                'status'      => 'approved',
                 'approved_by' => auth()->id(),
                 'approved_at' => now(),
             ]);

@@ -63,7 +63,6 @@ class ExpenseController extends Controller
             'nominal'     => $request->nominal,
             'category'    => $request->category,
             'noted'       => $request->noted,
-            'date'        => $expense->date->toDateString() . ' ' . now()->format('H:i:s'),
             'status'      => 'approved',
             'approved_by' => auth()->id(),
             'approved_at' => now(),
@@ -85,8 +84,13 @@ class ExpenseController extends Controller
         ]);
 
         $expense->update(array_merge(
-            $request->only(['kapal_id', 'date', 'description', 'nominal', 'category', 'noted']),
-            ['status' => 'pending', 'approved_by' => null, 'approved_at' => null],
+            $request->only(['kapal_id', 'description', 'nominal', 'category', 'noted']),
+            [
+                'date'        => $request->date . ' ' . now()->format('H:i:s'),
+                'status'      => 'pending',
+                'approved_by' => null,
+                'approved_at' => null,
+            ],
         ));
 
         Notification::sendToApprovers('approval', 'Pengeluaran Diupdate',

@@ -93,8 +93,13 @@ class CapitalController extends Controller
         ]);
 
         $capital->update(array_merge(
-            $request->only(['kapal_id', 'date', 'name', 'nominal', 'note']),
-            ['status' => 'pending', 'approved_by' => null, 'approved_at' => null],
+            $request->only(['kapal_id', 'name', 'nominal', 'note']),
+            [
+                'date'        => $request->date . ' ' . now()->format('H:i:s'),
+                'status'      => 'pending',
+                'approved_by' => null,
+                'approved_at' => null,
+            ],
         ));
 
         Notification::sendToApprovers('approval', 'Modal Diupdate',

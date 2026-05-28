@@ -46,7 +46,6 @@ class PiutangController extends Controller
             'description' => $request->description,
             'nominal'     => $request->nominal,
             'note'        => $request->note,
-            'date'        => $piutang->date->toDateString() . ' ' . now()->format('H:i:s'),
             'status'      => 'approved',
             'approved_by' => auth()->id(),
             'approved_at' => now(),

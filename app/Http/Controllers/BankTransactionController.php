@@ -72,7 +72,10 @@ class BankTransactionController extends Controller
             'job'         => 'required|string|max:255',
         ]);
 
-        $bank->update($request->only(['date', 'type', 'amount', 'description', 'note', 'job']));
+        $bank->update(array_merge(
+            $request->only(['type', 'amount', 'description', 'note', 'job']),
+            ['date' => $request->date . ' ' . now()->format('H:i:s')],
+        ));
 
         return response()->json(['message' => 'Transaksi berhasil diupdate.']);
     }

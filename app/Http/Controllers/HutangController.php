@@ -46,7 +46,6 @@ class HutangController extends Controller
             'description' => $request->description,
             'nominal'     => $request->nominal,
             'note'        => $request->note,
-            'date'        => $hutang->date->toDateString() . ' ' . now()->format('H:i:s'),
             'status'      => 'approved',
             'approved_by' => auth()->id(),
             'approved_at' => now(),

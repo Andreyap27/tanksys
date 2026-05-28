@@ -73,8 +73,11 @@ class LoriController extends Controller
         ]);
 
         $lori->update(array_merge(
-            $request->only(['date', 'customer_id', 'from', 'to', 'price']),
-            ['mobil_id' => $request->mobil_id ?: null]
+            $request->only(['customer_id', 'from', 'to', 'price']),
+            [
+                'date'     => $request->date . ' ' . now()->format('H:i:s'),
+                'mobil_id' => $request->mobil_id ?: null,
+            ]
         ));
 
         return response()->json(['message' => 'Data mobil tangki berhasil diupdate.']);

@@ -63,7 +63,6 @@ class UangKoordinasiController extends Controller
             'nominal'     => $nominal,
             'extra'       => $extra,
             'total'       => $nominal + $extra,
-            'date'        => $uangKoordinasi->date->toDateString() . ' ' . now()->format('H:i:s'),
             'status'      => 'approved',
             'approved_by' => auth()->id(),
             'approved_at' => now(),

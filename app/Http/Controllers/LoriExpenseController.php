@@ -98,8 +98,11 @@ class LoriExpenseController extends Controller
         ]);
 
         $loriExpense->update(array_merge(
-            $request->only(['type', 'date', 'description', 'category', 'nominal', 'noted']),
-            ['mobil_id' => $request->mobil_id ?: null]
+            $request->only(['type', 'description', 'category', 'nominal', 'noted']),
+            [
+                'date'     => $request->date . ' ' . now()->format('H:i:s'),
+                'mobil_id' => $request->mobil_id ?: null,
+            ]
         ));
 
         return response()->json(['message' => 'Expense berhasil diupdate.']);
