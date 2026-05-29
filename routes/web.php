@@ -219,6 +219,7 @@ Route::middleware('auth.jwt')->group(function () {
     Route::middleware('finance.only')->group(function () {
 
     // Gaji (Karyawan Master)
+    Route::get('/gaji/print', [GajiController::class, 'printReport'])->name('gaji.print');
     Route::get('/gaji/data', [GajiController::class, 'data'])->name('gaji.data');
     Route::get('/gaji/summary-stats', [GajiController::class, 'summaryStats'])->name('gaji.summary-stats');
     Route::get('/gaji/trash', [GajiController::class, 'trash'])->name('gaji.trash');
@@ -241,6 +242,7 @@ Route::middleware('auth.jwt')->group(function () {
     Route::get('/gaji/slip/{slip}/print', [GajiSlipController::class, 'print'])->name('gaji.slip.print');
 
     // Uang Koordinasi
+    Route::get('/uang-koordinasi/print', [UangKoordinasiController::class, 'printReport'])->name('uang-koordinasi.print');
     Route::get('/uang-koordinasi/data', [UangKoordinasiController::class, 'data'])->name('uang-koordinasi.data');
     Route::get('/uang-koordinasi/trash', [UangKoordinasiController::class, 'trash'])->name('uang-koordinasi.trash');
     Route::get('/uang-koordinasi/trash-data', [UangKoordinasiController::class, 'trashData'])->name('uang-koordinasi.trash-data');

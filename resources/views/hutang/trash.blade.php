@@ -49,7 +49,7 @@ $(document).ready(function () {
     $('#hutangTrashTable').DataTable({
         ajax: { url: '{{ route('hutang.trash-data') }}', type: 'GET' },
         columns: [
-            { data: 'date' },
+            { data: 'date', render: (d, t, r) => t === 'sort' ? r.date_raw : d },
             { data: 'nama' },
             { data: 'description' },
             { data: 'nominal', render: d => Currency.symbol + ' ' + d },

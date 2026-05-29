@@ -167,7 +167,7 @@ $(document).ready(function () {
     usageTable = $('#usageTable').DataTable({
         ajax: { url: '{{ route('stock-usage.data') }}', type: 'GET' },
         columns: [
-            { data: 'date' },
+            { data: 'date', render: (d, t, r) => t === 'sort' ? r.date_raw : d },
             { data: 'kapal' },
             { data: 'warna', render: d => WARNA_BADGE[d] || d },
             { data: 'quantity' },

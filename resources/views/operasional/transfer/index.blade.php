@@ -175,7 +175,7 @@ $(document).ready(function () {
     transferTable = $('#transferTable').DataTable({
         ajax: { url: '{{ route('stock-transfer.data') }}', type: 'GET' },
         columns: [
-            { data: 'date' },
+            { data: 'date', render: (d, t, r) => t === 'sort' ? r.date_raw : d },
             { data: 'from_kapal' },
             { data: 'to_kapal' },
             { data: 'warna', render: d => WARNA_BADGE[d] || d },

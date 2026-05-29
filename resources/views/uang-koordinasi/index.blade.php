@@ -13,6 +13,10 @@
             <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
             Trash
         </a>
+        <button class="btn btn-secondary" onclick="openPrintModal()">
+            <i data-lucide="printer" style="width:16px;height:16px;"></i>
+            Print
+        </button>
         @if(auth()->user()->canManagePayroll())
         <button class="btn btn-primary" onclick="openCreateModal()">
             <i data-lucide="plus" style="width:16px;height:16px;"></i>
@@ -87,6 +91,77 @@
                     </tr>
                 </thead>
             </table>
+        </div>
+    </div>
+</div>
+
+{{-- Print Modal --}}
+<div class="modal-overlay" id="printModal">
+    <div class="modal-box" style="max-width:460px;">
+        <div class="modal-header">
+            <h3 class="modal-title">Print Laporan Uang Koordinasi</h3>
+            <button class="modal-close-btn" onclick="closePrintModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Tanggal Dari</label>
+                    <input type="date" id="printFrom" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Tanggal Sampai</label>
+                    <input type="date" id="printTo" class="form-input">
+                </div>
+                <div class="form-group full">
+                    <label class="form-label">Kategori Biaya</label>
+                    <select id="printKategori" class="form-input">
+                        <option value="">-- Semua Kategori --</option>
+                        <option value="operational_koordinasi">Operational koordinasi</option>
+                        <option value="operational_pengambilan">Operational pengambilan</option>
+                        <option value="bantuan_operational">Bantuan operational</option>
+                        <option value="operational_lainnya">Operational lainnya</option>
+                    </select>
+                </div>
+                <div class="form-group full">
+                    <label class="form-label">Status</label>
+                    <select id="printStatus" class="form-input">
+                        <option value="">-- Semua Status --</option>
+                        <option value="approved">Approved</option>
+                        <option value="pending">Pending</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-danger" onclick="closePrintModal()">Batal</button>
+            <button class="btn btn-primary" onclick="doPreview()">
+                <i data-lucide="eye" style="width:14px;height:14px;"></i>
+                Preview
+            </button>
+        </div>
+    </div>
+</div>
+
+{{-- Print Preview Modal --}}
+<div class="modal-overlay" id="printPreviewModal">
+    <div class="modal-box" style="max-width:72rem;width:95%;height:90vh;display:flex;flex-direction:column;overflow:hidden;">
+        <div class="modal-header">
+            <h3 class="modal-title">Preview Print</h3>
+            <button class="modal-close-btn" onclick="closePreviewModal()">&times;</button>
+        </div>
+        <div style="flex:1;overflow:hidden;min-height:0;">
+            <iframe id="ukPreviewFrame" src="" style="width:100%;height:100%;border:none;display:block;"></iframe>
+        </div>
+        <div class="modal-footer">
+            <button class="btn" onclick="closePreviewModal()">
+                <i data-lucide="x" style="width:15px;height:15px;"></i>
+                Tutup
+            </button>
+            <button class="btn btn-primary" onclick="doPrint()">
+                <i data-lucide="printer" style="width:15px;height:15px;"></i>
+                Print
+            </button>
         </div>
     </div>
 </div>
@@ -205,6 +280,42 @@
 <script>
     let table;
     let editId = null;
+
+    // ── Print ───────────────────────────────────────────────────────────────────
+    const printModal   = document.getElementById('printModal');
+    const previewModal = document.getElementById('printPreviewModal');
+    const previewFrame = document.getElementById('ukPreviewFrame');
+
+    function openPrintModal()   { printModal.classList.add('active'); }
+    function closePrintModal()  { printModal.classList.remove('active'); }
+    function closePreviewModal() {
+        previewModal.classList.remove('active');
+        previewFrame.src = '';
+    }
+
+    function buildPrintUrl() {
+        const from    = document.getElementById('printFrom').value;
+        const to      = document.getElementById('printTo').value;
+        const kategori = document.getElementById('printKategori').value;
+        const status  = document.getElementById('printStatus').value;
+        const params  = new URLSearchParams();
+        if (from)    params.set('from', from);
+        if (to)      params.set('to', to);
+        if (kategori) params.set('kategori_biaya', kategori);
+        if (status)  params.set('status', status);
+        return '{{ route('uang-koordinasi.print') }}?' + params.toString();
+    }
+
+    function doPreview() {
+        closePrintModal();
+        previewFrame.src = buildPrintUrl();
+        previewModal.classList.add('active');
+        lucide.createIcons();
+    }
+
+    function doPrint() {
+        previewFrame.contentWindow.print();
+    }
     const createModal = document.getElementById('createModal');
     const editModal   = document.getElementById('editModal');
     const createForm  = document.getElementById('createForm');
@@ -256,11 +367,11 @@
                 { data: 'nama' },
                 { data: 'jabatan' },
                 { data: 'kategori_biaya', render: d => d && d !== '-' ? (kategoriBiayaLabel[d] || d) : '-' },
-                { data: 'nominal' },
-                { data: 'extra' },
-                { data: 'total' },
+                { data: 'nominal', render: (d, t, r) => t === 'sort' ? r.nominal_raw : d },
+                { data: 'extra',   render: (d, t, r) => t === 'sort' ? r.extra_raw   : d },
+                { data: 'total',   render: (d, t, r) => t === 'sort' ? r.total_raw   : d },
                 { data: 'noted' },
-                { data: 'status', render: d => statusBadge[d] || d },
+                { data: 'status', render: (d, t) => t === 'sort' ? d : (statusBadge[d] || d) },
                 {
                     data: null, orderable: false, searchable: false,
                     render: function(data, type, row) {

@@ -190,6 +190,7 @@ $(document).ready(function () {
               }
             }
         ],
+        order: [[0, 'desc']],
         drawCallback: function () { updateSummary(this.api()); }
     });
 

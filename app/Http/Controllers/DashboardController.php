@@ -8,6 +8,7 @@ use App\Models\Expense;
 use App\Models\Lori;
 use App\Models\Stock;
 use App\Models\PettyCashTransaction;
+use App\Models\UangKoordinasi;
 
 class DashboardController extends Controller
 {
@@ -24,9 +25,11 @@ class DashboardController extends Controller
         $purchaseAmt = (float) Purchase::whereIn('status', ['approved', 'paid'])->whereYear('date', $thisYear)->whereMonth('date', $thisMonth)->sum('amount');
         $expenseAmt  = (float) Expense::whereYear('date', $thisYear)->whereMonth('date', $thisMonth)->sum('nominal');
         $pcDebitAmt  = (float) PettyCashTransaction::where('type', 'out')->whereYear('date', $thisYear)->whereMonth('date', $thisMonth)->sum('amount');
+        $ukAmt       = (float) UangKoordinasi::where('status', 'approved')->whereYear('date', $thisYear)->whereMonth('date', $thisMonth)->sum('total');
         $totalExpenseAmt = $expenseAmt + $pcDebitAmt;
         $loriAmt     = (float) Lori::whereYear('date', $thisYear)->whereMonth('date', $thisMonth)->sum('price');
-        $profitAmt   = $salesAmt - $purchaseAmt - $totalExpenseAmt;
+        // Penjualan - Pembelian - Petty Cash Pemakaian - Uang Koordinasi - Expenses Ship
+        $profitAmt   = $salesAmt - $purchaseAmt - $pcDebitAmt - $ukAmt - $expenseAmt;
         $stockBal = Stock::currentBalance();
 
         $purchaseByWarna = Stock::where('type', 'purchase')
@@ -64,9 +67,13 @@ class DashboardController extends Controller
         $chartLabels   = $chartMonths->map(fn($m) => $m->translatedFormat('M Y'))->values();
         $chartSales    = $chartMonths->map(fn($m) => (float) Sale::whereIn('status', ['approved', 'paid'])->whereYear('date', $m->year)->whereMonth('date', $m->month)->sum('amount'))->values();
         $chartPurchase = $chartMonths->map(fn($m) => (float) Purchase::whereIn('status', ['approved', 'paid'])->whereYear('date', $m->year)->whereMonth('date', $m->month)->sum('amount'))->values();
-        $chartProfit   = $chartSales->zip($chartPurchase)->map(function ($pair) use ($chartMonths) {
-            [$s, $p] = $pair;
-            return round($s - $p, 2);
+        $chartProfit   = $chartMonths->map(function ($m) {
+            $s  = (float) Sale::whereIn('status', ['approved', 'paid'])->whereYear('date', $m->year)->whereMonth('date', $m->month)->sum('amount');
+            $p  = (float) Purchase::whereIn('status', ['approved', 'paid'])->whereYear('date', $m->year)->whereMonth('date', $m->month)->sum('amount');
+            $e  = (float) Expense::whereYear('date', $m->year)->whereMonth('date', $m->month)->sum('nominal');
+            $pc = (float) PettyCashTransaction::where('type', 'out')->whereYear('date', $m->year)->whereMonth('date', $m->month)->sum('amount');
+            $uk = (float) UangKoordinasi::where('status', 'approved')->whereYear('date', $m->year)->whereMonth('date', $m->month)->sum('total');
+            return round($s - $p - $e - $pc - $uk, 2);
         })->values();
 
         // ── Expenses by category (this month) ───────────────────────

@@ -41,7 +41,7 @@ class SaleController extends Controller
     {
         return response()->json([
             'id'             => $sale->id,
-            'date'           => $sale->date->format('Y-m-d'),
+            'date'           => $sale->date->format('Y-m-d H:i:s'),
             'invoice_number' => $sale->invoice_number,
             'customer_id'    => $sale->customer_id,
             'customer_name'  => $sale->customer->name,
@@ -62,7 +62,7 @@ class SaleController extends Controller
                 'id'             => $s->id,
                 'kapal_id'       => $s->kapal_id,
                 'date'           => $this->resolveDate($s)->translatedFormat('d M Y H:i'),
-                'date_raw'       => $s->date->format('Y-m-d'),
+                'date_raw'       => $s->date->format('Y-m-d H:i:s'),
                 'invoice_number' => $s->invoice_number,
                 'customer_id'    => $s->customer_id,
                 'customer_name'  => $s->customer->name,
@@ -320,7 +320,7 @@ class SaleController extends Controller
             'id'              => $s->id,
             'kapal_id'        => $s->kapal_id,
             'date'            => $this->resolveDate($s)->translatedFormat('d M Y H:i'),
-            'date_raw'        => $s->date->format('Y-m-d'),
+            'date_raw'        => $s->date->format('Y-m-d H:i:s'),
             'invoice_number'  => $s->invoice_number,
             'customer_name'   => $s->customer->name ?? '-',
             'description'     => $s->description ?? '',

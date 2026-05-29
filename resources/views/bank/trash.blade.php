@@ -47,7 +47,7 @@ $(document).ready(function () {
         ajax: { url: '{{ route('bank.trash-data') }}', type: 'GET' },
         processing: true,
         columns: [
-            { data: 'date' },
+            { data: 'date', render: (d, t, r) => t === 'sort' ? r.date_raw : d },
             { data: 'description' },
             { data: 'note' },
             { data: 'job' },

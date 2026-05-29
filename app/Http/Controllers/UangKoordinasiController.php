@@ -19,7 +19,7 @@ class UangKoordinasiController extends Controller
             $items = UangKoordinasi::orderBy('date', 'desc')->get()->map(fn($u) => [
                 'id'             => $u->id,
                 'date'           => $this->resolveDate($u)->translatedFormat('d M Y H:i'),
-                'date_raw'       => $u->date->format('Y-m-d'),
+                'date_raw'       => $u->date->format('Y-m-d H:i:s'),
                 'nama'           => $u->nama,
                 'jabatan'        => $u->jabatan ?? '-',
                 'kategori_biaya' => $u->kategori_biaya ?? '-',
@@ -182,6 +182,32 @@ class UangKoordinasiController extends Controller
         return response()->json(['message' => 'Uang koordinasi berhasil ditolak.']);
     }
 
+    public function printReport(Request $request)
+    {
+        $from     = $request->from;
+        $to       = $request->to;
+        $kategori = $request->kategori_biaya;
+        $status   = $request->status;
+
+        $query = UangKoordinasi::orderBy('date', 'asc');
+
+        if ($from)    $query->whereDate('date', '>=', $from);
+        if ($to)      $query->whereDate('date', '<=', $to);
+        if ($kategori) $query->where('kategori_biaya', $kategori);
+        if ($status)  $query->where('status', $status);
+
+        $items = $query->get();
+
+        $kategoriBiayaLabel = [
+            'operational_koordinasi'  => 'Operational koordinasi',
+            'operational_pengambilan' => 'Operational pengambilan',
+            'bantuan_operational'     => 'Bantuan operational',
+            'operational_lainnya'     => 'Operational lainnya',
+        ];
+
+        return view('uang-koordinasi.print', compact('items', 'from', 'to', 'kategori', 'status', 'kategoriBiayaLabel'));
+    }
+
     public function trash()
     {
         return view('uang-koordinasi.trash');
@@ -195,7 +221,7 @@ class UangKoordinasiController extends Controller
             ->map(fn($u) => [
                 'id'         => $u->id,
                 'date'       => $this->resolveDate($u)->translatedFormat('d M Y H:i'),
-                'date_raw'   => $u->date->format('Y-m-d'),
+                'date_raw'   => $u->date->format('Y-m-d H:i:s'),
                 'nama'       => $u->nama,
                 'jabatan'    => $u->jabatan ?? '-',
                 'total'      => number_format($u->total, 0, ',', '.'),

@@ -95,7 +95,7 @@ $warnaMap = ['biru' => ['#2563eb','Biru'], 'kuning' => ['#ca8a04','Kuning']];
                 </div>
                 <div class="dash-stat__trend flat">
                     <i data-lucide="calculator"></i>
-                    Sales − Purchase − Expenses
+                    Penjualan − Pembelian − Petty Cash − Koordinasi − Expenses
                 </div>
             </div>
         </div>

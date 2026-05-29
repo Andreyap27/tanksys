@@ -17,7 +17,7 @@ class HutangController extends Controller
         $rows = Hutang::orderBy('date', 'desc')->get()->map(fn($h) => [
             'id'          => $h->id,
             'date'        => $this->resolveDate($h)->translatedFormat('d M Y H:i'),
-            'date_raw'    => $h->date->format('Y-m-d'),
+            'date_raw'    => $h->date->format('Y-m-d H:i:s'),
             'nama'        => $h->nama,
             'description' => $h->description,
             'nominal'     => number_format($h->nominal, 0, ',', '.'),

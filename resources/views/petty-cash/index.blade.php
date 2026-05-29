@@ -118,7 +118,7 @@ $(document).ready(function () {
                 }
             }
         ],
-        order: [[0, 'asc']],
+        order: [[0, 'desc']],
         drawCallback: function () { lucide.createIcons(); }
     });
 });

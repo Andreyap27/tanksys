@@ -208,7 +208,8 @@
             },
             processing: true,
             columns: [{
-                    data: 'date'
+                    data: 'date',
+                    render: (d, t, r) => t === 'sort' ? r.date_raw : d
                 },
                 {
                     data: 'customer_name'

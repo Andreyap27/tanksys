@@ -17,7 +17,7 @@ class PiutangController extends Controller
         $rows = Piutang::orderBy('date', 'desc')->get()->map(fn($p) => [
             'id'          => $p->id,
             'date'        => $this->resolveDate($p)->translatedFormat('d M Y H:i'),
-            'date_raw'    => $p->date->format('Y-m-d'),
+            'date_raw'    => $p->date->format('Y-m-d H:i:s'),
             'nama'        => $p->nama,
             'description' => $p->description,
             'nominal'     => number_format($p->nominal, 0, ',', '.'),

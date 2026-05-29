@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GajiSlip;
 use App\Models\Karyawan;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -10,7 +11,31 @@ class GajiController extends Controller
 {
     public function index()
     {
-        return view('gaji.index');
+        $jabatans = Karyawan::whereNotNull('jabatan')->where('jabatan', '!=', '')
+            ->distinct()->orderBy('jabatan')->pluck('jabatan');
+        return view('gaji.index', compact('jabatans'));
+    }
+
+    public function printReport(Request $request)
+    {
+        $from    = $request->from;
+        $to      = $request->to;
+        $jabatan = $request->jabatan;
+
+        $query = GajiSlip::with('karyawan')->orderBy('period', 'asc');
+
+        if ($from) {
+            $query->where('period', '>=', $from . '-01');
+        }
+        if ($to) {
+            $query->where('period', '<=', Carbon::parse($to . '-01')->endOfMonth()->toDateString());
+        }
+        if ($jabatan) {
+            $query->whereHas('karyawan', fn($q) => $q->where('jabatan', $jabatan));
+        }
+
+        $slips = $query->get();
+        return view('gaji.print-report', compact('slips', 'from', 'to', 'jabatan'));
     }
 
     public function create()

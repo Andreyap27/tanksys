@@ -13,6 +13,10 @@
             <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
             Trash
         </a>
+        <button class="btn btn-secondary" onclick="openPrintModal()">
+            <i data-lucide="printer" style="width:16px;height:16px;"></i>
+            Print
+        </button>
         @if(auth()->user()->canManagePayroll())
         <a href="{{ route('gaji.create') }}" class="btn btn-primary">
             <i data-lucide="plus" style="width:16px;height:16px;"></i>
@@ -88,6 +92,67 @@
     </div>
 </div>
 
+{{-- Print Modal --}}
+<div class="modal-overlay" id="printModal">
+    <div class="modal-box" style="max-width:460px;">
+        <div class="modal-header">
+            <h3 class="modal-title">Print Laporan Gaji</h3>
+            <button class="modal-close-btn" onclick="closePrintModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Period Dari</label>
+                    <input type="month" id="printFrom" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Period Sampai</label>
+                    <input type="month" id="printTo" class="form-input">
+                </div>
+                <div class="form-group full">
+                    <label class="form-label">Jabatan (Kategori)</label>
+                    <select id="printJabatan" class="form-input">
+                        <option value="">-- Semua Jabatan --</option>
+                        @foreach($jabatans as $j)
+                        <option value="{{ $j }}">{{ $j }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-danger" onclick="closePrintModal()">Batal</button>
+            <button class="btn btn-primary" onclick="doPreview()">
+                <i data-lucide="eye" style="width:14px;height:14px;"></i>
+                Preview
+            </button>
+        </div>
+    </div>
+</div>
+
+{{-- Print Preview Modal --}}
+<div class="modal-overlay" id="printPreviewModal">
+    <div class="modal-box" style="max-width:72rem;width:95%;height:90vh;display:flex;flex-direction:column;overflow:hidden;">
+        <div class="modal-header">
+            <h3 class="modal-title">Preview Print</h3>
+            <button class="modal-close-btn" onclick="closePreviewModal()">&times;</button>
+        </div>
+        <div style="flex:1;overflow:hidden;min-height:0;">
+            <iframe id="gajiPreviewFrame" src="" style="width:100%;height:100%;border:none;display:block;"></iframe>
+        </div>
+        <div class="modal-footer">
+            <button class="btn" onclick="closePreviewModal()">
+                <i data-lucide="x" style="width:15px;height:15px;"></i>
+                Tutup
+            </button>
+            <button class="btn btn-primary" onclick="doPrint()">
+                <i data-lucide="printer" style="width:15px;height:15px;"></i>
+                Print
+            </button>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
@@ -159,6 +224,40 @@
             document.getElementById('cardTotalPinjaman').textContent = 'Rp ' + Currency.number(res.data.total_pinjaman_aktif);
         })
         .catch(() => {});
+
+    // ── Print ───────────────────────────────────────────────────────────────────
+    const printModal   = document.getElementById('printModal');
+    const previewModal = document.getElementById('printPreviewModal');
+    const previewFrame = document.getElementById('gajiPreviewFrame');
+
+    function openPrintModal()   { printModal.classList.add('active'); }
+    function closePrintModal()  { printModal.classList.remove('active'); }
+    function closePreviewModal() {
+        previewModal.classList.remove('active');
+        previewFrame.src = '';
+    }
+
+    function buildPrintUrl() {
+        const from    = document.getElementById('printFrom').value;
+        const to      = document.getElementById('printTo').value;
+        const jabatan = document.getElementById('printJabatan').value;
+        const params  = new URLSearchParams();
+        if (from)    params.set('from', from);
+        if (to)      params.set('to', to);
+        if (jabatan) params.set('jabatan', jabatan);
+        return '{{ route('gaji.print') }}?' + params.toString();
+    }
+
+    function doPreview() {
+        closePrintModal();
+        previewFrame.src = buildPrintUrl();
+        previewModal.classList.add('active');
+        lucide.createIcons();
+    }
+
+    function doPrint() {
+        previewFrame.contentWindow.print();
+    }
 
     // ── Delete ──────────────────────────────────────────────────────────────────
     function deleteKaryawan(id, nama) {
