@@ -145,7 +145,8 @@
     }
 
     function refreshCapitalSummary(kapalId) {
-        const params = {};
+        const _n = new Date();
+        const params = { month: _n.getMonth() + 1, year: _n.getFullYear() };
         if (kapalId) params.kapal_id = kapalId;
         axios.get('{{ route('capital.summary') }}', { params }).then(res => {
             document.getElementById('capitalAldive').textContent = 'Rp ' + Currency.number(res.data.pt_aldive);

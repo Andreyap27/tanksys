@@ -41,6 +41,9 @@ class CapitalController extends Controller
         $kapalId = request('kapal_id');
         $query   = Capital::where('status', 'approved');
         if ($kapalId) $query->where('kapal_id', $kapalId);
+        if (request('month') && request('year')) {
+            $query->whereMonth('date', request('month'))->whereYear('date', request('year'));
+        }
 
         $totals = $query->selectRaw('name, SUM(nominal) as total')
             ->groupBy('name')
