@@ -44,6 +44,9 @@ class LoriExpenseController extends Controller
         if ($mobilId) {
             $query->where('mobil_id', $mobilId);
         }
+        if (request('month') && request('year')) {
+            $query->whereMonth('date', request('month'))->whereYear('date', request('year'));
+        }
 
         $kredit = (float) (clone $query)->where('type', 'in')->sum('nominal');
         $debit  = (float) (clone $query)->where('type', 'out')->sum('nominal');

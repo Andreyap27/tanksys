@@ -215,7 +215,10 @@
     function updateSalesSummary(api) {
         const rows = api.rows({ search: 'applied' }).data();
         let totalAmount = 0, qtyTotal = 0, qtyBiru = 0, qtyKuning = 0;
+        const _now = new Date(), _cy = _now.getFullYear(), _cm = _now.getMonth() + 1;
         for (let i = 0; i < rows.length; i++) {
+            const _d = new Date((rows[i].date_raw || '').replace(' ', 'T'));
+            if (_d.getFullYear() !== _cy || (_d.getMonth() + 1) !== _cm) continue;
             if (rows[i].status === 'approved' || rows[i].status === 'paid') {
                 totalAmount += parseFloat(rows[i].amount_raw) || 0;
                 const qty = (parseFloat(rows[i].quantity_raw) || 0) + (parseFloat(rows[i].extra_raw) || 0) - (parseFloat(rows[i].short_raw) || 0);

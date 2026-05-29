@@ -411,7 +411,10 @@
     function updateSummary(api) {
         const rows = api.rows({ search: 'applied' }).data();
         let totalApproved = 0, countApproved = 0, totalPending = 0, countPending = 0;
+        const _now = new Date(), _cy = _now.getFullYear(), _cm = _now.getMonth() + 1;
         for (let i = 0; i < rows.length; i++) {
+            const _d = new Date((rows[i].date_raw || '').replace(' ', 'T'));
+            if (_d.getFullYear() !== _cy || (_d.getMonth() + 1) !== _cm) continue;
             const tot = parseFloat(rows[i].total_raw) || 0;
             if (rows[i].status === 'approved') { totalApproved += tot; countApproved++; }
             else if (rows[i].status === 'pending') { totalPending += tot; countPending++; }

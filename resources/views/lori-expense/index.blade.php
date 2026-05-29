@@ -161,7 +161,8 @@
     }
 
     function refreshLoriExpSummary(mobilId) {
-        const params = {};
+        const _n = new Date();
+        const params = { month: _n.getMonth() + 1, year: _n.getFullYear() };
         if (mobilId) params.mobil_id = mobilId;
         axios.get('{{ route('lori-expense.summary') }}', {
                 params

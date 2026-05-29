@@ -87,10 +87,8 @@ class DashboardController extends Controller
         $recentSales    = Sale::with('customer')->latest('date')->limit(5)->get();
         $recentExpenses = Expense::latest('date')->limit(5)->get();
 
-        $expenseAmt = $totalExpenseAmt;
-
         return view('dashboard.index', compact(
-            'salesAmt', 'purchaseAmt', 'expenseAmt', 'loriAmt', 'profitAmt', 'stockBal',
+            'salesAmt', 'purchaseAmt', 'expenseAmt', 'pcDebitAmt', 'ukAmt', 'loriAmt', 'profitAmt', 'stockBal',
             'purchaseLtr', 'saleLtr', 'purchaseByWarna', 'saleByWarna', 'saldoByWarna',
             'salesTrend', 'purchaseTrend',
             'chartLabels', 'chartSales', 'chartPurchase', 'chartProfit',

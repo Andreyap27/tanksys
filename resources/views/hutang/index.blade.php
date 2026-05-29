@@ -135,7 +135,10 @@ function escHtml(str) {
 function updateSummary(api) {
     const rows = api.rows({ search: 'applied' }).data();
     let pending = 0, pendingC = 0, approved = 0, approvedC = 0, paid = 0, paidC = 0;
+    const _now = new Date(), _cy = _now.getFullYear(), _cm = _now.getMonth() + 1;
     for (let i = 0; i < rows.length; i++) {
+        const _d = new Date((rows[i].date_raw || '').replace(' ', 'T'));
+        if (_d.getFullYear() !== _cy || (_d.getMonth() + 1) !== _cm) continue;
         const amt = parseFloat(rows[i].nominal_raw) || 0;
         if (rows[i].status === 'pending')  { pending  += amt; pendingC++;  }
         if (rows[i].status === 'approved') { approved += amt; approvedC++; }

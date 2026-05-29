@@ -171,7 +171,8 @@ function switchPcTab(btn, pcId) {
 }
 
 function refreshSummary(pcId) {
-    const params = {};
+    const _n = new Date();
+    const params = { month: _n.getMonth() + 1, year: _n.getFullYear() };
     if (pcId) params.petty_cash_id = pcId;
     axios.get('{{ route('petty-cash-transaction.summary') }}', { params }).then(res => {
         document.getElementById('pcKreditCard').textContent  = 'Rp ' + Currency.number(res.data.kredit  || 0);

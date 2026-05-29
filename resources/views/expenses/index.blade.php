@@ -307,7 +307,10 @@
         const rows = api.rows({ search: 'applied' }).data();
         let totalPaid = 0, countPaid = 0;
         let totalUnpaid = 0, countUnpaid = 0;
+        const _now = new Date(), _cy = _now.getFullYear(), _cm = _now.getMonth() + 1;
         for (let i = 0; i < rows.length; i++) {
+            const _d = new Date((rows[i].date_raw || '').replace(' ', 'T'));
+            if (_d.getFullYear() !== _cy || (_d.getMonth() + 1) !== _cm) continue;
             const nom = parseFloat(rows[i].nominal_raw) || 0;
             const st  = rows[i].status;
             if (st === 'paid') {

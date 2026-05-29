@@ -82,6 +82,60 @@ $warnaMap = ['biru' => ['#2563eb','Biru'], 'kuning' => ['#ca8a04','Kuning']];
         <div class="dash-stat__bg-icon"><i data-lucide="arrow-down-to-line" style="width:110px;height:110px;"></i></div>
     </div>
 
+    {{-- Petty Cash Pemakaian --}}
+    <div class="dash-stat ds-expense">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon">
+                <i data-lucide="wallet" style="width:20px;height:20px;"></i>
+            </div>
+            <div>
+                <div class="dash-stat__label">Petty Cash Pemakaian</div>
+                <div class="dash-stat__value">Rp {{ $fmt($pcDebitAmt) }}</div>
+                <div class="dash-stat__trend flat">
+                    <i data-lucide="arrow-right"></i>
+                    Pengeluaran kas kecil
+                </div>
+            </div>
+        </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="wallet" style="width:110px;height:110px;"></i></div>
+    </div>
+
+    {{-- Uang Koordinasi --}}
+    <div class="dash-stat ds-lori">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon">
+                <i data-lucide="handshake" style="width:20px;height:20px;"></i>
+            </div>
+            <div>
+                <div class="dash-stat__label">Uang Koordinasi</div>
+                <div class="dash-stat__value">Rp {{ $fmt($ukAmt) }}</div>
+                <div class="dash-stat__trend flat">
+                    <i data-lucide="arrow-right"></i>
+                    Approved bulan ini
+                </div>
+            </div>
+        </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="handshake" style="width:110px;height:110px;"></i></div>
+    </div>
+
+    {{-- Expenses Kapal --}}
+    <div class="dash-stat ds-capital">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon">
+                <i data-lucide="receipt" style="width:20px;height:20px;"></i>
+            </div>
+            <div>
+                <div class="dash-stat__label">Expenses Kapal</div>
+                <div class="dash-stat__value">Rp {{ $fmt($expenseAmt) }}</div>
+                <div class="dash-stat__trend flat">
+                    <i data-lucide="layers"></i>
+                    {{ $expByCategory->count() }} kategori
+                </div>
+            </div>
+        </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="receipt" style="width:110px;height:110px;"></i></div>
+    </div>
+
     {{-- Profit / Loss --}}
     <div class="dash-stat {{ $profitClass }}">
         <div class="dash-stat__header">
@@ -102,25 +156,14 @@ $warnaMap = ['biru' => ['#2563eb','Biru'], 'kuning' => ['#ca8a04','Kuning']];
         <div class="dash-stat__bg-icon"><i data-lucide="{{ $profitIcon }}" style="width:110px;height:110px;"></i></div>
     </div>
 
-    {{-- Expenses --}}
-    <div class="dash-stat ds-expense">
-        <div class="dash-stat__header">
-            <div class="dash-stat__icon">
-                <i data-lucide="receipt" style="width:20px;height:20px;"></i>
-            </div>
-            <div>
-                <div class="dash-stat__label">Pengeluaran Bulan Ini</div>
-                <div class="dash-stat__value">Rp {{ $fmt($expenseAmt) }}</div>
-                <div class="dash-stat__trend flat">
-                    <i data-lucide="layers"></i>
-                    {{ $expByCategory->count() }} kategori pengeluaran
-                </div>
-            </div>
-        </div>
-        <div class="dash-stat__bg-icon"><i data-lucide="receipt" style="width:110px;height:110px;"></i></div>
-    </div>
+</div>
 
-    {{-- Lori --}}
+{{-- Lori --}}
+<div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
+    <span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted-foreground);white-space:nowrap;">Mobil Tangki Bulan Ini</span>
+    <div style="flex:1;height:1px;background:var(--border);"></div>
+</div>
+<div class="dash-grid" style="margin-bottom:1.5rem;">
     <div class="dash-stat ds-lori">
         <div class="dash-stat__header">
             <div class="dash-stat__icon">
@@ -137,7 +180,6 @@ $warnaMap = ['biru' => ['#2563eb','Biru'], 'kuning' => ['#ca8a04','Kuning']];
         </div>
         <div class="dash-stat__bg-icon"><i data-lucide="truck" style="width:110px;height:110px;"></i></div>
     </div>
-
 </div>
 
 {{-- ── Section: Stok BBM ────────────────────────────────────────────────────── --}}

@@ -39,6 +39,9 @@ class PettyCashTransactionController extends Controller
         if (request('petty_cash_id')) {
             $query->where('petty_cash_id', request('petty_cash_id'));
         }
+        if (request('month') && request('year')) {
+            $query->whereMonth('date', request('month'))->whereYear('date', request('year'));
+        }
         $rows  = $query->get();
         $kredit = $rows->where('type', 'in')->sum('amount');
         $debit  = $rows->where('type', 'out')->sum('amount');

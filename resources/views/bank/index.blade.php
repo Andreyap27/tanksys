@@ -210,7 +210,10 @@
             incomeCount = 0,
             expense = 0,
             expenseCount = 0;
+        const _now = new Date(), _cy = _now.getFullYear(), _cm = _now.getMonth() + 1;
         for (let i = 0; i < rows.length; i++) {
+            const _d = new Date((rows[i].date_raw || '').replace(' ', 'T'));
+            if (_d.getFullYear() !== _cy || (_d.getMonth() + 1) !== _cm) continue;
             const amt = parseFloat(rows[i].amount_raw) || 0;
             if (rows[i].type === 'in') {
                 income += amt;
