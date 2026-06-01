@@ -35,20 +35,25 @@ class PettyCashTransactionController extends Controller
 
     public function summary()
     {
-        $query = PettyCashTransaction::query();
+        $base = PettyCashTransaction::query();
         if (request('petty_cash_id')) {
-            $query->where('petty_cash_id', request('petty_cash_id'));
+            $base->where('petty_cash_id', request('petty_cash_id'));
         }
+        // rolling balance — all time
+        $allRows = (clone $base)->get();
+        $balance = $allRows->where('type', 'in')->sum('amount')
+                 - $allRows->where('type', 'out')->sum('amount');
+        // monthly in/out
         if (request('month') && request('year')) {
-            $query->whereMonth('date', request('month'))->whereYear('date', request('year'));
+            $base->whereMonth('date', request('month'))->whereYear('date', request('year'));
         }
-        $rows  = $query->get();
+        $rows   = $base->get();
         $kredit = $rows->where('type', 'in')->sum('amount');
         $debit  = $rows->where('type', 'out')->sum('amount');
         return response()->json([
             'kredit'  => $kredit,
             'debit'   => $debit,
-            'balance' => $kredit - $debit,
+            'balance' => $balance,
         ]);
     }
 

@@ -203,34 +203,27 @@
 
     // ── Summary ───────────────────────────────────────────────────────────────────
     function updateBankSummary(api) {
-        const rows = api.rows({
-            search: 'applied'
-        }).data();
-        let income = 0,
-            incomeCount = 0,
-            expense = 0,
-            expenseCount = 0;
+        const rows = api.rows({ search: 'applied' }).data();
+        let income = 0, incomeCount = 0, expense = 0, expenseCount = 0;
+        let allIn = 0, allOut = 0;
         const _now = new Date(), _cy = _now.getFullYear(), _cm = _now.getMonth() + 1;
         for (let i = 0; i < rows.length; i++) {
+            const amt = parseFloat(rows[i].amount_raw) || 0;
+            // rolling balance — all rows
+            if (rows[i].type === 'in') allIn += amt;
+            else allOut += amt;
+            // monthly in/out
             const _d = new Date((rows[i].date_raw || '').replace(' ', 'T'));
             if (_d.getFullYear() !== _cy || (_d.getMonth() + 1) !== _cm) continue;
-            const amt = parseFloat(rows[i].amount_raw) || 0;
-            if (rows[i].type === 'in') {
-                income += amt;
-                incomeCount++;
-            } else {
-                expense += amt;
-                expenseCount++;
-            }
+            if (rows[i].type === 'in') { income += amt; incomeCount++; }
+            else { expense += amt; expenseCount++; }
         }
-        const balance = income - expense;
-
+        const balance = allIn - allOut;
         document.getElementById('bankIncomeCard').textContent = 'Rp ' + Currency.number(income);
         document.getElementById('bankIncomeCountCard').textContent = incomeCount;
         document.getElementById('bankExpenseCard').textContent = 'Rp ' + Currency.number(expense);
         document.getElementById('bankExpenseCountCard').textContent = expenseCount;
         document.getElementById('bankBalanceCard').textContent = 'Rp ' + Currency.number(balance);
-
         const wrapper = document.getElementById('bankBalanceCardWrapper');
         wrapper.classList.remove('ds-profit', 'ds-loss');
         wrapper.classList.add(balance >= 0 ? 'ds-profit' : 'ds-loss');
