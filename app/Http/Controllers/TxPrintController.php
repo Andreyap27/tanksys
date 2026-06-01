@@ -29,6 +29,7 @@ class TxPrintController extends Controller
         $kapalId   = $request->input('kapal_id')  ?: null;
         $mobilId   = $request->input('mobil_id')  ?: null;
         $pcId      = $request->input('petty_cash_id') ?: null;
+        $type      = $request->input('type') ?: null;
 
         $kapalName = $kapalId ? optional(Kapal::find($kapalId))->name : null;
         $mobilName = $mobilId ? optional(Mobil::find($mobilId))->name : null;
@@ -94,8 +95,9 @@ class TxPrintController extends Controller
                 if ($kapalId)  $q->where('kapal_id', $kapalId);
                 if ($dateFrom) $q->whereDate('date', '>=', $dateFrom);
                 if ($dateTo)   $q->whereDate('date', '<=', $dateTo);
+                if ($type)     $q->where('type', $type);
                 $data['rows'] = $q->get();
-                $data['title'] = 'Data Expenses Ship';
+                $data['title'] = 'Data Expenses Ship' . ($type ? ' (' . ucfirst($type) . ')' : '');
                 break;
 
             case 'petty-cash':

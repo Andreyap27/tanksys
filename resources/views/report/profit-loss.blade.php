@@ -11,13 +11,15 @@
     ];
     $fmt = fn($n) => number_format((float)$n, 0, ',', '.');
 
-    $gPur = 0; $gSal = 0; $gExp = 0;
+    $gPur=0; $gSal=0; $gExp=0; $gKoor=0; $gGaji=0;
     foreach (range(1,12) as $m) {
-        $gPur += (float)($purchases->get($m)->total_amount ?? 0);
-        $gSal += (float)($sales->get($m)->total_amount    ?? 0);
-        $gExp += (float)($expensesTotal[$m]               ?? 0);
+        $gPur  += (float)($purchases->get($m)->total_amount ?? 0);
+        $gSal  += (float)($sales->get($m)->total_amount    ?? 0);
+        $gExp  += (float)($expensesTotal[$m]               ?? 0);
+        $gKoor += (float)($koordinasiTotal[$m]             ?? 0);
+        $gGaji += (float)($gajiTotal[$m]                   ?? 0);
     }
-    $gPL = $gSal - $gPur - $gExp;
+    $gPL = $gSal - $gPur - $gExp - $gKoor - $gGaji;
 @endphp
 
 @include('report._header')
@@ -33,23 +35,29 @@
                         <th class="text-right">Total Purchase</th>
                         <th class="text-right">Total Sales</th>
                         <th class="text-right">Total Expenses</th>
+                        <th class="text-right">Total Koordinasi</th>
+                        <th class="text-right">Total Gaji</th>
                         <th class="text-right">Profit / Loss</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($months as $m => $name)
                         @php
-                            $pur     = (float)($purchases->get($m)->total_amount ?? 0);
-                            $sal     = (float)($sales->get($m)->total_amount    ?? 0);
-                            $exp     = (float)($expensesTotal[$m]               ?? 0);
-                            $pl      = $sal - $pur - $exp;
-                            $hasData = $pur || $sal || $exp;
+                            $pur  = (float)($purchases->get($m)->total_amount ?? 0);
+                            $sal  = (float)($sales->get($m)->total_amount    ?? 0);
+                            $exp  = (float)($expensesTotal[$m]               ?? 0);
+                            $koor = (float)($koordinasiTotal[$m]             ?? 0);
+                            $gaji = (float)($gajiTotal[$m]                   ?? 0);
+                            $pl   = $sal - $pur - $exp - $koor - $gaji;
+                            $hasData = $pur || $sal || $exp || $koor || $gaji;
                         @endphp
                         <tr>
                             <td>{{ $name }}</td>
-                            <td class="text-right">{{ $pur ? 'Rp '.$fmt($pur) : '-' }}</td>
-                            <td class="text-right">{{ $sal ? 'Rp '.$fmt($sal) : '-' }}</td>
-                            <td class="text-right">{{ $exp ? 'Rp '.$fmt($exp) : '-' }}</td>
+                            <td class="text-right">{{ $pur  ? 'Rp '.$fmt($pur)  : '-' }}</td>
+                            <td class="text-right">{{ $sal  ? 'Rp '.$fmt($sal)  : '-' }}</td>
+                            <td class="text-right">{{ $exp  ? 'Rp '.$fmt($exp)  : '-' }}</td>
+                            <td class="text-right">{{ $koor ? 'Rp '.$fmt($koor) : '-' }}</td>
+                            <td class="text-right">{{ $gaji ? 'Rp '.$fmt($gaji) : '-' }}</td>
                             <td class="text-right" @if($hasData) style="color:{{ $pl >= 0 ? 'var(--success)' : 'var(--destructive)' }};font-weight:600;" @endif>
                                 @if($hasData) {{ $pl < 0 ? '-' : '' }}Rp {{ $fmt(abs($pl)) }} @else - @endif
                             </td>
@@ -62,6 +70,8 @@
                         <td class="text-right"><strong>Rp {{ $fmt($gPur) }}</strong></td>
                         <td class="text-right"><strong>Rp {{ $fmt($gSal) }}</strong></td>
                         <td class="text-right"><strong>Rp {{ $fmt($gExp) }}</strong></td>
+                        <td class="text-right"><strong>Rp {{ $fmt($gKoor) }}</strong></td>
+                        <td class="text-right"><strong>Rp {{ $fmt($gGaji) }}</strong></td>
                         <td class="text-right" style="color:{{ $gPL >= 0 ? 'var(--success)' : 'var(--destructive)' }};font-weight:700;">
                             <strong>{{ $gPL < 0 ? '-' : '' }}Rp {{ $fmt(abs($gPL)) }}</strong>
                         </td>

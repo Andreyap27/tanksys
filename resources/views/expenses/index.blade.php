@@ -118,7 +118,7 @@
 
 @include('expenses.modals.create')
 @include('expenses.modals.edit')
-@php $txSection='expenses'; $txHasKapal=true; $txHasMobil=false; $txHasPc=false; @endphp
+@php $txSection='expenses'; $txHasKapal=true; $txHasMobil=false; $txHasPc=false; $txHasType=true; @endphp
 @include('print._tx_filter_modal')
 @endsection
 

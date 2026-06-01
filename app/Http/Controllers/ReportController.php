@@ -10,8 +10,10 @@ use App\Models\PettyCashTransaction;
 use App\Models\Purchase;
 use App\Models\Sale;
 use App\Models\Expense;
+use App\Models\GajiSlip;
 use App\Models\Lori;
 use App\Models\LoriExpense;
+use App\Models\UangKoordinasi;
 
 class ReportController extends Controller
 {
@@ -42,14 +44,15 @@ class ReportController extends Controller
         $kapalId  = request('kapal_id') ?: null;
         $kapals   = Kapal::orderBy('code')->get();
 
-        $purchases = Purchase::where('status', 'paid')
-            ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(short) as total_short, SUM(amount) as total_amount')
+        $base = Purchase::selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(short) as total_short, SUM(amount) as total_amount')
             ->whereYear('date', $year)
             ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
-            ->groupBy('month')
-            ->get()->keyBy('month');
+            ->groupBy('month');
 
-        return view('report.purchase', compact('year', 'years', 'purchases', 'kapals', 'kapalId'));
+        $purchasesPaid     = (clone $base)->where('status', 'paid')->get()->keyBy('month');
+        $purchasesApproved = (clone $base)->where('status', 'approved')->get()->keyBy('month');
+
+        return view('report.purchase', compact('year', 'years', 'purchasesPaid', 'purchasesApproved', 'kapals', 'kapalId'));
     }
 
     public function sale()
@@ -59,14 +62,15 @@ class ReportController extends Controller
         $kapalId = request('kapal_id') ?: null;
         $kapals  = Kapal::orderBy('code')->get();
 
-        $sales = Sale::where('status', 'paid')
-            ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(short) as total_short, SUM(amount) as total_amount')
+        $base = Sale::selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(short) as total_short, SUM(amount) as total_amount')
             ->whereYear('date', $year)
             ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
-            ->groupBy('month')
-            ->get()->keyBy('month');
+            ->groupBy('month');
 
-        return view('report.sale', compact('year', 'years', 'sales', 'kapals', 'kapalId'));
+        $salesPaid     = (clone $base)->where('status', 'paid')->get()->keyBy('month');
+        $salesApproved = (clone $base)->where('status', 'approved')->get()->keyBy('month');
+
+        return view('report.sale', compact('year', 'years', 'salesPaid', 'salesApproved', 'kapals', 'kapalId'));
     }
 
     public function expense()
@@ -100,27 +104,34 @@ class ReportController extends Controller
         $kapalId = request('kapal_id') ?: null;
         $kapals  = Kapal::orderBy('code')->get();
 
-        $purchases = Purchase::where('status', 'approved')
+        $purchases = Purchase::whereIn('status', ['approved', 'paid'])
             ->selectRaw('MONTH(date) as month, SUM(amount) as total_amount')
             ->whereYear('date', $year)
             ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
-            ->groupBy('month')
-            ->get()->keyBy('month');
+            ->groupBy('month')->get()->keyBy('month');
 
-        $sales = Sale::where('status', 'approved')
+        $sales = Sale::whereIn('status', ['approved', 'paid'])
             ->selectRaw('MONTH(date) as month, SUM(amount) as total_amount')
             ->whereYear('date', $year)
             ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
-            ->groupBy('month')
-            ->get()->keyBy('month');
+            ->groupBy('month')->get()->keyBy('month');
 
         $expensesTotal = Expense::selectRaw('MONTH(date) as month, SUM(nominal) as total')
             ->whereYear('date', $year)
             ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
-            ->groupBy('month')
-            ->pluck('total', 'month');
+            ->groupBy('month')->pluck('total', 'month');
 
-        return view('report.profit-loss', compact('year', 'years', 'purchases', 'sales', 'expensesTotal', 'kapals', 'kapalId'));
+        $koordinasiTotal = UangKoordinasi::where('status', 'approved')
+            ->selectRaw('MONTH(date) as month, SUM(total) as total')
+            ->whereYear('date', $year)
+            ->groupBy('month')->pluck('total', 'month');
+
+        $gajiTotal = GajiSlip::where('status', 'approved')
+            ->selectRaw('MONTH(period) as month, SUM(total) as total')
+            ->whereYear('period', $year)
+            ->groupBy('month')->pluck('total', 'month');
+
+        return view('report.profit-loss', compact('year', 'years', 'purchases', 'sales', 'expensesTotal', 'koordinasiTotal', 'gajiTotal', 'kapals', 'kapalId'));
     }
 
     public function capital()
@@ -367,21 +378,25 @@ class ReportController extends Controller
 
         switch ($section) {
             case 'purchase':
-                $query = $isTrash ? Purchase::onlyTrashed() : Purchase::where('status', 'paid');
-                $data['purchases'] = $query
-                    ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(short) as total_short, SUM(amount) as total_amount')
-                    ->whereYear('date', $year)
-                    ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
-                    ->groupBy('month')->get()->keyBy('month');
+                if ($isTrash) {
+                    $data['purchasesPaid']     = Purchase::onlyTrashed()->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(short) as total_short, SUM(amount) as total_amount')->whereYear('date', $year)->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))->groupBy('month')->get()->keyBy('month');
+                    $data['purchasesApproved'] = collect();
+                } else {
+                    $pBase = Purchase::selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(short) as total_short, SUM(amount) as total_amount')->whereYear('date', $year)->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))->groupBy('month');
+                    $data['purchasesPaid']     = (clone $pBase)->where('status', 'paid')->get()->keyBy('month');
+                    $data['purchasesApproved'] = (clone $pBase)->where('status', 'approved')->get()->keyBy('month');
+                }
                 $data['title'] = $isTrash ? 'Total Purchase (Trash)' : 'Total Purchase';
                 break;
             case 'sale':
-                $query = $isTrash ? Sale::onlyTrashed() : Sale::where('status', 'paid');
-                $data['sales'] = $query
-                    ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(short) as total_short, SUM(amount) as total_amount')
-                    ->whereYear('date', $year)
-                    ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
-                    ->groupBy('month')->get()->keyBy('month');
+                if ($isTrash) {
+                    $data['salesPaid']     = Sale::onlyTrashed()->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(short) as total_short, SUM(amount) as total_amount')->whereYear('date', $year)->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))->groupBy('month')->get()->keyBy('month');
+                    $data['salesApproved'] = collect();
+                } else {
+                    $sBase = Sale::selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(short) as total_short, SUM(amount) as total_amount')->whereYear('date', $year)->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))->groupBy('month');
+                    $data['salesPaid']     = (clone $sBase)->where('status', 'paid')->get()->keyBy('month');
+                    $data['salesApproved'] = (clone $sBase)->where('status', 'approved')->get()->keyBy('month');
+                }
                 $data['title'] = $isTrash ? 'Total Sale (Trash)' : 'Total Sale';
                 break;
             case 'expense':
@@ -404,12 +419,12 @@ class ReportController extends Controller
                 $data['title'] = $isTrash ? 'Total Expense (Trash)' : 'Total Expense';
                 break;
             case 'profit-loss':
-                $data['purchases'] = Purchase::where('status', 'approved')
+                $data['purchases'] = Purchase::whereIn('status', ['approved', 'paid'])
                     ->selectRaw('MONTH(date) as month, SUM(amount) as total_amount')
                     ->whereYear('date', $year)
                     ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
                     ->groupBy('month')->get()->keyBy('month');
-                $data['sales'] = Sale::where('status', 'approved')
+                $data['sales'] = Sale::whereIn('status', ['approved', 'paid'])
                     ->selectRaw('MONTH(date) as month, SUM(amount) as total_amount')
                     ->whereYear('date', $year)
                     ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
@@ -417,6 +432,14 @@ class ReportController extends Controller
                 $data['expensesTotal'] = Expense::selectRaw('MONTH(date) as month, SUM(nominal) as total')
                     ->whereYear('date', $year)
                     ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
+                    ->groupBy('month')->pluck('total', 'month');
+                $data['koordinasiTotal'] = UangKoordinasi::where('status', 'approved')
+                    ->selectRaw('MONTH(date) as month, SUM(total) as total')
+                    ->whereYear('date', $year)
+                    ->groupBy('month')->pluck('total', 'month');
+                $data['gajiTotal'] = GajiSlip::where('status', 'approved')
+                    ->selectRaw('MONTH(period) as month, SUM(total) as total')
+                    ->whereYear('period', $year)
                     ->groupBy('month')->pluck('total', 'month');
                 $data['title'] = 'Profit / Loss';
                 break;

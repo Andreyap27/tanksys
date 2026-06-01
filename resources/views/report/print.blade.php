@@ -84,6 +84,11 @@
         .rpt-table thead tr {
             background: #f0f4fb;
         }
+        /* Amount Paid = green, Amount Unpaid = red */
+        .rpt-table--grid tbody td:nth-last-child(2) { color: #16a34a; font-weight: 600; }
+        .rpt-table--grid tbody td:nth-last-child(1) { color: #dc2626; font-weight: 600; }
+        .rpt-table--grid tfoot td:nth-last-child(2) { color: #16a34a; font-weight: 700; }
+        .rpt-table--grid tfoot td:nth-last-child(1) { color: #dc2626; font-weight: 700; }
         .rpt-table th {
             padding: 0.6rem 0.85rem;
             text-align: left;
@@ -230,33 +235,39 @@
         {{-- ── Purchase ───────────────────────────────────────────── --}}
         @if($section === 'purchase')
             @php
-                $gQty = 0; $gExtra = 0; $gShort = 0; $gAmt = 0;
+                $gQty=0; $gExtra=0; $gShort=0; $gAmtP=0; $gAmtA=0;
                 foreach (range(1,12) as $m) {
-                    $gQty   += (float)($purchases->get($m)->total_qty    ?? 0);
-                    $gExtra += (float)($purchases->get($m)->total_extra  ?? 0);
-                    $gShort += (float)($purchases->get($m)->total_short  ?? 0);
-                    $gAmt   += (float)($purchases->get($m)->total_amount ?? 0);
+                    $gQty   += (float)($purchasesPaid->get($m)->total_qty      ?? 0) + (float)($purchasesApproved->get($m)->total_qty   ?? 0);
+                    $gExtra += (float)($purchasesPaid->get($m)->total_extra     ?? 0) + (float)($purchasesApproved->get($m)->total_extra  ?? 0);
+                    $gShort += (float)($purchasesPaid->get($m)->total_short     ?? 0) + (float)($purchasesApproved->get($m)->total_short  ?? 0);
+                    $gAmtP  += (float)($purchasesPaid->get($m)->total_amount    ?? 0);
+                    $gAmtA  += (float)($purchasesApproved->get($m)->total_amount ?? 0);
                 }
-                $gTotal = $gQty + $gExtra - $gShort;
+                $gTot = $gQty + $gExtra - $gShort;
             @endphp
-            <table class="rpt-table">
+            <table class="rpt-table rpt-table--grid">
                 <thead>
                     <tr>
-                        <th>Bulan</th>
-                        <th class="r">Qty (L)</th>
-                        <th class="r">Extra (L)</th>
-                        <th class="r">Short (L)</th>
-                        <th class="r">Total Qty (L)</th>
-                        <th class="r">Total Amount</th>
+                        <th rowspan="2">Bulan</th>
+                        <th rowspan="2" class="r">Qty (L)</th>
+                        <th rowspan="2" class="r">Extra (L)</th>
+                        <th rowspan="2" class="r">Short (L)</th>
+                        <th rowspan="2" class="r">Total Qty (L)</th>
+                        <th colspan="2" style="text-align:center;">Total Amount</th>
+                    </tr>
+                    <tr>
+                        <th style="text-align:center;color:#16a34a;">Paid</th>
+                        <th style="text-align:center;color:#dc2626;">Unpaid</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($months as $m => $name)
                         @php
-                            $qty   = (float)($purchases->get($m)->total_qty    ?? 0);
-                            $extra = (float)($purchases->get($m)->total_extra  ?? 0);
-                            $short = (float)($purchases->get($m)->total_short  ?? 0);
-                            $amt   = (float)($purchases->get($m)->total_amount ?? 0);
+                            $qty   = (float)($purchasesPaid->get($m)->total_qty      ?? 0) + (float)($purchasesApproved->get($m)->total_qty   ?? 0);
+                            $extra = (float)($purchasesPaid->get($m)->total_extra     ?? 0) + (float)($purchasesApproved->get($m)->total_extra  ?? 0);
+                            $short = (float)($purchasesPaid->get($m)->total_short     ?? 0) + (float)($purchasesApproved->get($m)->total_short  ?? 0);
+                            $amtP  = (float)($purchasesPaid->get($m)->total_amount    ?? 0);
+                            $amtA  = (float)($purchasesApproved->get($m)->total_amount ?? 0);
                             $tot   = $qty + $extra - $short;
                         @endphp
                         <tr>
@@ -265,7 +276,8 @@
                             <td class="r">{{ $extra ? $fmtQty($extra) : '-' }}</td>
                             <td class="r">{{ $short ? $fmtQty($short) : '-' }}</td>
                             <td class="r">{{ $tot   ? $fmtQty($tot)   : '-' }}</td>
-                            <td class="r">{{ $amt   ? 'Rp '.$fmt($amt) : '-' }}</td>
+                            <td class="r">{{ $amtP  ? 'Rp '.$fmt($amtP) : '-' }}</td>
+                            <td class="r">{{ $amtA  ? 'Rp '.$fmt($amtA) : '-' }}</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -275,8 +287,9 @@
                         <td class="r">{{ $fmtQty($gQty) }}</td>
                         <td class="r">{{ $fmtQty($gExtra) }}</td>
                         <td class="r">{{ $fmtQty($gShort) }}</td>
-                        <td class="r">{{ $fmtQty($gTotal) }}</td>
-                        <td class="r">Rp {{ $fmt($gAmt) }}</td>
+                        <td class="r">{{ $fmtQty($gTot) }}</td>
+                        <td class="r">Rp {{ $fmt($gAmtP) }}</td>
+                        <td class="r">Rp {{ $fmt($gAmtA) }}</td>
                     </tr>
                 </tfoot>
             </table>
@@ -284,33 +297,39 @@
         {{-- ── Sale ───────────────────────────────────────────────── --}}
         @elseif($section === 'sale')
             @php
-                $gQty = 0; $gExtra = 0; $gShort = 0; $gAmt = 0;
+                $gQty=0; $gExtra=0; $gShort=0; $gAmtP=0; $gAmtA=0;
                 foreach (range(1,12) as $m) {
-                    $gQty   += (float)($sales->get($m)->total_qty    ?? 0);
-                    $gExtra += (float)($sales->get($m)->total_extra  ?? 0);
-                    $gShort += (float)($sales->get($m)->total_short  ?? 0);
-                    $gAmt   += (float)($sales->get($m)->total_amount ?? 0);
+                    $gQty   += (float)($salesPaid->get($m)->total_qty      ?? 0) + (float)($salesApproved->get($m)->total_qty   ?? 0);
+                    $gExtra += (float)($salesPaid->get($m)->total_extra     ?? 0) + (float)($salesApproved->get($m)->total_extra  ?? 0);
+                    $gShort += (float)($salesPaid->get($m)->total_short     ?? 0) + (float)($salesApproved->get($m)->total_short  ?? 0);
+                    $gAmtP  += (float)($salesPaid->get($m)->total_amount    ?? 0);
+                    $gAmtA  += (float)($salesApproved->get($m)->total_amount ?? 0);
                 }
-                $gTotal = $gQty + $gExtra - $gShort;
+                $gTot = $gQty + $gExtra - $gShort;
             @endphp
-            <table class="rpt-table">
+            <table class="rpt-table rpt-table--grid">
                 <thead>
                     <tr>
-                        <th>Bulan</th>
-                        <th class="r">Qty (L)</th>
-                        <th class="r">Extra (L)</th>
-                        <th class="r">Short (L)</th>
-                        <th class="r">Total Qty (L)</th>
-                        <th class="r">Total Amount</th>
+                        <th rowspan="2">Bulan</th>
+                        <th rowspan="2" class="r">Qty (L)</th>
+                        <th rowspan="2" class="r">Extra (L)</th>
+                        <th rowspan="2" class="r">Short (L)</th>
+                        <th rowspan="2" class="r">Total Qty (L)</th>
+                        <th colspan="2" style="text-align:center;">Total Amount</th>
+                    </tr>
+                    <tr>
+                        <th style="text-align:center;color:#16a34a;">Paid</th>
+                        <th style="text-align:center;color:#dc2626;">Unpaid</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($months as $m => $name)
                         @php
-                            $qty   = (float)($sales->get($m)->total_qty    ?? 0);
-                            $extra = (float)($sales->get($m)->total_extra  ?? 0);
-                            $short = (float)($sales->get($m)->total_short  ?? 0);
-                            $amt   = (float)($sales->get($m)->total_amount ?? 0);
+                            $qty   = (float)($salesPaid->get($m)->total_qty      ?? 0) + (float)($salesApproved->get($m)->total_qty   ?? 0);
+                            $extra = (float)($salesPaid->get($m)->total_extra     ?? 0) + (float)($salesApproved->get($m)->total_extra  ?? 0);
+                            $short = (float)($salesPaid->get($m)->total_short     ?? 0) + (float)($salesApproved->get($m)->total_short  ?? 0);
+                            $amtP  = (float)($salesPaid->get($m)->total_amount    ?? 0);
+                            $amtA  = (float)($salesApproved->get($m)->total_amount ?? 0);
                             $tot   = $qty + $extra - $short;
                         @endphp
                         <tr>
@@ -319,7 +338,8 @@
                             <td class="r">{{ $extra ? $fmtQty($extra) : '-' }}</td>
                             <td class="r">{{ $short ? $fmtQty($short) : '-' }}</td>
                             <td class="r">{{ $tot   ? $fmtQty($tot)   : '-' }}</td>
-                            <td class="r">{{ $amt   ? 'Rp '.$fmt($amt) : '-' }}</td>
+                            <td class="r">{{ $amtP  ? 'Rp '.$fmt($amtP) : '-' }}</td>
+                            <td class="r">{{ $amtA  ? 'Rp '.$fmt($amtA) : '-' }}</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -329,8 +349,9 @@
                         <td class="r">{{ $fmtQty($gQty) }}</td>
                         <td class="r">{{ $fmtQty($gExtra) }}</td>
                         <td class="r">{{ $fmtQty($gShort) }}</td>
-                        <td class="r">{{ $fmtQty($gTotal) }}</td>
-                        <td class="r">Rp {{ $fmt($gAmt) }}</td>
+                        <td class="r">{{ $fmtQty($gTot) }}</td>
+                        <td class="r">Rp {{ $fmt($gAmtP) }}</td>
+                        <td class="r">Rp {{ $fmt($gAmtA) }}</td>
                     </tr>
                 </tfoot>
             </table>
@@ -386,13 +407,15 @@
         {{-- ── Profit / Loss ───────────────────────────────────────── --}}
         @elseif($section === 'profit-loss')
             @php
-                $gPur = 0; $gSal = 0; $gExp = 0;
+                $gPur=0; $gSal=0; $gExp=0; $gKoor=0; $gGaji=0;
                 foreach (range(1,12) as $m) {
-                    $gPur += (float)($purchases->get($m)->total_amount ?? 0);
-                    $gSal += (float)($sales->get($m)->total_amount    ?? 0);
-                    $gExp += (float)($expensesTotal[$m]               ?? 0);
+                    $gPur  += (float)($purchases->get($m)->total_amount ?? 0);
+                    $gSal  += (float)($sales->get($m)->total_amount    ?? 0);
+                    $gExp  += (float)($expensesTotal[$m]               ?? 0);
+                    $gKoor += (float)($koordinasiTotal[$m]             ?? 0);
+                    $gGaji += (float)($gajiTotal[$m]                   ?? 0);
                 }
-                $gPL = $gSal - $gPur - $gExp;
+                $gPL = $gSal - $gPur - $gExp - $gKoor - $gGaji;
             @endphp
             <table class="rpt-table">
                 <thead>
@@ -401,23 +424,29 @@
                         <th class="r">Total Purchase</th>
                         <th class="r">Total Sales</th>
                         <th class="r">Total Expenses</th>
+                        <th class="r">Total Koordinasi</th>
+                        <th class="r">Total Gaji</th>
                         <th class="r">Profit / Loss</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($months as $m => $name)
                         @php
-                            $pur     = (float)($purchases->get($m)->total_amount ?? 0);
-                            $sal     = (float)($sales->get($m)->total_amount    ?? 0);
-                            $exp     = (float)($expensesTotal[$m]               ?? 0);
-                            $pl      = $sal - $pur - $exp;
-                            $hasData = $pur || $sal || $exp;
+                            $pur  = (float)($purchases->get($m)->total_amount ?? 0);
+                            $sal  = (float)($sales->get($m)->total_amount    ?? 0);
+                            $exp  = (float)($expensesTotal[$m]               ?? 0);
+                            $koor = (float)($koordinasiTotal[$m]             ?? 0);
+                            $gaji = (float)($gajiTotal[$m]                   ?? 0);
+                            $pl   = $sal - $pur - $exp - $koor - $gaji;
+                            $hasData = $pur || $sal || $exp || $koor || $gaji;
                         @endphp
                         <tr>
                             <td>{{ $name }}</td>
-                            <td class="r">{{ $pur ? 'Rp '.$fmt($pur) : '-' }}</td>
-                            <td class="r">{{ $sal ? 'Rp '.$fmt($sal) : '-' }}</td>
-                            <td class="r">{{ $exp ? 'Rp '.$fmt($exp) : '-' }}</td>
+                            <td class="r">{{ $pur  ? 'Rp '.$fmt($pur)  : '-' }}</td>
+                            <td class="r">{{ $sal  ? 'Rp '.$fmt($sal)  : '-' }}</td>
+                            <td class="r">{{ $exp  ? 'Rp '.$fmt($exp)  : '-' }}</td>
+                            <td class="r">{{ $koor ? 'Rp '.$fmt($koor) : '-' }}</td>
+                            <td class="r">{{ $gaji ? 'Rp '.$fmt($gaji) : '-' }}</td>
                             <td class="r {{ $hasData ? ($pl >= 0 ? 'text-profit' : 'text-loss') : '' }}">
                                 @if($hasData) {{ $pl < 0 ? '-' : '' }}Rp {{ $fmt(abs($pl)) }} @else - @endif
                             </td>
@@ -430,6 +459,8 @@
                         <td class="r">Rp {{ $fmt($gPur) }}</td>
                         <td class="r">Rp {{ $fmt($gSal) }}</td>
                         <td class="r">Rp {{ $fmt($gExp) }}</td>
+                        <td class="r">Rp {{ $fmt($gKoor) }}</td>
+                        <td class="r">Rp {{ $fmt($gGaji) }}</td>
                         <td class="r {{ $gPL >= 0 ? 'text-profit' : 'text-loss' }}">
                             {{ $gPL < 0 ? '-' : '' }}Rp {{ $fmt(abs($gPL)) }}
                         </td>

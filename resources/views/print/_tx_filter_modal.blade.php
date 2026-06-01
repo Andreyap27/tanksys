@@ -60,6 +60,17 @@
                         </select>
                     </div>
                     @endif
+
+                    @if($txHasType ?? false)
+                    <div class="form-group full">
+                        <label class="form-label">Type</label>
+                        <select name="type" class="form-select" id="txPrintTypeSelect">
+                            <option value="">-- Semua Type --</option>
+                            <option value="out">Out</option>
+                            <option value="in">In</option>
+                        </select>
+                    </div>
+                    @endif
                 </div>
             </form>
         </div>
@@ -123,6 +134,8 @@ function doTxPreview(section) {
     if (kp) params.set('kapal_id', kp);
     if (mb) params.set('mobil_id', mb);
     if (pc) params.set('petty_cash_id', pc);
+    const tp = document.getElementById('txPrintTypeSelect')?.value;
+    if (tp) params.set('type', tp);
     closeTxPrintModal();
     document.getElementById('txPrintFrame').src = '{{ route('tx.print') }}?' + params.toString();
     document.getElementById('txPreviewModal').classList.add('active');
