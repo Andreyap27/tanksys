@@ -108,9 +108,15 @@
 
 <script>
 function openTxPrintModal() {
-    const today = new Date().toISOString().split('T')[0];
+    const now  = new Date();
+    const pad  = n => String(n).padStart(2, '0');
+    const y    = now.getFullYear(), m = now.getMonth() + 1, d = now.getDate();
+    const firstDay = y + '-' + pad(m) + '-01';
+    const today    = y + '-' + pad(m) + '-' + pad(d);
+    const dfEl = document.getElementById('txPrintDateFrom');
     const dtEl = document.getElementById('txPrintDateTo');
-    if (dtEl) dtEl.value = today;
+    if (dfEl && !dfEl.value) dfEl.value = firstDay;
+    if (dtEl && !dtEl.value) dtEl.value = today;
     document.getElementById('txPrintModal').classList.add('active');
     if (typeof lucide !== 'undefined') lucide.createIcons();
 }

@@ -286,7 +286,16 @@
     const previewModal = document.getElementById('printPreviewModal');
     const previewFrame = document.getElementById('ukPreviewFrame');
 
-    function openPrintModal()   { printModal.classList.add('active'); }
+    function openPrintModal() {
+        const now = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        const y = now.getFullYear(), m = now.getMonth() + 1, d = now.getDate();
+        const dfEl = document.getElementById('printFrom');
+        const dtEl = document.getElementById('printTo');
+        if (dfEl && !dfEl.value) dfEl.value = y + '-' + pad(m) + '-01';
+        if (dtEl && !dtEl.value) dtEl.value = y + '-' + pad(m) + '-' + pad(d);
+        printModal.classList.add('active');
+    }
     function closePrintModal()  { printModal.classList.remove('active'); }
     function closePreviewModal() {
         previewModal.classList.remove('active');

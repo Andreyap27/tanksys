@@ -230,7 +230,16 @@
     const previewModal = document.getElementById('printPreviewModal');
     const previewFrame = document.getElementById('gajiPreviewFrame');
 
-    function openPrintModal()   { printModal.classList.add('active'); }
+    function openPrintModal() {
+        const now      = new Date();
+        const year     = now.getFullYear();
+        const curMonth = String(now.getMonth() + 1).padStart(2, '0');
+        const dfEl = document.getElementById('printFrom');
+        const dtEl = document.getElementById('printTo');
+        if (dfEl && !dfEl.value) dfEl.value = year + '-01';
+        if (dtEl && !dtEl.value) dtEl.value = year + '-' + curMonth;
+        printModal.classList.add('active');
+    }
     function closePrintModal()  { printModal.classList.remove('active'); }
     function closePreviewModal() {
         previewModal.classList.remove('active');
