@@ -45,6 +45,7 @@ class Expense extends Model
         'description',
         'nominal',
         'category',
+        'type',
         'noted',
         'status',
         'approved_by',

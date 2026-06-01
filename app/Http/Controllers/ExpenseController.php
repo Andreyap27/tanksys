@@ -26,6 +26,7 @@ class ExpenseController extends Controller
                 'date_raw'    => $e->date->format('Y-m-d H:i:s'),
                 'description' => $e->description,
                 'category'    => $e->category,
+                'type'        => $e->type ?? 'out',
                 'nominal'     => number_format($e->nominal, 0, ',', '.'),
                 'nominal_raw' => $e->nominal,
                 'noted'       => $e->noted ?? '-',
@@ -53,6 +54,7 @@ class ExpenseController extends Controller
             'description' => 'required|string|max:255',
             'nominal'     => 'required|numeric|min:0',
             'category'    => 'required|in:' . implode(',', Expense::CATEGORIES),
+            'type'        => 'required|in:in,out',
             'noted'       => 'nullable|string',
         ]);
 
@@ -62,6 +64,7 @@ class ExpenseController extends Controller
             'description' => $request->description,
             'nominal'     => $request->nominal,
             'category'    => $request->category,
+            'type'        => $request->type,
             'noted'       => $request->noted,
             'status'      => 'approved',
             'approved_by' => auth()->id(),
@@ -80,11 +83,12 @@ class ExpenseController extends Controller
             'description' => 'required|string|max:255',
             'nominal'     => 'required|numeric|min:0',
             'category'    => 'required|in:' . implode(',', Expense::CATEGORIES),
+            'type'        => 'required|in:in,out',
             'noted'       => 'nullable|string',
         ]);
 
         $expense->update(array_merge(
-            $request->only(['kapal_id', 'description', 'nominal', 'category', 'noted']),
+            $request->only(['kapal_id', 'description', 'nominal', 'category', 'type', 'noted']),
             [
                 'date'        => $request->date . ' ' . now()->format('H:i:s'),
                 'status'      => 'pending',

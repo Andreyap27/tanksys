@@ -27,6 +27,14 @@
                         </select>
                     </div>
                     <div class="form-group full">
+                        <label class="form-label">Type <span class="text-danger">*</span></label>
+                        <select name="type" class="form-select" required>
+                            <option value="" disabled hidden>-- Pilih Type --</option>
+                            <option value="out">Out</option>
+                            <option value="in">In</option>
+                        </select>
+                    </div>
+                    <div class="form-group full">
                         <label class="form-label">Deskripsi <span class="text-danger">*</span></label>
                         <input type="text" name="description" class="form-input" placeholder="Deskripsi pengeluaran" required>
                     </div>

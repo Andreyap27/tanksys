@@ -29,7 +29,7 @@
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.25rem;margin-bottom:1.5rem;">
     <div class="dash-stat ds-profit">
         <div class="dash-stat__header">
-            <div class="dash-stat__icon"><i data-lucide="banknote" style="width:20px;height:20px;"></i></div>
+            <div class="dash-stat__icon"><i data-lucide="circle-check" style="width:20px;height:20px;"></i></div>
             <div>
                 <div class="dash-stat__label">Total Paid</div>
                 <div class="dash-stat__value" id="expensesPaidCard">Rp 0</div>
@@ -38,11 +38,11 @@
                 </div>
             </div>
         </div>
-        <div class="dash-stat__bg-icon"><i data-lucide="banknote" style="width:110px;height:110px;"></i></div>
+        <div class="dash-stat__bg-icon"><i data-lucide="circle-check" style="width:110px;height:110px;"></i></div>
     </div>
-    <div class="dash-stat ds-loss">
+    <div class="dash-stat ds-lori">
         <div class="dash-stat__header">
-            <div class="dash-stat__icon"><i data-lucide="clock" style="width:20px;height:20px;"></i></div>
+            <div class="dash-stat__icon"><i data-lucide="hourglass" style="width:20px;height:20px;"></i></div>
             <div>
                 <div class="dash-stat__label">Total Unpaid</div>
                 <div class="dash-stat__value" id="expensesUnpaidCard">Rp 0</div>
@@ -51,20 +51,33 @@
                 </div>
             </div>
         </div>
-        <div class="dash-stat__bg-icon"><i data-lucide="clock" style="width:110px;height:110px;"></i></div>
+        <div class="dash-stat__bg-icon"><i data-lucide="hourglass" style="width:110px;height:110px;"></i></div>
     </div>
     <div class="dash-stat ds-expense">
         <div class="dash-stat__header">
-            <div class="dash-stat__icon"><i data-lucide="receipt" style="width:20px;height:20px;"></i></div>
+            <div class="dash-stat__icon"><i data-lucide="trending-down" style="width:20px;height:20px;"></i></div>
             <div>
-                <div class="dash-stat__label">Total Pengeluaran</div>
-                <div class="dash-stat__value" id="expensesTotalCard">Rp 0</div>
+                <div class="dash-stat__label">Total Pengeluaran Out</div>
+                <div class="dash-stat__value" id="expensesOutCard">Rp 0</div>
                 <div class="dash-stat__trend flat">
-                    <i data-lucide="clipboard-list"></i> <span id="expensesCountCard">0</span> transaksi
+                    <i data-lucide="clipboard-list"></i> <span id="expensesOutCountCard">0</span> transaksi
                 </div>
             </div>
         </div>
-        <div class="dash-stat__bg-icon"><i data-lucide="receipt" style="width:110px;height:110px;"></i></div>
+        <div class="dash-stat__bg-icon"><i data-lucide="trending-down" style="width:110px;height:110px;"></i></div>
+    </div>
+    <div class="dash-stat ds-capital">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon"><i data-lucide="trending-up" style="width:20px;height:20px;"></i></div>
+            <div>
+                <div class="dash-stat__label">Total Pengeluaran In</div>
+                <div class="dash-stat__value" id="expensesInCard">Rp 0</div>
+                <div class="dash-stat__trend flat">
+                    <i data-lucide="clipboard-list"></i> <span id="expensesInCountCard">0</span> transaksi
+                </div>
+            </div>
+        </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="trending-up" style="width:110px;height:110px;"></i></div>
     </div>
 </div>
 
@@ -222,7 +235,10 @@
                 },
                 {
                     data: 'nominal',
-                    render: (data) => Currency.symbol + ' ' + data
+                    render: (data, type, row) => {
+                        const color = row.type === 'in' ? 'var(--success)' : 'var(--destructive)';
+                        return `<span style="font-weight:600;color:${color};">${Currency.symbol} ${data}</span>`;
+                    }
                 },
                 {
                     data: 'noted',
@@ -247,7 +263,7 @@
                     render: function(data, type, row) {
                         const editBtn = canManage ?
                             `<button class="icon-btn primary" title="Edit"
-                               onclick="openEditModal('${row.id}', '${row.date_raw}', '${escHtml(row.description)}', '${row.category}', '${row.nominal_raw}', '${escHtml(row.noted)}', '${row.kapal_id || ''}')">
+                               onclick="openEditModal('${row.id}', '${row.date_raw}', '${escHtml(row.description)}', '${row.category}', '${row.type || 'out'}', '${row.nominal_raw}', '${escHtml(row.noted)}', '${row.kapal_id || ''}')">
                                <i data-lucide="pencil" style="width:14px;height:14px;"></i>
                            </button>` :
                             '';
@@ -307,6 +323,8 @@
         const rows = api.rows({ search: 'applied' }).data();
         let totalPaid = 0, countPaid = 0;
         let totalUnpaid = 0, countUnpaid = 0;
+        let totalOut = 0, countOut = 0;
+        let totalIn = 0, countIn = 0;
         const _now = new Date(), _cy = _now.getFullYear(), _cm = _now.getMonth() + 1;
         for (let i = 0; i < rows.length; i++) {
             const _d = new Date((rows[i].date_raw || '').replace(' ', 'T'));
@@ -318,15 +336,17 @@
             } else if (st === 'approved' || st === 'pending') {
                 totalUnpaid += nom; countUnpaid++;
             }
+            if (rows[i].type === 'out') { totalOut += nom; countOut++; }
+            else if (rows[i].type === 'in') { totalIn += nom; countIn++; }
         }
-        const totalAll  = totalPaid + totalUnpaid;
-        const countAll  = countPaid + countUnpaid;
-        document.getElementById('expensesPaidCard').textContent      = 'Rp ' + Currency.number(totalPaid);
-        document.getElementById('expensesPaidCountCard').textContent  = countPaid;
-        document.getElementById('expensesUnpaidCard').textContent     = 'Rp ' + Currency.number(totalUnpaid);
+        document.getElementById('expensesPaidCard').textContent       = 'Rp ' + Currency.number(totalPaid);
+        document.getElementById('expensesPaidCountCard').textContent   = countPaid;
+        document.getElementById('expensesUnpaidCard').textContent      = 'Rp ' + Currency.number(totalUnpaid);
         document.getElementById('expensesUnpaidCountCard').textContent = countUnpaid;
-        document.getElementById('expensesTotalCard').textContent      = 'Rp ' + Currency.number(totalAll);
-        document.getElementById('expensesCountCard').textContent      = countAll;
+        document.getElementById('expensesOutCard').textContent         = 'Rp ' + Currency.number(totalOut);
+        document.getElementById('expensesOutCountCard').textContent    = countOut;
+        document.getElementById('expensesInCard').textContent          = 'Rp ' + Currency.number(totalIn);
+        document.getElementById('expensesInCountCard').textContent     = countIn;
     }
 
     function escHtml(str) {
@@ -350,6 +370,7 @@
             kapal_id: document.getElementById('createExpenseKapalSelect').value || null,
             date: createForm.date.value,
             category: createForm.category.value,
+            type: createForm.type.value,
             description: createForm.description.value,
             nominal: getRaw(createForm.nominal),
             noted: createForm.noted.value,
@@ -372,11 +393,12 @@
     }
 
     // ── Edit ──────────────────────────────────────────────────────────────────────
-    function openEditModal(id, date, description, category, nominal, noted, kapalId) {
+    function openEditModal(id, date, description, category, type, nominal, noted, kapalId) {
         editId = id;
         editForm.date.value = date;
         editForm.description.value = description;
         editForm.category.value = category;
+        editForm.type.value = type || 'out';
         editForm.noted.value = noted !== '-' ? noted : '';
         setRaw(editForm.nominal, nominal);
         editForm.nominal.value = parseInt(nominal) ? Currency.format(nominal) : '';
@@ -394,6 +416,7 @@
             kapal_id: document.getElementById('editExpenseKapalSelect').value || null,
             date: editForm.date.value,
             category: editForm.category.value,
+            type: editForm.type.value,
             description: editForm.description.value,
             nominal: getRaw(editForm.nominal),
             noted: editForm.noted.value,

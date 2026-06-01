@@ -33,11 +33,13 @@ class DashboardController extends Controller
         $stockBal = Stock::currentBalance();
 
         $purchaseByWarna = Stock::where('type', 'purchase')
+            ->whereYear('date', $thisYear)->whereMonth('date', $thisMonth)
             ->selectRaw('warna, SUM(qty_in) as total')
             ->groupBy('warna')->pluck('total', 'warna');
         $purchaseLtr = (float) $purchaseByWarna->sum();
 
         $saleByWarna = Stock::where('type', 'sale')
+            ->whereYear('date', $thisYear)->whereMonth('date', $thisMonth)
             ->selectRaw('warna, SUM(qty_out) as total')
             ->groupBy('warna')->pluck('total', 'warna');
         $saleLtr = (float) $saleByWarna->sum();
