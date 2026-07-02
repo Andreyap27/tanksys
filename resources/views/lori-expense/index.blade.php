@@ -156,24 +156,24 @@
         document.querySelectorAll('#loriExpenseMobilTabs .tab').forEach(t => t.classList.remove('active'));
         btn.classList.add('active');
         activeLoriExpenseMobilId = mobilId;
-        refreshLoriExpSummary(mobilId);
         table.ajax.reload(null, false);
     }
 
-    function refreshLoriExpSummary(mobilId) {
-        const _n = new Date();
-        const params = { month: _n.getMonth() + 1, year: _n.getFullYear() };
-        if (mobilId) params.mobil_id = mobilId;
-        axios.get('{{ route('lori-expense.summary') }}', {
-                params
-            }).then(res => {
-            document.getElementById('loriExpKreditCard').textContent = 'Rp ' + Currency.number(res.data.kredit || 0);
-            document.getElementById('loriExpDebitCard').textContent = 'Rp ' + Currency.number(res.data.debit || 0);
-            document.getElementById('loriExpBalanceCard').textContent = 'Rp ' + Currency.number(res.data.balance || 0);
-            const wrapper = document.getElementById('loriExpBalanceWrapper');
-            wrapper.classList.remove('ds-profit', 'ds-loss');
-            wrapper.classList.add((res.data.balance || 0) >= 0 ? 'ds-profit' : 'ds-loss');
-        });
+    function updateLoriExpSummary(api) {
+        const rows = api.rows({ search: 'applied' }).data();
+        let kredit = 0, debit = 0;
+        for (let i = 0; i < rows.length; i++) {
+            const nominal = parseFloat(rows[i].nominal_raw) || 0;
+            if (rows[i].type === 'in') kredit += nominal;
+            else debit += nominal;
+        }
+        const balance = kredit - debit;
+        document.getElementById('loriExpKreditCard').textContent = 'Rp ' + Currency.number(kredit);
+        document.getElementById('loriExpDebitCard').textContent = 'Rp ' + Currency.number(debit);
+        document.getElementById('loriExpBalanceCard').textContent = 'Rp ' + Currency.number(Math.abs(balance));
+        const wrapper = document.getElementById('loriExpBalanceWrapper');
+        wrapper.classList.remove('ds-profit', 'ds-loss');
+        wrapper.classList.add(balance >= 0 ? 'ds-profit' : 'ds-loss');
     }
 
     // ── Input formatter ───────────────────────────────────────────────────────────
@@ -204,7 +204,6 @@
     // ── DataTable ─────────────────────────────────────────────────────────────────
     $(document).ready(function() {
         loadLoriExpenseMobils();
-        refreshLoriExpSummary(null);
 
         table = $('#loriExpenseTable').DataTable({
             ajax: {
@@ -270,6 +269,7 @@
             ],
             drawCallback: function() {
                 lucide.createIcons();
+                updateLoriExpSummary(this.api());
             }
         });
     });
@@ -306,7 +306,6 @@
                 showSuccess('Berhasil', res.data.message);
                 closeCreateModal();
                 table.ajax.reload(null, false);
-                refreshLoriExpSummary(activeLoriExpenseMobilId);
             })
             .catch(err => {
                 const errors = err.response?.data?.errors;
@@ -348,7 +347,6 @@
                 showSuccess('Berhasil', res.data.message);
                 closeEditModal();
                 table.ajax.reload(null, false);
-                refreshLoriExpSummary(activeLoriExpenseMobilId);
             })
             .catch(err => {
                 const errors = err.response?.data?.errors;
