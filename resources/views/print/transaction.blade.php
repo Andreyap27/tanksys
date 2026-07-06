@@ -128,26 +128,26 @@
     {{-- ── PURCHASE ────────────────────────────────────────────────────── --}}
     @elseif($section === 'purchase')
     @php
-        $gQty=0; $gExtra=0; $gShort=0; $gAmt=0;
-        $gQtyPaid=0; $gExtraPaid=0; $gShortPaid=0; $gAmtPaid=0;
-        $gQtyUnpaid=0; $gExtraUnpaid=0; $gShortUnpaid=0; $gAmtUnpaid=0;
+        $gQty=0; $gExtra=0; $gAmt=0;
+        $gQtyPaid=0; $gExtraPaid=0; $gAmtPaid=0;
+        $gQtyUnpaid=0; $gExtraUnpaid=0; $gAmtUnpaid=0;
         foreach($rows as $r){
-            $gQty+=$r->quantity; $gExtra+=$r->extra; $gShort+=$r->short; $gAmt+=$r->amount;
+            $gQty+=$r->quantity; $gExtra+=$r->extra; $gAmt+=$r->amount;
             if($r->status==='paid'){
-                $gQtyPaid+=$r->quantity; $gExtraPaid+=$r->extra; $gShortPaid+=$r->short; $gAmtPaid+=$r->amount;
+                $gQtyPaid+=$r->quantity; $gExtraPaid+=$r->extra; $gAmtPaid+=$r->amount;
             } else {
-                $gQtyUnpaid+=$r->quantity; $gExtraUnpaid+=$r->extra; $gShortUnpaid+=$r->short; $gAmtUnpaid+=$r->amount;
+                $gQtyUnpaid+=$r->quantity; $gExtraUnpaid+=$r->extra; $gAmtUnpaid+=$r->amount;
             }
         }
-        $gNetQty       = $gQty       + $gExtra       - $gShort;
-        $gNetQtyPaid   = $gQtyPaid   + $gExtraPaid   - $gShortPaid;
-        $gNetQtyUnpaid = $gQtyUnpaid + $gExtraUnpaid - $gShortUnpaid;
+        $gNetQty       = $gQty       + $gExtra;
+        $gNetQtyPaid   = $gQtyPaid   + $gExtraPaid;
+        $gNetQtyUnpaid = $gQtyUnpaid + $gExtraUnpaid;
     @endphp
     <table>
         <thead><tr>
             <th style="width:3%">#</th>
             <th>Tanggal</th><th>Vendor</th><th>Deskripsi</th><th>Warna</th>
-            <th class="r">Qty (L)</th><th class="r">Extra (L)</th><th class="r">Short (L)</th>
+            <th class="r">Qty (L)</th><th class="r">Extra (L)</th>
             <th class="r">Harga/L</th><th class="c">Status</th><th class="r">Amount</th>
         </tr></thead>
         <tbody>
@@ -159,12 +159,11 @@
                 <td>{{ ucfirst($r->warna ?? '-') }}</td>
                 <td class="r">{{ $fmtQty($r->quantity) }}</td>
                 <td class="r">{{ $r->extra > 0 ? $fmtQty($r->extra) : '-' }}</td>
-                <td class="r" style="{{ $r->short > 0 ? 'color:#dc2626;' : '' }}">{{ $r->short > 0 ? $fmtQty($r->short) : '-' }}</td>
                 <td class="r">Rp {{ $fmt($r->price) }}</td>
                 <td class="c"><span class="badge badge-{{ $r->status }}">{{ ucfirst($r->status) }}</span></td>
                 <td class="r">Rp {{ $fmt($r->amount) }}</td>
             </tr>
-            @empty<tr><td colspan="11" style="text-align:center;color:#888;">Tidak ada data</td></tr>
+            @empty<tr><td colspan="10" style="text-align:center;color:#888;">Tidak ada data</td></tr>
             @endforelse
         </tbody>
         <tfoot>
@@ -172,13 +171,12 @@
                 <td colspan="5"><strong>Total Pembelian</strong></td>
                 <td class="r">{{ $fmtQty($gQty) }}</td>
                 <td class="r">{{ $fmtQty($gExtra) }}</td>
-                <td class="r">{{ $gShort > 0 ? $fmtQty($gShort) : '-' }}</td>
                 <td></td><td></td>
                 <td class="r">Rp {{ $fmt($gAmt) }}</td>
             </tr>
             <tr style="background:#dbeafe;">
                 <td colspan="5" style="color:#1a5cb8;"><strong>Total Stok</strong></td>
-                <td class="r" style="color:#1a5cb8;" colspan="3">{{ $fmtQty($gNetQty) }}</td>
+                <td class="r" style="color:#1a5cb8;" colspan="2">{{ $fmtQty($gNetQty) }}</td>
                 <td></td><td></td>
                 <td class="r" style="color:#1a5cb8;">Rp {{ $fmt($gAmt) }}</td>
             </tr>
@@ -186,7 +184,6 @@
                 <td colspan="5" style="color:#16a34a;"><strong>Total Paid</strong></td>
                 <td class="r" style="color:#16a34a;">{{ $fmtQty($gQtyPaid) }}</td>
                 <td class="r" style="color:#16a34a;">{{ $fmtQty($gExtraPaid) }}</td>
-                <td class="r" style="color:#16a34a;">{{ $gShortPaid > 0 ? $fmtQty($gShortPaid) : '-' }}</td>
                 <td></td><td></td>
                 <td class="r" style="color:#16a34a;">Rp {{ $fmt($gAmtPaid) }}</td>
             </tr>
@@ -194,7 +191,6 @@
                 <td colspan="5" style="color:#dc2626;"><strong>Total Unpaid</strong></td>
                 <td class="r" style="color:#dc2626;">{{ $fmtQty($gQtyUnpaid) }}</td>
                 <td class="r" style="color:#dc2626;">{{ $fmtQty($gExtraUnpaid) }}</td>
-                <td class="r" style="color:#dc2626;">{{ $gShortUnpaid > 0 ? $fmtQty($gShortUnpaid) : '-' }}</td>
                 <td></td><td></td>
                 <td class="r" style="color:#dc2626;">Rp {{ $fmt($gAmtUnpaid) }}</td>
             </tr>
@@ -204,15 +200,15 @@
     {{-- ── SALES ───────────────────────────────────────────────────────── --}}
     @elseif($section === 'sales')
     @php
-        $gQty=0; $gExtra=0; $gShort=0; $gAmt=0;
-        $gQtyPaid=0; $gExtraPaid=0; $gShortPaid=0; $gAmtPaid=0;
-        $gQtyUnpaid=0; $gExtraUnpaid=0; $gShortUnpaid=0; $gAmtUnpaid=0;
+        $gQty=0; $gExtra=0; $gAmt=0;
+        $gQtyPaid=0; $gExtraPaid=0; $gAmtPaid=0;
+        $gQtyUnpaid=0; $gExtraUnpaid=0; $gAmtUnpaid=0;
         foreach($rows as $r){
-            $gQty+=$r->quantity; $gExtra+=$r->extra; $gShort+=$r->short; $gAmt+=$r->amount;
+            $gQty+=$r->quantity; $gExtra+=$r->extra; $gAmt+=$r->amount;
             if($r->status==='paid'){
-                $gQtyPaid+=$r->quantity; $gExtraPaid+=$r->extra; $gShortPaid+=$r->short; $gAmtPaid+=$r->amount;
+                $gQtyPaid+=$r->quantity; $gExtraPaid+=$r->extra; $gAmtPaid+=$r->amount;
             } else {
-                $gQtyUnpaid+=$r->quantity; $gExtraUnpaid+=$r->extra; $gShortUnpaid+=$r->short; $gAmtUnpaid+=$r->amount;
+                $gQtyUnpaid+=$r->quantity; $gExtraUnpaid+=$r->extra; $gAmtUnpaid+=$r->amount;
             }
         }
     @endphp
@@ -220,7 +216,7 @@
         <thead><tr>
             <th style="width:3%">#</th>
             <th>Tanggal</th><th>Invoice</th><th>Customer</th><th>Warna</th>
-            <th class="r">Qty (L)</th><th class="r">Extra (L)</th><th class="r">Short (L)</th>
+            <th class="r">Qty (L)</th><th class="r">Extra (L)</th>
             <th class="r">Harga/L</th><th class="c">Status</th><th class="r">Amount</th>
         </tr></thead>
         <tbody>
@@ -233,12 +229,11 @@
                 <td>{{ ucfirst($r->warna ?? '-') }}</td>
                 <td class="r">{{ $fmtQty($r->quantity) }}</td>
                 <td class="r">{{ $r->extra > 0 ? $fmtQty($r->extra) : '-' }}</td>
-                <td class="r" style="{{ $r->short > 0 ? 'color:#dc2626;' : '' }}">{{ $r->short > 0 ? $fmtQty($r->short) : '-' }}</td>
                 <td class="r">Rp {{ $fmt($r->price) }}</td>
                 <td class="c"><span class="badge badge-{{ $r->status }}">{{ ucfirst($r->status) }}</span></td>
                 <td class="r">Rp {{ $fmt($r->amount) }}</td>
             </tr>
-            @empty<tr><td colspan="11" style="text-align:center;color:#888;">Tidak ada data</td></tr>
+            @empty<tr><td colspan="10" style="text-align:center;color:#888;">Tidak ada data</td></tr>
             @endforelse
         </tbody>
         <tfoot>
@@ -246,7 +241,6 @@
                 <td colspan="5"><strong>Total</strong></td>
                 <td class="r">{{ $fmtQty($gQty) }}</td>
                 <td class="r">{{ $fmtQty($gExtra) }}</td>
-                <td class="r">{{ $gShort > 0 ? $fmtQty($gShort) : '-' }}</td>
                 <td></td><td></td>
                 <td class="r">Rp {{ $fmt($gAmt) }}</td>
             </tr>
@@ -254,7 +248,6 @@
                 <td colspan="5" style="color:#16a34a;"><strong>Total Paid</strong></td>
                 <td class="r" style="color:#16a34a;">{{ $fmtQty($gQtyPaid) }}</td>
                 <td class="r" style="color:#16a34a;">{{ $fmtQty($gExtraPaid) }}</td>
-                <td class="r" style="color:#16a34a;">{{ $gShortPaid > 0 ? $fmtQty($gShortPaid) : '-' }}</td>
                 <td></td><td></td>
                 <td class="r" style="color:#16a34a;">Rp {{ $fmt($gAmtPaid) }}</td>
             </tr>
@@ -262,7 +255,6 @@
                 <td colspan="5" style="color:#dc2626;"><strong>Total Unpaid</strong></td>
                 <td class="r" style="color:#dc2626;">{{ $fmtQty($gQtyUnpaid) }}</td>
                 <td class="r" style="color:#dc2626;">{{ $fmtQty($gExtraUnpaid) }}</td>
-                <td class="r" style="color:#dc2626;">{{ $gShortUnpaid > 0 ? $fmtQty($gShortUnpaid) : '-' }}</td>
                 <td></td><td></td>
                 <td class="r" style="color:#dc2626;">Rp {{ $fmt($gAmtUnpaid) }}</td>
             </tr>

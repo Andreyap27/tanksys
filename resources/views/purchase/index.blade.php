@@ -261,7 +261,6 @@
 
     attachDecimalInput('.fmt-qty', function(el) { triggerAmountCalc(el); });
     attachDecimalInput('.fmt-extra');
-    attachDecimalInput('.fmt-short');
 
     document.querySelectorAll('.fmt-price').forEach(el => {
         el.addEventListener('input', function() {
@@ -298,7 +297,7 @@
             if (_d.getFullYear() !== _cy || (_d.getMonth() + 1) !== _cm) continue;
             if (rows[i].status === 'approved' || rows[i].status === 'paid') {
                 totalAmount += parseFloat(rows[i].amount_raw) || 0;
-                const qty = (parseFloat(rows[i].quantity_raw) || 0) + (parseFloat(rows[i].extra_raw) || 0) - (parseFloat(rows[i].short_raw) || 0);
+                const qty = (parseFloat(rows[i].quantity_raw) || 0) + (parseFloat(rows[i].extra_raw) || 0);
                 qtyTotal += qty;
                 if (rows[i].warna === 'biru') qtyBiru += qty;
                 else if (rows[i].warna === 'kuning') qtyKuning += qty;
@@ -354,10 +353,6 @@
                     render: (data) => data && data !== '0' ? data : '<span class="text-muted">0</span>'
                 },
                 {
-                    data: 'short',
-                    render: (data) => data && data !== '0' ? `<span style="color:#dc2626;">${data}</span>` : '<span class="text-muted">0</span>'
-                },
-                {
                     data: 'price',
                     render: (data) => Currency.symbol + ' ' + data
                 },
@@ -399,7 +394,6 @@
                                     '${row.warna || ''}',
                                     '${row.quantity_raw}',
                                     '${row.extra_raw}',
-                                    '${row.short_raw}',
                                     '${row.price_raw}',
                                     '${escHtml(row.noted)}',
                                     '${row.kapal_id || ''}'
@@ -482,8 +476,6 @@
         document.getElementById('createAmountDisplay').value = '';
         setRaw(createForm.extra, 0);
         createForm.extra.value = '';
-        setRaw(createForm.short, 0);
-        createForm.short.value = '';
         if (activeKapalId) document.getElementById('createKapalSelect').value = activeKapalId;
         loadVendorOptions();
         createModal.classList.add('active');
@@ -508,7 +500,6 @@
             warna: createForm.warna.value || null,
             quantity: getRaw(createForm.quantity),
             extra: getRaw(createForm.extra) || 0,
-            short: getRaw(createForm.short) || 0,
             price: getRaw(createForm.price),
             noted: createForm.noted.value,
         };
@@ -537,7 +528,7 @@
         document.getElementById('editAmountDisplay').value = Currency.format(qty * price);
     }
 
-    function openEditModal(id, date, vendor, description, warna, quantity, extra, short, price, noted, kapalId) {
+    function openEditModal(id, date, vendor, description, warna, quantity, extra, price, noted, kapalId) {
         editId = id;
         editForm.date.value = date;
         editForm.description.value = description;
@@ -552,10 +543,6 @@
         setRaw(editForm.extra, extra);
         editForm.extra.value = parseFloat(extra) ?
             parseFloat(extra).toLocaleString('id-ID', { maximumFractionDigits: 3 }) : '';
-
-        setRaw(editForm.short, short);
-        editForm.short.value = parseFloat(short) ?
-            parseFloat(short).toLocaleString('id-ID', { maximumFractionDigits: 3 }) : '';
 
         setRaw(editForm.price, price);
         editForm.price.value = parseInt(price) ? Currency.format(price) : '';
@@ -585,7 +572,6 @@
             warna: editForm.warna.value || null,
             quantity: getRaw(editForm.quantity),
             extra: getRaw(editForm.extra) || 0,
-            short: getRaw(editForm.short) || 0,
             price: getRaw(editForm.price),
             noted: editForm.noted.value,
         };

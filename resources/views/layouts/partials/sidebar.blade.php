@@ -63,7 +63,7 @@
             <i data-lucide="package"></i>
             <span>Stock BBM</span>
         </a>
-        @php $operasionalActive = request()->routeIs('stock-transfer.*') || request()->routeIs('stock-usage.*'); @endphp
+        @php $operasionalActive = request()->routeIs('stock-usage.*'); @endphp
         <div class="nav-group">
             <div class="nav-group-header {{ $operasionalActive ? 'open' : '' }}" onclick="toggleNavGroup(this)">
                 <i data-lucide="settings-2"></i>
@@ -71,9 +71,6 @@
                 <i data-lucide="chevron-right" class="nav-chevron"></i>
             </div>
             <div class="nav-sub {{ $operasionalActive ? 'open' : '' }}">
-                <a href="{{ route('stock-transfer.index') }}" class="nav-sub-item {{ request()->routeIs('stock-transfer.*') ? 'active' : '' }}">
-                    Transfer Stok
-                </a>
                 <a href="{{ route('stock-usage.index') }}" class="nav-sub-item {{ request()->routeIs('stock-usage.*') ? 'active' : '' }}">
                     Pemakaian Stok
                 </a>
@@ -184,6 +181,9 @@
                 </a>
                 <a href="{{ route('report.petty-cash') }}" class="nav-sub-item {{ request()->routeIs('report.petty-cash') ? 'active' : '' }}">
                     Petty Cash
+                </a>
+                <a href="{{ route('report.jasa-angkut') }}" class="nav-sub-item {{ request()->routeIs('report.jasa-angkut') ? 'active' : '' }}">
+                    Jasa Angkut
                 </a>
             </div>
         </div>

@@ -22,7 +22,6 @@ use App\Http\Controllers\HutangController;
 use App\Http\Controllers\PiutangController;
 use App\Http\Controllers\PettyCashController;
 use App\Http\Controllers\PettyCashTransactionController;
-use App\Http\Controllers\StockTransferController;
 use App\Http\Controllers\StockUsageController;
 use App\Http\Controllers\TxPrintController;
 use App\Http\Controllers\GajiController;
@@ -93,12 +92,6 @@ Route::middleware('auth.jwt')->group(function () {
     Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
     Route::get('/stock/data', [StockController::class, 'data'])->name('stock.data');
     Route::get('/stock/summary', [StockController::class, 'summary'])->name('stock.summary');
-
-    // Operasional — Transfer Stok
-    Route::get('/operasional/transfer', [StockTransferController::class, 'index'])->name('stock-transfer.index');
-    Route::get('/operasional/transfer/data', [StockTransferController::class, 'data'])->name('stock-transfer.data');
-    Route::post('/operasional/transfer', [StockTransferController::class, 'store'])->name('stock-transfer.store');
-    Route::delete('/operasional/transfer/{stockTransfer}', [StockTransferController::class, 'destroy'])->name('stock-transfer.destroy');
 
     // Operasional — Pemakaian Stok
     Route::get('/operasional/usage', [StockUsageController::class, 'index'])->name('stock-usage.index');
@@ -275,6 +268,8 @@ Route::middleware('auth.jwt')->group(function () {
     Route::get('/report/lori/trash',    [ReportController::class, 'loriTrash'])->name('report.lori.trash');
     Route::get('/report/profit-loss',   [ReportController::class, 'profitLoss'])->name('report.profit-loss');
     Route::get('/report/petty-cash',    [ReportController::class, 'pettyCash'])->name('report.petty-cash');
+    Route::get('/report/jasa-angkut',         [ReportController::class, 'jasaAngkut'])->name('report.jasa-angkut');
+    Route::get('/report/jasa-angkut/print',   [ReportController::class, 'jasaAngkutPrint'])->name('report.jasa-angkut.print');
 
     }); // end not.finance (report)
 });

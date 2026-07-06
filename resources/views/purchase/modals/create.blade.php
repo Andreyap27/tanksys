@@ -46,17 +46,10 @@
                         <input type="text" name="quantity" class="form-input fmt-qty" inputmode="decimal"
                             placeholder="0" required>
                     </div>
-                    <div class="form-group full" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-                        <div style="margin:0;">
-                            <label class="form-label">Extra (Liter)</label>
-                            <input type="text" name="extra" class="form-input fmt-extra" inputmode="decimal"
-                                placeholder="0" value="0">
-                        </div>
-                        <div style="margin:0;">
-                            <label class="form-label">Short (Liter)</label>
-                            <input type="text" name="short" class="form-input fmt-short" inputmode="decimal"
-                                placeholder="0" value="0">
-                        </div>
+                    <div class="form-group full">
+                        <label class="form-label">Extra (Liter)</label>
+                        <input type="text" name="extra" class="form-input fmt-extra" inputmode="decimal"
+                            placeholder="0" value="0">
                     </div>
                     <div class="form-group full" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
                         <div class="form-group full" style="margin:0;">

@@ -24,6 +24,7 @@
                     <tr>
                         <th>Kode</th>
                         <th>Nama Kapal</th>
+                        <th class="text-right">Harga Jasa Angkut/L</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -45,6 +46,10 @@
                     <div class="form-group full">
                         <label class="form-label">Nama Kapal <span class="text-danger">*</span></label>
                         <input type="text" name="name" class="form-input" placeholder="Nama kapal" required>
+                    </div>
+                    <div class="form-group full">
+                        <label class="form-label">Harga Jasa Angkut / Liter (Rp)</label>
+                        <input type="text" name="price" class="form-input fmt-price" inputmode="numeric" placeholder="0">
                     </div>
                 </div>
             </form>
@@ -78,6 +83,10 @@
                         <label class="form-label">Nama Kapal <span class="text-danger">*</span></label>
                         <input type="text" name="name" class="form-input" placeholder="Nama kapal" required>
                     </div>
+                    <div class="form-group full">
+                        <label class="form-label">Harga Jasa Angkut / Liter (Rp)</label>
+                        <input type="text" name="price" class="form-input fmt-price" inputmode="numeric" placeholder="0">
+                    </div>
                 </div>
             </form>
         </div>
@@ -109,6 +118,11 @@ $(document).ready(function () {
             { data: 'code' },
             { data: 'name' },
             {
+                data: 'price',
+                className: 'text-right',
+                render: (v) => v > 0 ? 'Rp ' + fmtNum(v) : '-'
+            },
+            {
                 data: null,
                 orderable: false,
                 searchable: false,
@@ -116,7 +130,7 @@ $(document).ready(function () {
                     return `
                         <div class="table-actions">
                             <button class="icon-btn primary" title="Edit"
-                                onclick="openEditModal('${row.id}','${escHtml(row.code)}','${escHtml(row.name)}')">
+                                onclick="openEditModal('${row.id}','${escHtml(row.code)}','${escHtml(row.name)}',${row.price})">
                                 <i data-lucide="pencil" style="width:14px;height:14px;"></i>
                             </button>
                             <button class="icon-btn danger" title="Hapus"
@@ -136,26 +150,60 @@ function escHtml(str) {
     if (str == null) return '';
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,"\\'").replace(/"/g,'&quot;');
 }
+function fmtNum(n) {
+    return Number(n).toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
+function setRaw(el, raw) { el.dataset.raw = raw; }
+function getRaw(el) { return parseFloat(el.dataset.raw) || 0; }
 
-function openCreateModal() { createForm.reset(); createModal.classList.add('active'); }
+document.querySelectorAll('.fmt-price').forEach(el => {
+    el.addEventListener('input', function () {
+        const raw = this.value.replace(/[^0-9]/g, '');
+        this.value = raw;
+        setRaw(this, raw);
+    });
+    el.addEventListener('blur', function () {
+        const raw = parseInt(this.value.replace(/[^0-9]/g, '')) || 0;
+        setRaw(this, raw);
+        this.value = raw ? Currency.format(raw) : '';
+    });
+    el.addEventListener('focus', function () {
+        this.value = this.dataset.raw || '';
+    });
+});
+
+function openCreateModal() {
+    createForm.reset();
+    setRaw(createForm.price, 0);
+    createForm.price.value = '';
+    createModal.classList.add('active');
+}
 function closeCreateModal() { createModal.classList.remove('active'); }
 
 function storeKapal() {
-    axios.post('{{ route('kapal.store') }}', { name: createForm.name.value })
+    axios.post('{{ route('kapal.store') }}', {
+        name:  createForm.name.value,
+        price: getRaw(createForm.price),
+    })
         .then(res => { showSuccess('Berhasil', res.data.message); closeCreateModal(); table.ajax.reload(null, false); })
         .catch(err => showError('Gagal', err.response?.data?.message || 'Terjadi kesalahan'));
 }
 
-function openEditModal(id, code, name) {
+function openEditModal(id, code, name, price) {
     editId = id;
     editForm.code.value = code;
     editForm.name.value = name;
+    setRaw(editForm.price, price ?? 0);
+    editForm.price.value = price > 0 ? Currency.format(price) : '';
     editModal.classList.add('active');
 }
 function closeEditModal() { editModal.classList.remove('active'); editId = null; }
 
 function updateKapal() {
-    axios.put(`/kapal/${editId}`, { name: editForm.name.value })
+    axios.put(`/kapal/${editId}`, {
+        name:  editForm.name.value,
+        price: getRaw(editForm.price),
+    })
         .then(res => { showSuccess('Berhasil', res.data.message); closeEditModal(); table.ajax.reload(null, false); })
         .catch(err => showError('Gagal', err.response?.data?.message || 'Terjadi kesalahan'));
 }

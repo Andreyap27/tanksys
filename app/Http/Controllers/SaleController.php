@@ -18,16 +18,8 @@ class SaleController extends Controller
 
     public function nextInvoice()
     {
-        $kapalId = request('kapal_id');
-        $date    = now()->format('Ymd');
-
-        if ($kapalId) {
-            $kapal  = \App\Models\Kapal::find($kapalId);
-            $code   = $kapal ? $kapal->code : 'K000';
-            $prefix = "INV-{$date}-{$code}-";
-        } else {
-            $prefix = "INV-{$date}-";
-        }
+        $date   = now()->format('Ymd');
+        $prefix = "INV-{$date}-";
 
         $latest = Sale::withTrashed()
             ->where('invoice_number', 'like', $prefix . '%')
@@ -55,12 +47,8 @@ class SaleController extends Controller
     public function data()
     {
         try {
-            $kapalId = request('kapal_id');
-            $query   = Sale::with('customer')->orderBy('date', 'desc');
-            if ($kapalId) $query->where('kapal_id', $kapalId);
-            $sales = $query->get()->map(fn($s) => [
+            $sales = Sale::with('customer')->orderBy('date', 'desc')->get()->map(fn($s) => [
                 'id'             => $s->id,
-                'kapal_id'       => $s->kapal_id,
                 'date'           => $this->resolveDate($s)->translatedFormat('d M Y H:i'),
                 'date_raw'       => $s->date->format('Y-m-d H:i:s'),
                 'invoice_number' => $s->invoice_number,
@@ -72,8 +60,6 @@ class SaleController extends Controller
                 'quantity_raw'   => $s->quantity,
                 'extra'          => number_format($s->extra, 0, ',', '.'),
                 'extra_raw'      => $s->extra,
-                'short'          => number_format($s->short, 0, ',', '.'),
-                'short_raw'      => $s->short,
                 'price'          => number_format($s->price, 0, ',', '.'),
                 'price_raw'      => $s->price,
                 'amount'         => number_format($s->amount, 0, ',', '.'),
@@ -90,7 +76,6 @@ class SaleController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'kapal_id'       => 'nullable|exists:kapals,id',
             'date'           => 'required|date',
             'invoice_number' => 'required|string|unique:sales,invoice_number,NULL,id,deleted_at,NULL',
             'customer_id'    => 'required|exists:customers,id',
@@ -98,14 +83,12 @@ class SaleController extends Controller
             'warna'          => 'required|in:biru,kuning',
             'quantity'       => 'required|numeric|min:0.01',
             'extra'          => 'nullable|numeric|min:0',
-            'short'          => 'nullable|numeric|min:0',
             'price'          => 'required|numeric|min:0',
             'noted'          => 'nullable|string',
         ]);
 
         $extra    = (float) ($request->extra ?? 0);
-        $short    = (float) ($request->short ?? 0);
-        $totalOut = (float) $request->quantity + $extra - $short;
+        $totalOut = (float) $request->quantity + $extra;
         $warna    = $request->warna ?: null;
         $currentBalance = Stock::currentBalance(null, $warna);
         if ($totalOut > $currentBalance) {
@@ -115,9 +98,8 @@ class SaleController extends Controller
             ], 422);
         }
 
-        DB::transaction(function () use ($request, $extra, $short) {
+        DB::transaction(function () use ($request, $extra) {
             $sale = Sale::create([
-                'kapal_id'       => $request->kapal_id ?: null,
                 'date'           => $request->date . ' ' . now()->format('H:i:s'),
                 'invoice_number' => $request->invoice_number,
                 'customer_id'    => $request->customer_id,
@@ -125,7 +107,7 @@ class SaleController extends Controller
                 'warna'          => $request->warna ?: null,
                 'quantity'       => $request->quantity,
                 'extra'          => $extra,
-                'short'          => $short,
+                'short'          => 0,
                 'price'          => $request->price,
                 'amount'         => $request->quantity * $request->price,
                 'noted'          => $request->noted,
@@ -136,7 +118,7 @@ class SaleController extends Controller
             ]);
 
             Stock::create([
-                'kapal_id'       => $sale->kapal_id,
+                'kapal_id'       => null,
                 'date'           => $sale->date,
                 'type'           => 'sale',
                 'reference_id'   => $sale->id,
@@ -144,7 +126,7 @@ class SaleController extends Controller
                 'party'          => $sale->customer->name,
                 'warna'          => $sale->warna,
                 'qty_in'         => 0,
-                'qty_out'        => (float) $sale->quantity + (float) $sale->extra - (float) $sale->short,
+                'qty_out'        => (float) $sale->quantity + (float) $sale->extra,
             ]);
         });
 
@@ -158,7 +140,6 @@ class SaleController extends Controller
         }
 
         $request->validate([
-            'kapal_id'       => 'nullable|exists:kapals,id',
             'date'           => 'required|date',
             'invoice_number' => 'required|string|unique:sales,invoice_number,' . $sale->id . ',id,deleted_at,NULL',
             'customer_id'    => 'required|exists:customers,id',
@@ -166,7 +147,6 @@ class SaleController extends Controller
             'warna'          => 'required|in:biru,kuning',
             'quantity'       => 'required|numeric|min:0.01',
             'extra'          => 'nullable|numeric|min:0',
-            'short'          => 'nullable|numeric|min:0',
             'price'          => 'required|numeric|min:0',
             'noted'          => 'nullable|string',
         ]);
@@ -177,7 +157,6 @@ class SaleController extends Controller
             }
 
             $sale->update([
-                'kapal_id'       => $request->kapal_id ?: null,
                 'date'           => $request->date . ' ' . now()->format('H:i:s'),
                 'invoice_number' => $request->invoice_number,
                 'customer_id'    => $request->customer_id,
@@ -185,7 +164,7 @@ class SaleController extends Controller
                 'warna'          => $request->warna ?: null,
                 'quantity'       => $request->quantity,
                 'extra'          => (float) ($request->extra ?? 0),
-                'short'          => (float) ($request->short ?? 0),
+                'short'          => 0,
                 'price'          => $request->price,
                 'amount'         => $request->quantity * $request->price,
                 'noted'          => $request->noted,
@@ -228,7 +207,7 @@ class SaleController extends Controller
             return response()->json(['message' => 'Penjualan ini sudah diproses sebelumnya.'], 422);
         }
 
-        $totalOut = (float) $sale->quantity + (float) $sale->extra - (float) $sale->short;
+        $totalOut = (float) $sale->quantity + (float) $sale->extra;
         $warna    = $sale->warna ?: null;
         $currentBalance = Stock::currentBalance(null, $warna);
         if ($totalOut > $currentBalance) {
@@ -241,13 +220,13 @@ class SaleController extends Controller
         DB::transaction(function () use ($sale) {
             $sale->update([
                 'date'        => $sale->date->toDateString() . ' ' . now()->format('H:i:s'),
-            'status'      => 'approved',
+                'status'      => 'approved',
                 'approved_by' => auth()->id(),
                 'approved_at' => now(),
             ]);
 
             Stock::create([
-                'kapal_id'       => $sale->kapal_id,
+                'kapal_id'       => null,
                 'date'           => $sale->date,
                 'type'           => 'sale',
                 'reference_id'   => $sale->id,
@@ -255,7 +234,7 @@ class SaleController extends Controller
                 'party'          => $sale->customer->name,
                 'warna'          => $sale->warna,
                 'qty_in'         => 0,
-                'qty_out'        => (float) $sale->quantity + (float) $sale->extra - (float) $sale->short,
+                'qty_out'        => (float) $sale->quantity + (float) $sale->extra,
             ]);
         });
 
@@ -313,12 +292,8 @@ class SaleController extends Controller
 
     public function trashData()
     {
-        $kapalId = request('kapal_id');
-        $query   = Sale::onlyTrashed()->with(['creator', 'customer', 'deleter'])->orderBy('date', 'desc');
-        if ($kapalId) $query->where('kapal_id', $kapalId);
-        $sales   = $query->get()->map(fn($s) => [
+        $sales = Sale::onlyTrashed()->with(['creator', 'customer', 'deleter'])->orderBy('date', 'desc')->get()->map(fn($s) => [
             'id'              => $s->id,
-            'kapal_id'        => $s->kapal_id,
             'date'            => $this->resolveDate($s)->translatedFormat('d M Y H:i'),
             'date_raw'        => $s->date->format('Y-m-d H:i:s'),
             'invoice_number'  => $s->invoice_number,

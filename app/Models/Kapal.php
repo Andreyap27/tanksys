@@ -9,7 +9,7 @@ class Kapal extends Model
 {
     use HasUuids;
 
-    protected $fillable = ['code', 'name'];
+    protected $fillable = ['code', 'name', 'price'];
 
     public static function generateNextCode(): string
     {

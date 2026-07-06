@@ -8,12 +8,6 @@
             <form id="editForm" onsubmit="return false;">
                 <div class="form-grid">
                     <div class="form-group full">
-                        <label class="form-label">Kapal</label>
-                        <select name="kapal_id" id="editSaleKapalSelect" class="form-select">
-                            <option value="">-- Pilih Kapal --</option>
-                        </select>
-                    </div>
-                    <div class="form-group full">
                         <label class="form-label">No Invoice</label>
                         <input type="text" name="invoice_number" class="form-input"
                             readonly style="background:#f5f5f4;cursor:not-allowed;">
@@ -51,17 +45,10 @@
                         <input type="text" name="quantity" class="form-input fmt-qty" inputmode="decimal"
                             placeholder="0" required>
                     </div>
-                    <div class="form-group full" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-                        <div style="margin:0;">
-                            <label class="form-label">Extra (Liter)</label>
-                            <input type="text" name="extra" class="form-input fmt-extra" inputmode="decimal"
-                                placeholder="0">
-                        </div>
-                        <div style="margin:0;">
-                            <label class="form-label">Short (Liter)</label>
-                            <input type="text" name="short" class="form-input fmt-short" inputmode="decimal"
-                                placeholder="0">
-                        </div>
+                    <div class="form-group full">
+                        <label class="form-label">Extra (Liter)</label>
+                        <input type="text" name="extra" class="form-input fmt-extra" inputmode="decimal"
+                            placeholder="0">
                     </div>
                     <div class="form-group full" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
                         <div class="form-group full" style="margin:0;">

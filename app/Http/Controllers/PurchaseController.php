@@ -33,8 +33,6 @@ class PurchaseController extends Controller
                 'quantity_raw'  => $p->quantity,
                 'extra'         => number_format($p->extra, 0, ',', '.'),
                 'extra_raw'     => $p->extra,
-                'short'         => number_format($p->short, 0, ',', '.'),
-                'short_raw'     => $p->short,
                 'price'         => number_format($p->price, 0, ',', '.'),
                 'price_raw'     => $p->price,
                 'amount'        => number_format($p->amount, 0, ',', '.'),
@@ -58,14 +56,12 @@ class PurchaseController extends Controller
             'warna'       => 'required|in:biru,kuning',
             'quantity'    => 'required|numeric|min:0.01',
             'extra'       => 'nullable|numeric|min:0',
-            'short'       => 'nullable|numeric|min:0',
             'price'       => 'required|numeric|min:0',
             'noted'       => 'nullable|string',
         ]);
 
         DB::transaction(function () use ($request) {
             $extra  = (float) ($request->extra ?? 0);
-            $short  = (float) ($request->short ?? 0);
             $purchase = Purchase::create([
                 'kapal_id'    => $request->kapal_id ?: null,
                 'date'        => $request->date . ' ' . now()->format('H:i:s'),
@@ -74,7 +70,7 @@ class PurchaseController extends Controller
                 'warna'       => $request->warna ?: null,
                 'quantity'    => $request->quantity,
                 'extra'       => $extra,
-                'short'       => $short,
+                'short'       => 0,
                 'price'       => $request->price,
                 'amount'      => $request->quantity * $request->price,
                 'noted'       => $request->noted,
@@ -92,7 +88,7 @@ class PurchaseController extends Controller
                 'reference_type' => Purchase::class,
                 'party'          => $purchase->vendor,
                 'warna'          => $purchase->warna,
-                'qty_in'         => (float) $purchase->quantity + (float) $purchase->extra - (float) $purchase->short,
+                'qty_in'         => (float) $purchase->quantity + (float) $purchase->extra,
                 'qty_out'        => 0,
             ]);
         });
@@ -114,7 +110,6 @@ class PurchaseController extends Controller
             'warna'       => 'required|in:biru,kuning',
             'quantity'    => 'required|numeric|min:0.01',
             'extra'       => 'nullable|numeric|min:0',
-            'short'       => 'nullable|numeric|min:0',
             'price'       => 'required|numeric|min:0',
             'noted'       => 'nullable|string',
         ]);
@@ -132,7 +127,7 @@ class PurchaseController extends Controller
                 'warna'       => $request->warna ?: null,
                 'quantity'    => $request->quantity,
                 'extra'       => (float) ($request->extra ?? 0),
-                'short'       => (float) ($request->short ?? 0),
+                'short'       => 0,
                 'price'       => $request->price,
                 'amount'      => $request->quantity * $request->price,
                 'noted'       => $request->noted,
@@ -191,7 +186,7 @@ class PurchaseController extends Controller
                 'reference_type' => Purchase::class,
                 'party'          => $purchase->vendor,
                 'warna'          => $purchase->warna,
-                'qty_in'         => (float) $purchase->quantity + (float) $purchase->extra - (float) $purchase->short,
+                'qty_in'         => (float) $purchase->quantity + (float) $purchase->extra,
                 'qty_out'        => 0,
             ]);
         });

@@ -17,7 +17,7 @@ class KapalController extends Controller
 
     public function list()
     {
-        return response()->json(Kapal::orderBy('code')->get(['id', 'code', 'name']));
+        return response()->json(Kapal::orderBy('code')->get(['id', 'code', 'name', 'price']));
     }
 
     public function data()
@@ -26,9 +26,10 @@ class KapalController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
         $kapals = Kapal::orderBy('code')->get()->map(fn($k) => [
-            'id'   => $k->id,
-            'code' => $k->code,
-            'name' => $k->name,
+            'id'    => $k->id,
+            'code'  => $k->code,
+            'name'  => $k->name,
+            'price' => $k->price,
         ]);
         return response()->json(['data' => $kapals]);
     }
@@ -40,12 +41,14 @@ class KapalController extends Controller
         }
 
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name'  => 'required|string|max:255',
+            'price' => 'nullable|numeric|min:0',
         ]);
 
         Kapal::create([
-            'code' => Kapal::generateNextCode(),
-            'name' => $request->name,
+            'code'  => Kapal::generateNextCode(),
+            'name'  => $request->name,
+            'price' => $request->price ?? 0,
         ]);
 
         return response()->json(['message' => 'Kapal berhasil ditambahkan.']);
@@ -58,10 +61,14 @@ class KapalController extends Controller
         }
 
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name'  => 'required|string|max:255',
+            'price' => 'nullable|numeric|min:0',
         ]);
 
-        $kapal->update(['name' => $request->name]);
+        $kapal->update([
+            'name'  => $request->name,
+            'price' => $request->price ?? 0,
+        ]);
 
         return response()->json(['message' => 'Kapal berhasil diupdate.']);
     }

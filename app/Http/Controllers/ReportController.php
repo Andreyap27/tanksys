@@ -44,7 +44,7 @@ class ReportController extends Controller
         $kapalId  = request('kapal_id') ?: null;
         $kapals   = Kapal::orderBy('code')->get();
 
-        $base = Purchase::selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(short) as total_short, SUM(amount) as total_amount')
+        $base = Purchase::selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(amount) as total_amount')
             ->whereYear('date', $year)
             ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
             ->groupBy('month');
@@ -62,7 +62,7 @@ class ReportController extends Controller
         $kapalId = request('kapal_id') ?: null;
         $kapals  = Kapal::orderBy('code')->get();
 
-        $base = Sale::selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(short) as total_short, SUM(amount) as total_amount')
+        $base = Sale::selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(amount) as total_amount')
             ->whereYear('date', $year)
             ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
             ->groupBy('month');
@@ -240,7 +240,7 @@ class ReportController extends Controller
         $kapals   = Kapal::orderBy('code')->get();
 
         $purchases = Purchase::onlyTrashed()
-            ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(short) as total_short, SUM(amount) as total_amount')
+            ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(amount) as total_amount')
             ->whereYear('date', $year)
             ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
             ->groupBy('month')
@@ -257,7 +257,7 @@ class ReportController extends Controller
         $kapals  = Kapal::orderBy('code')->get();
 
         $sales = Sale::onlyTrashed()
-            ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(short) as total_short, SUM(amount) as total_amount')
+            ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(amount) as total_amount')
             ->whereYear('date', $year)
             ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
             ->groupBy('month')
@@ -379,10 +379,10 @@ class ReportController extends Controller
         switch ($section) {
             case 'purchase':
                 if ($isTrash) {
-                    $data['purchasesPaid']     = Purchase::onlyTrashed()->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(short) as total_short, SUM(amount) as total_amount')->whereYear('date', $year)->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))->groupBy('month')->get()->keyBy('month');
+                    $data['purchasesPaid']     = Purchase::onlyTrashed()->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(amount) as total_amount')->whereYear('date', $year)->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))->groupBy('month')->get()->keyBy('month');
                     $data['purchasesApproved'] = collect();
                 } else {
-                    $pBase = Purchase::selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(short) as total_short, SUM(amount) as total_amount')->whereYear('date', $year)->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))->groupBy('month');
+                    $pBase = Purchase::selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(amount) as total_amount')->whereYear('date', $year)->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))->groupBy('month');
                     $data['purchasesPaid']     = (clone $pBase)->where('status', 'paid')->get()->keyBy('month');
                     $data['purchasesApproved'] = (clone $pBase)->where('status', 'approved')->get()->keyBy('month');
                 }
@@ -390,10 +390,10 @@ class ReportController extends Controller
                 break;
             case 'sale':
                 if ($isTrash) {
-                    $data['salesPaid']     = Sale::onlyTrashed()->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(short) as total_short, SUM(amount) as total_amount')->whereYear('date', $year)->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))->groupBy('month')->get()->keyBy('month');
+                    $data['salesPaid']     = Sale::onlyTrashed()->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(amount) as total_amount')->whereYear('date', $year)->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))->groupBy('month')->get()->keyBy('month');
                     $data['salesApproved'] = collect();
                 } else {
-                    $sBase = Sale::selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(short) as total_short, SUM(amount) as total_amount')->whereYear('date', $year)->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))->groupBy('month');
+                    $sBase = Sale::selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(amount) as total_amount')->whereYear('date', $year)->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))->groupBy('month');
                     $data['salesPaid']     = (clone $sBase)->where('status', 'paid')->get()->keyBy('month');
                     $data['salesApproved'] = (clone $sBase)->where('status', 'approved')->get()->keyBy('month');
                 }
@@ -511,5 +511,52 @@ class ReportController extends Controller
         }
 
         return view('report.print', $data);
+    }
+
+    public function jasaAngkut()
+    {
+        $year  = $this->getYear();
+        $years = $this->getYears();
+
+        $purchases = Purchase::select(
+                'purchases.date',
+                'purchases.quantity',
+                'purchases.extra',
+                'kapals.name as kapal_name',
+                'kapals.price as kapal_price'
+            )
+            ->join('kapals', 'kapals.id', '=', 'purchases.kapal_id')
+            ->whereYear('purchases.date', $year)
+            ->whereNotNull('purchases.kapal_id')
+            ->whereIn('purchases.status', ['approved', 'paid'])
+            ->orderBy('purchases.date')
+            ->get();
+
+        $byMonth = $purchases->groupBy(fn($p) => (int)\Carbon\Carbon::parse($p->date)->format('n'));
+
+        return view('report.jasa-angkut', compact('year', 'years', 'byMonth'));
+    }
+
+    public function jasaAngkutPrint()
+    {
+        $year = $this->getYear();
+
+        $purchases = Purchase::select(
+                'purchases.date',
+                'purchases.quantity',
+                'purchases.extra',
+                'kapals.name as kapal_name',
+                'kapals.price as kapal_price'
+            )
+            ->join('kapals', 'kapals.id', '=', 'purchases.kapal_id')
+            ->whereYear('purchases.date', $year)
+            ->whereNotNull('purchases.kapal_id')
+            ->whereIn('purchases.status', ['approved', 'paid'])
+            ->orderBy('purchases.date')
+            ->get();
+
+        $byMonth = $purchases->groupBy(fn($p) => (int)\Carbon\Carbon::parse($p->date)->format('n'));
+
+        return view('report.print-jasa-angkut', compact('year', 'byMonth'));
     }
 }

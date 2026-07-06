@@ -74,11 +74,6 @@
     </div>
 </div>
 
-{{-- Kapal Tabs --}}
-<div class="tab-bar" id="salesTabs">
-    <button class="tab active" data-kapal-id="" onclick="switchSaleTab(this, '')"><i data-lucide="list" style="width:16px;height:16px;"></i> Semua</button>
-</div>
-
 <div class="card">
     <div class="card-toolbar">
         <div class="dt-search-slot"></div>
@@ -102,7 +97,6 @@
                         <th>Warna</th>
                         <th>Qty (L)</th>
                         <th>Extra (L)</th>
-                        <th>Short (L)</th>
                         <th>Harga/L</th>
                         <th>Amount</th>
                         <th>Status</th>
@@ -116,7 +110,7 @@
 
 @include('sales.modals.create')
 @include('sales.modals.edit')
-@php $txSection='sales'; $txHasKapal=true; $txHasMobil=false; $txHasPc=false; @endphp
+@php $txSection='sales'; $txHasKapal=false; $txHasMobil=false; $txHasPc=false; @endphp
 @include('print._tx_filter_modal')
 
 {{-- Invoice Preview Modal --}}
@@ -166,7 +160,6 @@
 
     let table;
     let editId = null;
-    let activeSaleKapalId = '';
     let quickCustomerContext = 'create';
     const createForm = document.getElementById('createForm');
     const editForm = document.getElementById('editForm');
@@ -181,37 +174,6 @@
         utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@23.1.0/build/js/utils.js',
     });
 
-    // ── Kapal tabs ───────────────────────────────────────────────────────────────
-    let saleKapalList = [];
-
-    function loadSaleKapals() {
-        axios.get('{{ route('kapal.list') }}').then(res => {
-            saleKapalList = res.data;
-            const tabBar = document.getElementById('salesTabs');
-            const opts = res.data.map(k => `<option value="${k.id}">${k.code} — ${k.name}</option>`).join('');
-            saleKapalList.forEach(k => {
-                const btn = document.createElement('button');
-                btn.className = 'tab';
-                btn.dataset.kapalId = k.id;
-                btn.innerHTML = `<i data-lucide="ship" style="width:16px;height:16px;"></i> ${k.name}`;
-                btn.onclick = function() {
-                    switchSaleTab(this, k.id);
-                };
-                tabBar.appendChild(btn);
-            });
-            lucide.createIcons();
-            document.getElementById('createSaleKapalSelect').innerHTML = '<option value="">-- Pilih Kapal --</option>' + opts;
-            document.getElementById('editSaleKapalSelect').innerHTML = '<option value="">-- Pilih Kapal --</option>' + opts;
-        });
-    }
-
-    function switchSaleTab(btn, kapalId) {
-        document.querySelectorAll('#salesTabs .tab').forEach(t => t.classList.remove('active'));
-        btn.classList.add('active');
-        activeSaleKapalId = kapalId;
-        table.ajax.reload(null, false);
-    }
-
     function updateSalesSummary(api) {
         const rows = api.rows({ search: 'applied' }).data();
         let totalAmount = 0, qtyTotal = 0, qtyBiru = 0, qtyKuning = 0;
@@ -221,7 +183,7 @@
             if (_d.getFullYear() !== _cy || (_d.getMonth() + 1) !== _cm) continue;
             if (rows[i].status === 'approved' || rows[i].status === 'paid') {
                 totalAmount += parseFloat(rows[i].amount_raw) || 0;
-                const qty = (parseFloat(rows[i].quantity_raw) || 0) + (parseFloat(rows[i].extra_raw) || 0) - (parseFloat(rows[i].short_raw) || 0);
+                const qty = (parseFloat(rows[i].quantity_raw) || 0) + (parseFloat(rows[i].extra_raw) || 0);
                 qtyTotal += qty;
                 if (rows[i].warna === 'biru') qtyBiru += qty;
                 else if (rows[i].warna === 'kuning') qtyKuning += qty;
@@ -231,25 +193,6 @@
         document.getElementById('salesQtyTotal').textContent = Currency.number(qtyTotal) + ' L';
         document.getElementById('salesQtyBiru').textContent = Currency.number(qtyBiru) + ' L';
         document.getElementById('salesQtyKuning').textContent = Currency.number(qtyKuning) + ' L';
-    }
-
-    // When kapal changes in create modal, reload invoice number
-    function onCreateSaleKapalChange() {
-        const kapalId = document.getElementById('createSaleKapalSelect').value;
-        const invInput = createForm.invoice_number;
-        invInput.value = '';
-        invInput.placeholder = 'Memuat...';
-        const params = kapalId ? {
-            kapal_id: kapalId
-        } : {};
-        axios.get('{{ route('sales.next-invoice') }}', { params })
-            .then(res => {
-                invInput.value = res.data.invoice_number;
-                invInput.placeholder = '';
-            })
-            .catch(() => {
-                invInput.placeholder = 'Gagal memuat nomor';
-            });
     }
 
     // ── Select2 init ─────────────────────────────────────────────────────────────
@@ -324,7 +267,6 @@
 
     attachDecimalInput('.fmt-qty', function(el) { triggerAmountCalc(el); });
     attachDecimalInput('.fmt-extra');
-    attachDecimalInput('.fmt-short');
 
     document.querySelectorAll('.fmt-price').forEach(el => {
         el.addEventListener('input', function() {
@@ -354,15 +296,11 @@
     // ── DataTable ────────────────────────────────────────────────────────────────
     $(document).ready(function() {
         initSelect2();
-        loadSaleKapals();
 
         table = $('#salesTable').DataTable({
             ajax: {
                 url: '{{ route('sales.data') }}',
                 type: 'GET',
-                data: function(d) {
-                    if (activeSaleKapalId) d.kapal_id = activeSaleKapalId;
-                }
             },
             processing: true,
             columns: [{
@@ -398,10 +336,6 @@
                     render: (data) => data && data !== '0' ? data : '<span class="text-muted">0</span>'
                 },
                 {
-                    data: 'short',
-                    render: (data) => data && data !== '0' ? `<span style="color:#dc2626;">${data}</span>` : '<span class="text-muted">0</span>'
-                },
-                {
                     data: 'price',
                     render: (data) => Currency.symbol + ' ' + data
                 },
@@ -431,7 +365,7 @@
                         if (canManage) {
                             actions += `
                             <button class="icon-btn primary" title="Edit"
-                                onclick="openEditModal('${row.id}', '${row.date_raw}', '${escHtml(row.invoice_number)}', '${row.customer_id}', '${escHtml(row.description)}', '${row.warna || ''}', '${row.quantity_raw}', '${row.extra_raw}', '${row.short_raw}', '${row.price_raw}', '${escHtml(row.noted)}', '${row.kapal_id || ''}')">
+                                onclick="openEditModal('${row.id}', '${row.date_raw}', '${escHtml(row.invoice_number)}', '${row.customer_id}', '${escHtml(row.description)}', '${row.warna || ''}', '${row.quantity_raw}', '${row.extra_raw}', '${row.price_raw}', '${escHtml(row.noted)}')">
                                 <i data-lucide="pencil" style="width:14px;height:14px;"></i>
                             </button>`;
                         }
@@ -516,19 +450,12 @@
         document.getElementById('createAmountDisplay').value = '';
         setRaw(createForm.extra, 0);
         createForm.extra.value = '';
-        setRaw(createForm.short, 0);
-        createForm.short.value = '';
         createForm.invoice_number.value = '';
         createForm.invoice_number.placeholder = 'Memuat...';
-        const kapalSel = document.getElementById('createSaleKapalSelect');
-        if (activeSaleKapalId) {
-            kapalSel.value = activeSaleKapalId;
-        }
         loadCustomerOptions();
         createModal.classList.add('active');
 
-        const params = activeSaleKapalId ? { kapal_id: activeSaleKapalId } : {};
-        axios.get('{{ route('sales.next-invoice') }}', { params })
+        axios.get('{{ route('sales.next-invoice') }}')
             .then(res => {
                 createForm.invoice_number.value = res.data.invoice_number;
                 createForm.invoice_number.placeholder = '';
@@ -550,7 +477,6 @@
         }
 
         const payload = {
-            kapal_id: document.getElementById('createSaleKapalSelect').value || null,
             date: createForm.date.value,
             invoice_number: createForm.invoice_number.value,
             customer_id: customer,
@@ -558,7 +484,6 @@
             warna: createForm.warna.value || null,
             quantity: getRaw(createForm.quantity),
             extra: getRaw(createForm.extra) || 0,
-            short: getRaw(createForm.short) || 0,
             price: getRaw(createForm.price),
             noted: createForm.noted.value,
         };
@@ -587,13 +512,12 @@
         document.getElementById('editAmountDisplay').value = Currency.format(qty * price);
     }
 
-    function openEditModal(id, date, invoice_number, customer_id, description, warna, quantity, extra, short, price, noted, kapalId) {
+    function openEditModal(id, date, invoice_number, customer_id, description, warna, quantity, extra, price, noted) {
         editId = id;
         editForm.invoice_number.value = invoice_number;
         editForm.date.value = date;
         editForm.description.value = description !== '-' ? description : '';
         editForm.noted.value = noted !== '-' ? noted : '';
-        document.getElementById('editSaleKapalSelect').value = kapalId || '';
         document.getElementById('editSaleWarnaSelect').value = warna || '';
 
         setRaw(editForm.quantity, quantity);
@@ -603,10 +527,6 @@
         setRaw(editForm.extra, extra);
         editForm.extra.value = parseFloat(extra) ?
             parseFloat(extra).toLocaleString('id-ID', { maximumFractionDigits: 3 }) : '';
-
-        setRaw(editForm.short, short);
-        editForm.short.value = parseFloat(short) ?
-            parseFloat(short).toLocaleString('id-ID', { maximumFractionDigits: 3 }) : '';
 
         setRaw(editForm.price, price);
         editForm.price.value = parseInt(price) ? Currency.format(price) : '';
@@ -629,7 +549,6 @@
         }
 
         const payload = {
-            kapal_id: document.getElementById('editSaleKapalSelect').value || null,
             date: editForm.date.value,
             invoice_number: editForm.invoice_number.value,
             customer_id: customer,
@@ -637,7 +556,6 @@
             warna: editForm.warna.value || null,
             quantity: getRaw(editForm.quantity),
             extra: getRaw(editForm.extra) || 0,
-            short: getRaw(editForm.short) || 0,
             price: getRaw(editForm.price),
             noted: editForm.noted.value,
         };
