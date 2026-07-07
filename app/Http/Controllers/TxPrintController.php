@@ -128,8 +128,7 @@ class TxPrintController extends Controller
                 break;
 
             case 'stock-usage':
-                $q = StockUsage::with('kapal')->orderBy('date')->orderBy('created_at');
-                if ($kapalId)  $q->where('kapal_id', $kapalId);
+                $q = StockUsage::orderBy('date')->orderBy('created_at');
                 if ($dateFrom) $q->whereDate('date', '>=', $dateFrom);
                 if ($dateTo)   $q->whereDate('date', '<=', $dateTo);
                 $data['rows'] = $q->get();

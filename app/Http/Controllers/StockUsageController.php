@@ -16,14 +16,13 @@ class StockUsageController extends Controller
 
     public function data()
     {
-        $usages = StockUsage::with(['kapal', 'creator'])
+        $usages = StockUsage::with(['creator'])
             ->orderBy('date', 'desc')
             ->get()
             ->map(fn($u) => [
                 'id'           => $u->id,
                 'date'         => $this->resolveDate($u)->translatedFormat('d M Y H:i'),
                 'date_raw'     => $u->date->format('Y-m-d H:i:s'),
-                'kapal'        => $u->kapal?->name ?? '-',
                 'warna'        => $u->warna,
                 'quantity'     => number_format($u->quantity, 0, ',', '.'),
                 'quantity_raw' => $u->quantity,
@@ -38,7 +37,6 @@ class StockUsageController extends Controller
     {
         $request->validate([
             'date'      => 'required|date',
-            'kapal_id'  => 'nullable|exists:kapals,id',
             'warna'     => 'required|in:biru,kuning',
             'quantity'  => 'required|numeric|min:0.01',
             'keperluan' => 'required|string|max:255',
@@ -47,7 +45,7 @@ class StockUsageController extends Controller
         DB::transaction(function () use ($request) {
             $usage = StockUsage::create([
                 'date'       => $request->date . ' ' . now()->format('H:i:s'),
-                'kapal_id'   => $request->kapal_id ?: null,
+                'kapal_id'   => null,
                 'warna'      => $request->warna,
                 'quantity'   => $request->quantity,
                 'keperluan'  => $request->keperluan,
@@ -55,7 +53,7 @@ class StockUsageController extends Controller
             ]);
 
             Stock::create([
-                'kapal_id'       => $usage->kapal_id,
+                'kapal_id'       => null,
                 'date'           => $usage->date,
                 'type'           => 'usage',
                 'reference_id'   => $usage->id,

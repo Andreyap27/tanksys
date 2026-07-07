@@ -405,7 +405,7 @@
     <table>
         <thead><tr>
             <th style="width:3%">#</th>
-            <th>Tanggal</th><th>Kapal</th><th>Keperluan</th><th>Warna</th>
+            <th>Tanggal</th><th>Keperluan</th><th>Warna</th>
             <th class="r">Qty (L)</th>
         </tr></thead>
         <tbody>
@@ -413,16 +413,15 @@
             <tr>
                 <td class="c">{{ $i+1 }}</td>
                 <td>{{ $r->date->translatedFormat('d M Y') }}</td>
-                <td>{{ $r->kapal->name ?? '-' }}</td>
                 <td>{{ $r->keperluan ?? '-' }}</td>
                 <td>{{ ucfirst($r->warna) }}</td>
                 <td class="r">{{ $fmtQty($r->quantity) }}</td>
             </tr>
-            @empty<tr><td colspan="6" style="text-align:center;color:#888;">Tidak ada data</td></tr>
+            @empty<tr><td colspan="5" style="text-align:center;color:#888;">Tidak ada data</td></tr>
             @endforelse
         </tbody>
         <tfoot><tr>
-            <td colspan="5"><strong>Total</strong></td>
+            <td colspan="4"><strong>Total</strong></td>
             <td class="r">{{ $fmtQty($gQty) }}</td>
         </tr></tfoot>
     </table>

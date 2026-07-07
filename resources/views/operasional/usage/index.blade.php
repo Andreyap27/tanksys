@@ -55,7 +55,6 @@
                 <thead>
                     <tr>
                         <th>Tanggal</th>
-                        <th>Kapal</th>
                         <th>Warna</th>
                         <th>Qty (L)</th>
                         <th>Keperluan</th>
@@ -81,12 +80,6 @@
                     <div class="form-group full">
                         <label class="form-label">Tanggal <span class="text-danger">*</span></label>
                         <input type="date" name="date" class="form-input" required>
-                    </div>
-                    <div class="form-group full">
-                        <label class="form-label">Stok Dari (Kapal)</label>
-                        <select name="kapal_id" id="usageKapalSelect" class="form-select">
-                            <option value="">-- Pilih Kapal --</option>
-                        </select>
                     </div>
                     <div class="form-group full">
                         <label class="form-label">Warna BBM <span class="text-danger">*</span></label>
@@ -117,7 +110,7 @@
         </div>
     </div>
 </div>
-@php $txSection='stock-usage'; $txHasKapal=true; $txHasMobil=false; $txHasPc=false; @endphp
+@php $txSection='stock-usage'; $txHasKapal=false; $txHasMobil=false; $txHasPc=false; @endphp
 @include('print._tx_filter_modal')
 @endsection
 
@@ -137,21 +130,20 @@ function escHtml(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,"\\'");
 }
 
-function loadKapals() {
-    axios.get('{{ route('kapal.list') }}').then(res => {
-        const opts = res.data.map(k => `<option value="${k.id}">${k.code} — ${k.name}</option>`).join('');
-        document.getElementById('usageKapalSelect').innerHTML = '<option value="">-- Pilih Kapal --</option>' + opts;
-    });
-}
-
 function updateSummary(api) {
-    const totals = { biru: 0, kuning: 0 };
-    const rows = api.rows({ search: 'applied' }).data();
+    const now      = new Date();
+    const curYear  = now.getFullYear();
+    const curMonth = now.getMonth() + 1;
+    const totals   = { biru: 0, kuning: 0 };
+    const allRows  = api.rows().data();
     let total = 0;
-    for (let i = 0; i < rows.length; i++) {
-        const qty = parseFloat(rows[i].quantity_raw) || 0;
+    for (let i = 0; i < allRows.length; i++) {
+        const raw = allRows[i].date_raw || '';
+        const [rowYear, rowMonth] = raw.split('-').map(Number);
+        if (rowYear !== curYear || rowMonth !== curMonth) continue;
+        const qty = parseFloat(allRows[i].quantity_raw) || 0;
         total += qty;
-        const w = rows[i].warna;
+        const w = allRows[i].warna;
         if (totals[w] !== undefined) totals[w] += qty;
     }
     const fmt = n => new Intl.NumberFormat('id-ID').format(Math.round(n));
@@ -162,13 +154,10 @@ function updateSummary(api) {
 }
 
 $(document).ready(function () {
-    loadKapals();
-
     usageTable = $('#usageTable').DataTable({
         ajax: { url: '{{ route('stock-usage.data') }}', type: 'GET' },
         columns: [
             { data: 'date', render: (d, t, r) => t === 'sort' ? r.date_raw : d },
-            { data: 'kapal' },
             { data: 'warna', render: d => WARNA_BADGE[d] || d },
             { data: 'quantity' },
             { data: 'keperluan' },
@@ -200,7 +189,6 @@ function storeUsage() {
 
     const payload = {
         date:      createForm.date.value,
-        kapal_id:  createForm.kapal_id.value || null,
         warna:     createForm.warna.value,
         quantity:  parseFloat(createForm.quantity.value),
         keperluan: createForm.keperluan.value,
