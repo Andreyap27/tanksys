@@ -52,26 +52,6 @@
         </div>
         <div class="dash-stat__bg-icon"><i data-lucide="fuel" style="width:110px;height:110px;"></i></div>
     </div>
-    <div class="dash-stat" style="background:rgba(37,99,235,0.08);border-radius:var(--radius-lg,0.75rem);padding:1.25rem;position:relative;overflow:hidden;">
-        <div class="dash-stat__header">
-            <div class="dash-stat__icon" style="background:rgba(37,99,235,0.12);color:#2563eb;"><i data-lucide="fuel" style="width:20px;height:20px;"></i></div>
-            <div>
-                <div class="dash-stat__label">Qty Biru (Approved)</div>
-                <div class="dash-stat__value" id="purchaseQtyBiru" style="color:#2563eb;">0 L</div>
-            </div>
-        </div>
-        <div class="dash-stat__bg-icon" style="color:#2563eb;"><i data-lucide="fuel" style="width:110px;height:110px;"></i></div>
-    </div>
-    <div class="dash-stat" style="background:rgba(202,138,4,0.08);border-radius:var(--radius-lg,0.75rem);padding:1.25rem;position:relative;overflow:hidden;">
-        <div class="dash-stat__header">
-            <div class="dash-stat__icon" style="background:rgba(202,138,4,0.12);color:#ca8a04;"><i data-lucide="fuel" style="width:20px;height:20px;"></i></div>
-            <div>
-                <div class="dash-stat__label">Qty Kuning (Approved)</div>
-                <div class="dash-stat__value" id="purchaseQtyKuning" style="color:#ca8a04;">0 L</div>
-            </div>
-        </div>
-        <div class="dash-stat__bg-icon" style="color:#ca8a04;"><i data-lucide="fuel" style="width:110px;height:110px;"></i></div>
-    </div>
 </div>
 
 {{-- Kapal Tabs --}}
@@ -98,10 +78,8 @@
                         <th>Tanggal</th>
                         <th>Vendor</th>
                         <th>Deskripsi</th>
-                        <th>Warna</th>
                         <th>Qty (L)</th>
                         <th>Extra (L)</th>
-                        <th>Short (L)</th>
                         <th>Harga/L</th>
                         <th>Amount</th>
                         <th>Status</th>
@@ -290,7 +268,7 @@
     // ── Summary card ─────────────────────────────────────────────────────────────
     function updatePurchaseSummary(api) {
         const rows = api.rows({ search: 'applied' }).data();
-        let totalAmount = 0, qtyTotal = 0, qtyBiru = 0, qtyKuning = 0;
+        let totalAmount = 0, qtyTotal = 0;
         const _now = new Date(), _cy = _now.getFullYear(), _cm = _now.getMonth() + 1;
         for (let i = 0; i < rows.length; i++) {
             const _d = new Date((rows[i].date_raw || '').replace(' ', 'T'));
@@ -299,14 +277,10 @@
                 totalAmount += parseFloat(rows[i].amount_raw) || 0;
                 const qty = (parseFloat(rows[i].quantity_raw) || 0) + (parseFloat(rows[i].extra_raw) || 0);
                 qtyTotal += qty;
-                if (rows[i].warna === 'biru') qtyBiru += qty;
-                else if (rows[i].warna === 'kuning') qtyKuning += qty;
             }
         }
         document.getElementById('purchaseTotalAmount').textContent = 'Rp ' + Currency.number(totalAmount);
         document.getElementById('purchaseQtyTotal').textContent = Currency.number(qtyTotal) + ' L';
-        document.getElementById('purchaseQtyBiru').textContent = Currency.number(qtyBiru) + ' L';
-        document.getElementById('purchaseQtyKuning').textContent = Currency.number(qtyKuning) + ' L';
     }
 
     // ── DataTable ────────────────────────────────────────────────────────────────
@@ -333,17 +307,6 @@
                 {
                     data: 'description',
                     render: (data) => data ? data : '<span class="text-muted">-</span>'
-                },
-                {
-                    data: 'warna',
-                    render: function(data) {
-                        if (!data) return '<span class="text-muted">-</span>';
-                        const map = {
-                            biru:    '<span class="badge" style="background:#2563eb;color:#fff;">Biru</span>',
-                            kuning:  '<span class="badge" style="background:#ca8a04;color:#fff;">Kuning</span>',
-                        };
-                        return map[data] || data;
-                    }
                 },
                 {
                     data: 'quantity'
@@ -391,7 +354,6 @@
                                     '${row.date_raw}',
                                     '${escHtml(row.vendor)}',
                                     '${escHtml(row.description)}',
-                                    '${row.warna || ''}',
                                     '${row.quantity_raw}',
                                     '${row.extra_raw}',
                                     '${row.price_raw}',
@@ -497,7 +459,6 @@
             date: createForm.date.value,
             vendor: vendor,
             description: createForm.description.value,
-            warna: createForm.warna.value || null,
             quantity: getRaw(createForm.quantity),
             extra: getRaw(createForm.extra) || 0,
             price: getRaw(createForm.price),
@@ -528,13 +489,12 @@
         document.getElementById('editAmountDisplay').value = Currency.format(qty * price);
     }
 
-    function openEditModal(id, date, vendor, description, warna, quantity, extra, price, noted, kapalId) {
+    function openEditModal(id, date, vendor, description, quantity, extra, price, noted, kapalId) {
         editId = id;
         editForm.date.value = date;
         editForm.description.value = description;
         editForm.noted.value = noted;
         document.getElementById('editKapalSelect').value = kapalId || '';
-        document.getElementById('editWarnaSelect').value = warna || '';
 
         setRaw(editForm.quantity, quantity);
         editForm.quantity.value = parseFloat(quantity) ?
@@ -569,7 +529,6 @@
             date: editForm.date.value,
             vendor: vendor,
             description: editForm.description.value,
-            warna: editForm.warna.value || null,
             quantity: getRaw(editForm.quantity),
             extra: getRaw(editForm.extra) || 0,
             price: getRaw(editForm.price),

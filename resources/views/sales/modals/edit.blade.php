@@ -33,14 +33,6 @@
                         <input type="text" name="description" class="form-input" placeholder="Deskripsi penjualan">
                     </div>
                     <div class="form-group full">
-                        <label class="form-label">Warna <span class="text-danger">*</span></label>
-                        <select name="warna" id="editSaleWarnaSelect" class="form-select" required>
-                            <option value="">-- Pilih Warna --</option>
-                            <option value="biru">Biru</option>
-                            <option value="kuning">Kuning</option>
-                        </select>
-                    </div>
-                    <div class="form-group full">
                         <label class="form-label">Qty (Liter) <span class="text-danger">*</span></label>
                         <input type="text" name="quantity" class="form-input fmt-qty" inputmode="decimal"
                             placeholder="0" required>

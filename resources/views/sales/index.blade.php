@@ -52,26 +52,6 @@
         </div>
         <div class="dash-stat__bg-icon"><i data-lucide="fuel" style="width:110px;height:110px;"></i></div>
     </div>
-    <div class="dash-stat" style="background:rgba(37,99,235,0.08);border-radius:var(--radius-lg,0.75rem);padding:1.25rem;position:relative;overflow:hidden;">
-        <div class="dash-stat__header">
-            <div class="dash-stat__icon" style="background:rgba(37,99,235,0.12);color:#2563eb;"><i data-lucide="fuel" style="width:20px;height:20px;"></i></div>
-            <div>
-                <div class="dash-stat__label">Qty Biru (Approved)</div>
-                <div class="dash-stat__value" id="salesQtyBiru" style="color:#2563eb;">0 L</div>
-            </div>
-        </div>
-        <div class="dash-stat__bg-icon" style="color:#2563eb;"><i data-lucide="fuel" style="width:110px;height:110px;"></i></div>
-    </div>
-    <div class="dash-stat" style="background:rgba(202,138,4,0.08);border-radius:var(--radius-lg,0.75rem);padding:1.25rem;position:relative;overflow:hidden;">
-        <div class="dash-stat__header">
-            <div class="dash-stat__icon" style="background:rgba(202,138,4,0.12);color:#ca8a04;"><i data-lucide="fuel" style="width:20px;height:20px;"></i></div>
-            <div>
-                <div class="dash-stat__label">Qty Kuning (Approved)</div>
-                <div class="dash-stat__value" id="salesQtyKuning" style="color:#ca8a04;">0 L</div>
-            </div>
-        </div>
-        <div class="dash-stat__bg-icon" style="color:#ca8a04;"><i data-lucide="fuel" style="width:110px;height:110px;"></i></div>
-    </div>
 </div>
 
 <div class="card">
@@ -94,7 +74,6 @@
                         <th>No Invoice</th>
                         <th>Customer</th>
                         <th>Deskripsi</th>
-                        <th>Warna</th>
                         <th>Qty (L)</th>
                         <th>Extra (L)</th>
                         <th>Harga/L</th>
@@ -176,7 +155,7 @@
 
     function updateSalesSummary(api) {
         const rows = api.rows({ search: 'applied' }).data();
-        let totalAmount = 0, qtyTotal = 0, qtyBiru = 0, qtyKuning = 0;
+        let totalAmount = 0, qtyTotal = 0;
         const _now = new Date(), _cy = _now.getFullYear(), _cm = _now.getMonth() + 1;
         for (let i = 0; i < rows.length; i++) {
             const _d = new Date((rows[i].date_raw || '').replace(' ', 'T'));
@@ -185,14 +164,10 @@
                 totalAmount += parseFloat(rows[i].amount_raw) || 0;
                 const qty = (parseFloat(rows[i].quantity_raw) || 0) + (parseFloat(rows[i].extra_raw) || 0);
                 qtyTotal += qty;
-                if (rows[i].warna === 'biru') qtyBiru += qty;
-                else if (rows[i].warna === 'kuning') qtyKuning += qty;
             }
         }
         document.getElementById('salesTotalAmount').textContent = 'Rp ' + Currency.number(totalAmount);
         document.getElementById('salesQtyTotal').textContent = Currency.number(qtyTotal) + ' L';
-        document.getElementById('salesQtyBiru').textContent = Currency.number(qtyBiru) + ' L';
-        document.getElementById('salesQtyKuning').textContent = Currency.number(qtyKuning) + ' L';
     }
 
     // ── Select2 init ─────────────────────────────────────────────────────────────
@@ -318,17 +293,6 @@
                     render: (data) => data && data !== '-' ? data : '<span class="text-muted">-</span>'
                 },
                 {
-                    data: 'warna',
-                    render: function(data) {
-                        if (!data) return '<span class="text-muted">-</span>';
-                        const map = {
-                            biru:   '<span class="badge" style="background:#2563eb;color:#fff;">Biru</span>',
-                            kuning: '<span class="badge" style="background:#ca8a04;color:#fff;">Kuning</span>',
-                        };
-                        return map[data] || data;
-                    }
-                },
-                {
                     data: 'quantity'
                 },
                 {
@@ -365,7 +329,7 @@
                         if (canManage) {
                             actions += `
                             <button class="icon-btn primary" title="Edit"
-                                onclick="openEditModal('${row.id}', '${row.date_raw}', '${escHtml(row.invoice_number)}', '${row.customer_id}', '${escHtml(row.description)}', '${row.warna || ''}', '${row.quantity_raw}', '${row.extra_raw}', '${row.price_raw}', '${escHtml(row.noted)}')">
+                                onclick="openEditModal('${row.id}', '${row.date_raw}', '${escHtml(row.invoice_number)}', '${row.customer_id}', '${escHtml(row.description)}', '${row.quantity_raw}', '${row.extra_raw}', '${row.price_raw}', '${escHtml(row.noted)}')">
                                 <i data-lucide="pencil" style="width:14px;height:14px;"></i>
                             </button>`;
                         }
@@ -481,7 +445,6 @@
             invoice_number: createForm.invoice_number.value,
             customer_id: customer,
             description: createForm.description.value,
-            warna: createForm.warna.value || null,
             quantity: getRaw(createForm.quantity),
             extra: getRaw(createForm.extra) || 0,
             price: getRaw(createForm.price),
@@ -512,13 +475,12 @@
         document.getElementById('editAmountDisplay').value = Currency.format(qty * price);
     }
 
-    function openEditModal(id, date, invoice_number, customer_id, description, warna, quantity, extra, price, noted) {
+    function openEditModal(id, date, invoice_number, customer_id, description, quantity, extra, price, noted) {
         editId = id;
         editForm.invoice_number.value = invoice_number;
         editForm.date.value = date;
         editForm.description.value = description !== '-' ? description : '';
         editForm.noted.value = noted !== '-' ? noted : '';
-        document.getElementById('editSaleWarnaSelect').value = warna || '';
 
         setRaw(editForm.quantity, quantity);
         editForm.quantity.value = parseFloat(quantity) ?
@@ -553,7 +515,6 @@
             invoice_number: editForm.invoice_number.value,
             customer_id: customer,
             description: editForm.description.value,
-            warna: editForm.warna.value || null,
             quantity: getRaw(editForm.quantity),
             extra: getRaw(editForm.extra) || 0,
             price: getRaw(editForm.price),

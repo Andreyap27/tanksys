@@ -19,7 +19,33 @@
             $isFinance    = auth()->user()->isFinance();
             $isSuperAdmin = auth()->user()->role === 'Super Admin';
             $isSPV        = auth()->user()->isSPV();
+            $isMarketing  = auth()->user()->isMarketing();
         @endphp
+
+        @if($isMarketing)
+        {{-- Marketing: restricted to Dashboard, Purchase, Sales, Pemakaian Stok --}}
+        <div class="nav-section">Menu</div>
+        <a href="{{ route('dashboard') }}" class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+        </a>
+        <div class="nav-section">Transaksi</div>
+        <a href="{{ route('purchase.index') }}" class="nav-item {{ request()->routeIs('purchase.*') ? 'active' : '' }}">
+            <i data-lucide="arrow-down-to-line"></i>
+            <span>Purchase</span>
+            <span class="sidebar-notif-badge" id="sidebarBadge-purchase" style="display:none;"></span>
+        </a>
+        <a href="{{ route('sales.index') }}" class="nav-item {{ request()->routeIs('sales.*') ? 'active' : '' }}">
+            <i data-lucide="arrow-up-from-line"></i>
+            <span>Sales</span>
+            <span class="sidebar-notif-badge" id="sidebarBadge-sales" style="display:none;"></span>
+        </a>
+        <a href="{{ route('stock-usage.index') }}" class="nav-item {{ request()->routeIs('stock-usage.*') ? 'active' : '' }}">
+            <i data-lucide="flame"></i>
+            <span>Pemakaian Stok</span>
+        </a>
+
+        @else
 
         {{-- ── Non-Finance menus ────────────────────────────────────────── --}}
         @if(!$isFinance)
@@ -59,23 +85,14 @@
 
         <!-- Transaksi -->
         <div class="nav-section">Transaksi</div>
-        <a href="{{ route('stock.index') }}" class="nav-item {{ request()->routeIs('stock.index') || request()->routeIs('stock.data') || request()->routeIs('stock.summary') ? 'active' : '' }}">
+        {{-- <a href="{{ route('stock.index') }}" class="nav-item {{ request()->routeIs('stock.index') || request()->routeIs('stock.data') || request()->routeIs('stock.summary') ? 'active' : '' }}">
             <i data-lucide="package"></i>
             <span>Stock BBM</span>
+        </a> --}}
+        <a href="{{ route('stock-usage.index') }}" class="nav-item {{ request()->routeIs('stock-usage.*') ? 'active' : '' }}">
+            <i data-lucide="flame"></i>
+            <span>Pemakaian Stok</span>
         </a>
-        @php $operasionalActive = request()->routeIs('stock-usage.*'); @endphp
-        <div class="nav-group">
-            <div class="nav-group-header {{ $operasionalActive ? 'open' : '' }}" onclick="toggleNavGroup(this)">
-                <i data-lucide="settings-2"></i>
-                <span>Operasional</span>
-                <i data-lucide="chevron-right" class="nav-chevron"></i>
-            </div>
-            <div class="nav-sub {{ $operasionalActive ? 'open' : '' }}">
-                <a href="{{ route('stock-usage.index') }}" class="nav-sub-item {{ request()->routeIs('stock-usage.*') ? 'active' : '' }}">
-                    Pemakaian Stok
-                </a>
-            </div>
-        </div>
         <a href="{{ route('purchase.index') }}" class="nav-item {{ request()->routeIs('purchase.*') ? 'active' : '' }}">
             <i data-lucide="arrow-down-to-line"></i>
             <span>Purchase</span>
@@ -188,6 +205,8 @@
             </div>
         </div>
         @endif {{-- !isFinance --}}
+
+        @endif {{-- !isMarketing --}}
 
     </nav>
 

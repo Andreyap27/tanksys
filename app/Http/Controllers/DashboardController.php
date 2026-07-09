@@ -32,23 +32,13 @@ class DashboardController extends Controller
         $profitAmt   = $salesAmt - $purchaseAmt - $pcDebitAmt - $ukAmt - $expenseAmt;
         $stockBal = Stock::currentBalance();
 
-        $purchaseByWarna = Stock::where('type', 'purchase')
+        $purchaseLtr = (float) Stock::where('type', 'purchase')
             ->whereYear('date', $thisYear)->whereMonth('date', $thisMonth)
-            ->selectRaw('warna, SUM(qty_in) as total')
-            ->groupBy('warna')->pluck('total', 'warna');
-        $purchaseLtr = (float) $purchaseByWarna->sum();
+            ->sum('qty_in');
 
-        $saleByWarna = Stock::where('type', 'sale')
+        $saleLtr = (float) Stock::where('type', 'sale')
             ->whereYear('date', $thisYear)->whereMonth('date', $thisMonth)
-            ->selectRaw('warna, SUM(qty_out) as total')
-            ->groupBy('warna')->pluck('total', 'warna');
-        $saleLtr = (float) $saleByWarna->sum();
-
-        $saldoByWarna = collect(['biru', 'kuning'])->mapWithKeys(function ($w) {
-            $in  = (float) Stock::where('warna', $w)->sum('qty_in');
-            $out = (float) Stock::where('warna', $w)->sum('qty_out');
-            return [$w => $in - $out];
-        });
+            ->sum('qty_out');
 
         // ── Last month (for trend) ───────────────────────────────────
         $salesPrev    = (float) Sale::whereIn('status', ['approved', 'paid'])->whereYear('date', $prevYear)->whereMonth('date', $prevMonth)->sum('amount');
@@ -91,7 +81,7 @@ class DashboardController extends Controller
 
         return view('dashboard.index', compact(
             'salesAmt', 'purchaseAmt', 'expenseAmt', 'pcDebitAmt', 'ukAmt', 'loriAmt', 'profitAmt', 'stockBal',
-            'purchaseLtr', 'saleLtr', 'purchaseByWarna', 'saleByWarna', 'saldoByWarna',
+            'purchaseLtr', 'saleLtr',
             'salesTrend', 'purchaseTrend',
             'chartLabels', 'chartSales', 'chartPurchase', 'chartProfit',
             'expByCategory', 'recentSales', 'recentExpenses'

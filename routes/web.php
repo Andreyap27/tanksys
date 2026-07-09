@@ -46,28 +46,16 @@ Route::middleware('auth.jwt')->group(function () {
     // ── Routes NOT accessible by Finance ────────────────────────────────────────
     Route::middleware('not.finance')->group(function () {
 
-    // Dashboard
+    // Dashboard (Marketing allowed)
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
-    // User Management
-    Route::get('/user/next-id', [UserController::class, 'nextId'])->name('user.next-id');
-    Route::get('/user/check-username', [UserController::class, 'checkUsername'])->name('user.check-username');
-    Route::get('/user/data', [UserController::class, 'data'])->name('user.data');
-    Route::post('/user/{user}/reset-password', [UserController::class, 'adminResetPassword'])->name('user.reset-password');
-    Route::resource('user', UserController::class)->names('user')->except(['create', 'edit', 'show']);
-
-    // Vendor
-    Route::get('/vendor/next-id', [VendorController::class, 'nextId'])->name('vendor.next-id');
+    // ── Endpoints accessible to Marketing (needed by Purchase/Sales forms) ───────
     Route::get('/vendor/list', [VendorController::class, 'list'])->name('vendor.list');
-    Route::get('/vendor/data', [VendorController::class, 'data'])->name('vendor.data');
-    Route::resource('vendor', VendorController::class)->names('vendor')->except(['create', 'edit', 'show']);
-
-    // Customer
-    Route::get('/customer/next-id', [CustomerController::class, 'nextId'])->name('customer.next-id');
+    Route::get('/kapal/list', [KapalController::class, 'list'])->name('kapal.list');
     Route::get('/customer/data', [CustomerController::class, 'data'])->name('customer.data');
-    Route::resource('customer', CustomerController::class)->names('customer')->except(['create', 'edit', 'show']);
+    Route::get('/mobil-master/list', [MobilController::class, 'list'])->name('mobil-master.list');
 
-    // Purchase
+    // Purchase (Marketing allowed)
     Route::get('/purchase/data', [PurchaseController::class, 'data'])->name('purchase.data');
     Route::get('/purchase/trash', [PurchaseController::class, 'trash'])->name('purchase.trash');
     Route::get('/purchase/trash-data', [PurchaseController::class, 'trashData'])->name('purchase.trash-data');
@@ -78,28 +66,7 @@ Route::middleware('auth.jwt')->group(function () {
     Route::post('/purchase/{purchase}/paid', [PurchaseController::class, 'paid'])->name('purchase.paid');
     Route::resource('purchase', PurchaseController::class)->names('purchase')->except(['create', 'edit', 'show']);
 
-    // Kapal
-    Route::get('/kapal/list', [KapalController::class, 'list'])->name('kapal.list');
-    Route::get('/kapal/data', [KapalController::class, 'data'])->name('kapal.data');
-    Route::resource('kapal', KapalController::class)->names('kapal')->except(['create', 'edit', 'show']);
-
-    // Mobil (Master)
-    Route::get('/mobil-master/list', [MobilController::class, 'list'])->name('mobil-master.list');
-    Route::get('/mobil-master/data', [MobilController::class, 'data'])->name('mobil-master.data');
-    Route::resource('mobil-master', MobilController::class)->names('mobil-master')->parameters(['mobil-master' => 'mobil'])->except(['create', 'edit', 'show']);
-
-    // Stock (read only, auto)
-    Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
-    Route::get('/stock/data', [StockController::class, 'data'])->name('stock.data');
-    Route::get('/stock/summary', [StockController::class, 'summary'])->name('stock.summary');
-
-    // Operasional — Pemakaian Stok
-    Route::get('/operasional/usage', [StockUsageController::class, 'index'])->name('stock-usage.index');
-    Route::get('/operasional/usage/data', [StockUsageController::class, 'data'])->name('stock-usage.data');
-    Route::post('/operasional/usage', [StockUsageController::class, 'store'])->name('stock-usage.store');
-    Route::delete('/operasional/usage/{stockUsage}', [StockUsageController::class, 'destroy'])->name('stock-usage.destroy');
-
-    // Sales
+    // Sales (Marketing allowed)
     Route::get('/sales/data', [SaleController::class, 'data'])->name('sales.data');
     Route::get('/sales/trash', [SaleController::class, 'trash'])->name('sales.trash');
     Route::get('/sales/trash-data', [SaleController::class, 'trashData'])->name('sales.trash-data');
@@ -113,6 +80,52 @@ Route::middleware('auth.jwt')->group(function () {
     Route::post('/sales/{sale}/paid', [SaleController::class, 'paid'])->name('sales.paid');
     Route::resource('sales', SaleController::class)->names('sales')->except(['create', 'edit', 'show']);
 
+    // Pemakaian Stok (Marketing allowed)
+    Route::get('/operasional/usage', [StockUsageController::class, 'index'])->name('stock-usage.index');
+    Route::get('/operasional/usage/data', [StockUsageController::class, 'data'])->name('stock-usage.data');
+    Route::post('/operasional/usage', [StockUsageController::class, 'store'])->name('stock-usage.store');
+    Route::delete('/operasional/usage/{stockUsage}', [StockUsageController::class, 'destroy'])->name('stock-usage.destroy');
+
+    // Notifications (Marketing allowed)
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+
+    // Transaction Print (Marketing allowed — for purchase/sales print)
+    Route::get('/tx-print', [TxPrintController::class, 'show'])->name('tx.print');
+
+    // ── Routes blocked for Marketing ─────────────────────────────────────────────
+    Route::middleware('not.marketing')->group(function () {
+
+    // User Management
+    Route::get('/user/next-id', [UserController::class, 'nextId'])->name('user.next-id');
+    Route::get('/user/check-username', [UserController::class, 'checkUsername'])->name('user.check-username');
+    Route::get('/user/data', [UserController::class, 'data'])->name('user.data');
+    Route::post('/user/{user}/reset-password', [UserController::class, 'adminResetPassword'])->name('user.reset-password');
+    Route::resource('user', UserController::class)->names('user')->except(['create', 'edit', 'show']);
+
+    // Vendor (management)
+    Route::get('/vendor/next-id', [VendorController::class, 'nextId'])->name('vendor.next-id');
+    Route::get('/vendor/data', [VendorController::class, 'data'])->name('vendor.data');
+    Route::resource('vendor', VendorController::class)->names('vendor')->except(['create', 'edit', 'show']);
+
+    // Customer (management — customer.data already registered above for Marketing)
+    Route::get('/customer/next-id', [CustomerController::class, 'nextId'])->name('customer.next-id');
+    Route::resource('customer', CustomerController::class)->names('customer')->except(['create', 'edit', 'show']);
+
+    // Kapal (management)
+    Route::get('/kapal/data', [KapalController::class, 'data'])->name('kapal.data');
+    Route::resource('kapal', KapalController::class)->names('kapal')->except(['create', 'edit', 'show']);
+
+    // Mobil (management)
+    Route::get('/mobil-master/data', [MobilController::class, 'data'])->name('mobil-master.data');
+    Route::resource('mobil-master', MobilController::class)->names('mobil-master')->parameters(['mobil-master' => 'mobil'])->except(['create', 'edit', 'show']);
+
+    // Stock BBM
+    Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
+    Route::get('/stock/data', [StockController::class, 'data'])->name('stock.data');
+    Route::get('/stock/summary', [StockController::class, 'summary'])->name('stock.summary');
+
     // Capital
     Route::get('/capital/summary', [CapitalController::class, 'summary'])->name('capital.summary');
     Route::get('/capital/data', [CapitalController::class, 'data'])->name('capital.data');
@@ -124,7 +137,7 @@ Route::middleware('auth.jwt')->group(function () {
     Route::post('/capital/{capital}/reject', [CapitalController::class, 'reject'])->name('capital.reject');
     Route::resource('capital', CapitalController::class)->names('capital')->except(['create', 'edit', 'show']);
 
-    // Expenses
+    // Expenses Ship
     Route::get('/expenses/capital-total', [ExpenseController::class, 'capitalTotal'])->name('expenses.capital-total');
     Route::get('/expenses/data', [ExpenseController::class, 'data'])->name('expenses.data');
     Route::get('/expenses/trash', [ExpenseController::class, 'trash'])->name('expenses.trash');
@@ -198,13 +211,7 @@ Route::middleware('auth.jwt')->group(function () {
     Route::post('/bank/{id}/force-delete', [BankTransactionController::class, 'forceDelete'])->name('bank.force-delete');
     Route::resource('bank', BankTransactionController::class)->names('bank')->except(['create', 'edit', 'show']);
 
-    // Notifications
-    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
-    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
-    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
-
-    // Transaction Print
-    Route::get('/tx-print', [TxPrintController::class, 'show'])->name('tx.print');
+    }); // end not.marketing
 
     }); // end not.finance
 
@@ -247,8 +254,8 @@ Route::middleware('auth.jwt')->group(function () {
 
     }); // end finance.only
 
-    // ── Report (not.finance) ─────────────────────────────────────────────────────
-    Route::middleware('not.finance')->group(function () {
+    // ── Report (not.finance, not.marketing) ─────────────────────────────────────
+    Route::middleware(['not.finance', 'not.marketing'])->group(function () {
 
     // Report
     Route::get('/report', fn() => redirect()->route('report.purchase'))->name('report.index');

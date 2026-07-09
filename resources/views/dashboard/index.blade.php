@@ -20,11 +20,44 @@ $profitIcon = $isProfit ? 'trending-up' : 'trending-down';
     </div>
 </div>
 
-{{-- ── Section: Keuangan ────────────────────────────────────────────────────── --}}
-@php
-$warnaMap = ['biru' => ['#2563eb','Biru'], 'kuning' => ['#ca8a04','Kuning']];
-@endphp
+@if(auth()->user()->isMarketing())
+{{-- Marketing: simplified 3-card dashboard --}}
+<div class="dash-grid" style="margin-bottom:1.5rem;">
+    <div class="dash-stat ds-purchase">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon"><i data-lucide="arrow-down-to-line" style="width:20px;height:20px;"></i></div>
+            <div>
+                <div class="dash-stat__label">Total Purchase Bulan Ini</div>
+                <div class="dash-stat__value">Rp {{ $fmt($purchaseAmt) }}</div>
+            </div>
+        </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="arrow-down-to-line" style="width:110px;height:110px;"></i></div>
+    </div>
+    <div class="dash-stat ds-sales">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon"><i data-lucide="arrow-up-from-line" style="width:20px;height:20px;"></i></div>
+            <div>
+                <div class="dash-stat__label">Total Sales Bulan Ini</div>
+                <div class="dash-stat__value">Rp {{ $fmt($salesAmt) }}</div>
+            </div>
+        </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="arrow-up-from-line" style="width:110px;height:110px;"></i></div>
+    </div>
+    <div class="dash-stat ds-stock">
+        <div class="dash-stat__header">
+            <div class="dash-stat__icon"><i data-lucide="fuel" style="width:20px;height:20px;"></i></div>
+            <div>
+                <div class="dash-stat__label">Sisa Stok BBM</div>
+                <div class="dash-stat__value">{{ $fmt($stockBal) }} <span style="font-size:0.85rem;font-weight:500;color:var(--muted-foreground);">L</span></div>
+            </div>
+        </div>
+        <div class="dash-stat__bg-icon"><i data-lucide="fuel" style="width:110px;height:110px;"></i></div>
+    </div>
+</div>
 
+@else
+
+{{-- ── Section: Keuangan ────────────────────────────────────────────────────── --}}
 <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
     <span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted-foreground);white-space:nowrap;">Keuangan Bulan Ini</span>
     <div style="flex:1;height:1px;background:var(--border);"></div>
@@ -201,17 +234,6 @@ $warnaMap = ['biru' => ['#2563eb','Biru'], 'kuning' => ['#ca8a04','Kuning']];
                 <div class="dash-stat__value">{{ $fmt($purchaseLtr) }} <span style="font-size:0.85rem;font-weight:500;color:var(--muted-foreground);">L</span></div>
             </div>
         </div>
-        <div style="border-top:1px solid rgba(37,99,235,0.15);padding-top:0.6rem;display:flex;flex-direction:column;gap:0.35rem;position:relative;z-index:1;">
-            @foreach($warnaMap as $w => [$c, $l])
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-                <div style="display:flex;align-items:center;gap:0.4rem;">
-                    <span style="width:8px;height:8px;border-radius:50%;background:{{ $c }};flex-shrink:0;"></span>
-                    <span style="font-size:0.72rem;color:var(--muted-foreground);">{{ $l }}</span>
-                </div>
-                <span style="font-size:0.78rem;font-weight:600;color:{{ $c }};">{{ $fmt($purchaseByWarna[$w] ?? 0) }} L</span>
-            </div>
-            @endforeach
-        </div>
         <div class="dash-stat__bg-icon"><i data-lucide="package-check" style="width:110px;height:110px;"></i></div>
     </div>
 
@@ -226,17 +248,6 @@ $warnaMap = ['biru' => ['#2563eb','Biru'], 'kuning' => ['#ca8a04','Kuning']];
                 <div class="dash-stat__value">{{ $fmt($saleLtr) }} <span style="font-size:0.85rem;font-weight:500;color:var(--muted-foreground);">L</span></div>
             </div>
         </div>
-        <div style="border-top:1px solid rgba(217,119,6,0.15);padding-top:0.6rem;display:flex;flex-direction:column;gap:0.35rem;position:relative;z-index:1;">
-            @foreach($warnaMap as $w => [$c, $l])
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-                <div style="display:flex;align-items:center;gap:0.4rem;">
-                    <span style="width:8px;height:8px;border-radius:50%;background:{{ $c }};flex-shrink:0;"></span>
-                    <span style="font-size:0.72rem;color:var(--muted-foreground);">{{ $l }}</span>
-                </div>
-                <span style="font-size:0.78rem;font-weight:600;color:{{ $c }};">{{ $fmt($saleByWarna[$w] ?? 0) }} L</span>
-            </div>
-            @endforeach
-        </div>
         <div class="dash-stat__bg-icon"><i data-lucide="package-minus" style="width:110px;height:110px;"></i></div>
     </div>
 
@@ -250,17 +261,6 @@ $warnaMap = ['biru' => ['#2563eb','Biru'], 'kuning' => ['#ca8a04','Kuning']];
                 <div class="dash-stat__label">Saldo Stok BBM</div>
                 <div class="dash-stat__value">{{ $fmt($stockBal) }} <span style="font-size:0.85rem;font-weight:500;color:var(--muted-foreground);">L</span></div>
             </div>
-        </div>
-        <div style="border-top:1px solid rgba(0,0,0,0.08);padding-top:0.6rem;display:flex;flex-direction:column;gap:0.35rem;position:relative;z-index:1;">
-            @foreach($warnaMap as $w => [$c, $l])
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-                <div style="display:flex;align-items:center;gap:0.4rem;">
-                    <span style="width:8px;height:8px;border-radius:50%;background:{{ $c }};flex-shrink:0;"></span>
-                    <span style="font-size:0.72rem;color:var(--muted-foreground);">{{ $l }}</span>
-                </div>
-                <span style="font-size:0.78rem;font-weight:600;color:{{ $c }};">{{ $fmt($saldoByWarna[$w] ?? 0) }} L</span>
-            </div>
-            @endforeach
         </div>
         <div class="dash-stat__bg-icon"><i data-lucide="fuel" style="width:110px;height:110px;"></i></div>
     </div>
@@ -403,6 +403,8 @@ $warnaMap = ['biru' => ['#2563eb','Biru'], 'kuning' => ['#ca8a04','Kuning']];
     </div>
 
 </div> -->
+
+@endif {{-- !isMarketing --}}
 
 @endsection
 

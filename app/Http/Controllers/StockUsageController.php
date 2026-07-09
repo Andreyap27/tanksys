@@ -23,7 +23,6 @@ class StockUsageController extends Controller
                 'id'           => $u->id,
                 'date'         => $this->resolveDate($u)->translatedFormat('d M Y H:i'),
                 'date_raw'     => $u->date->format('Y-m-d H:i:s'),
-                'warna'        => $u->warna,
                 'quantity'     => number_format($u->quantity, 0, ',', '.'),
                 'quantity_raw' => $u->quantity,
                 'keperluan'    => $u->keperluan,
@@ -37,7 +36,7 @@ class StockUsageController extends Controller
     {
         $request->validate([
             'date'      => 'required|date',
-            'warna'     => 'required|in:biru,kuning',
+            'warna'     => 'nullable|string',
             'quantity'  => 'required|numeric|min:0.01',
             'keperluan' => 'required|string|max:255',
         ]);

@@ -33,18 +33,6 @@
         </div>
         <div class="dash-stat__bg-icon"><i data-lucide="flame" style="width:110px;height:110px;"></i></div>
     </div>
-    @foreach(['biru'=>['#2563eb','rgba(37,99,235,0.08)'],'kuning'=>['#ca8a04','rgba(202,138,4,0.08)']] as $w=>[$color,$bg])
-    <div class="dash-stat" style="background:{{$bg}};border-radius:var(--radius-lg,.75rem);padding:1.25rem;position:relative;overflow:hidden;">
-        <div class="dash-stat__header">
-            <div class="dash-stat__icon" style="background:{{$bg}};color:{{$color}};"><i data-lucide="flame" style="width:20px;height:20px;"></i></div>
-            <div>
-                <div class="dash-stat__label">Pakai {{ ucfirst($w) }}</div>
-                <div class="dash-stat__value" id="usageTotal_{{$w}}" style="color:{{$color}};">0 L</div>
-            </div>
-        </div>
-        <div class="dash-stat__bg-icon" style="color:{{$color}};"><i data-lucide="flame" style="width:110px;height:110px;"></i></div>
-    </div>
-    @endforeach
 </div>
 
 <div class="card">
@@ -55,7 +43,6 @@
                 <thead>
                     <tr>
                         <th>Tanggal</th>
-                        <th>Warna</th>
                         <th>Qty (L)</th>
                         <th>Keperluan</th>
                         <th>Dibuat</th>
@@ -80,14 +67,6 @@
                     <div class="form-group full">
                         <label class="form-label">Tanggal <span class="text-danger">*</span></label>
                         <input type="date" name="date" class="form-input" required>
-                    </div>
-                    <div class="form-group full">
-                        <label class="form-label">Warna BBM <span class="text-danger">*</span></label>
-                        <select name="warna" class="form-select" required>
-                            <option value="">-- Pilih Warna --</option>
-                            <option value="biru">Biru</option>
-                            <option value="kuning">Kuning</option>
-                        </select>
                     </div>
                     <div class="form-group full">
                         <label class="form-label">Qty (Liter) <span class="text-danger">*</span></label>
@@ -120,11 +99,6 @@ let usageTable;
 const createForm = document.getElementById('createForm');
 const createModal = document.getElementById('createModal');
 
-const WARNA_BADGE = {
-    biru:   '<span class="badge" style="background:#2563eb;color:#fff;">Biru</span>',
-    kuning: '<span class="badge" style="background:#ca8a04;color:#fff;">Kuning</span>',
-};
-
 function escHtml(s) {
     if (!s) return '';
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,"\\'");
@@ -134,7 +108,6 @@ function updateSummary(api) {
     const now      = new Date();
     const curYear  = now.getFullYear();
     const curMonth = now.getMonth() + 1;
-    const totals   = { biru: 0, kuning: 0 };
     const allRows  = api.rows().data();
     let total = 0;
     for (let i = 0; i < allRows.length; i++) {
@@ -143,14 +116,9 @@ function updateSummary(api) {
         if (rowYear !== curYear || rowMonth !== curMonth) continue;
         const qty = parseFloat(allRows[i].quantity_raw) || 0;
         total += qty;
-        const w = allRows[i].warna;
-        if (totals[w] !== undefined) totals[w] += qty;
     }
     const fmt = n => new Intl.NumberFormat('id-ID').format(Math.round(n));
     document.getElementById('usageTotal_all').textContent = fmt(total) + ' L';
-    ['biru','kuning'].forEach(w => {
-        document.getElementById(`usageTotal_${w}`).textContent = fmt(totals[w]) + ' L';
-    });
 }
 
 $(document).ready(function () {
@@ -158,7 +126,6 @@ $(document).ready(function () {
         ajax: { url: '{{ route('stock-usage.data') }}', type: 'GET' },
         columns: [
             { data: 'date', render: (d, t, r) => t === 'sort' ? r.date_raw : d },
-            { data: 'warna', render: d => WARNA_BADGE[d] || d },
             { data: 'quantity' },
             { data: 'keperluan' },
             { data: 'created_by' },
@@ -184,12 +151,10 @@ function openCreateModal() { createForm.reset(); createModal.classList.add('acti
 function closeCreateModal() { createModal.classList.remove('active'); }
 
 function storeUsage() {
-    if (!createForm.warna.value)     { showError('Validasi', 'Warna BBM wajib dipilih.'); return; }
     if (!createForm.keperluan.value) { showError('Validasi', 'Keperluan wajib diisi.'); return; }
 
     const payload = {
         date:      createForm.date.value,
-        warna:     createForm.warna.value,
         quantity:  parseFloat(createForm.quantity.value),
         keperluan: createForm.keperluan.value,
     };

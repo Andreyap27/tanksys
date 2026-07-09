@@ -15,7 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth.jwt'     => \App\Http\Middleware\JwtMiddleware::class,
             'guest.jwt'    => \App\Http\Middleware\GuestJwtMiddleware::class,
             'finance.only' => \App\Http\Middleware\FinanceOnly::class,
-            'not.finance'  => \App\Http\Middleware\NotFinance::class,
+            'not.finance'   => \App\Http\Middleware\NotFinance::class,
+            'not.marketing' => \App\Http\Middleware\NotMarketing::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

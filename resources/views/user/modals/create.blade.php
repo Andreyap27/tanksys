@@ -23,6 +23,7 @@
                             <option value="Admin">Admin</option>
                             <option value="SPV">SPV</option>
                             <option value="Finance">Finance</option>
+                            <option value="Marketing">Marketing</option>
                         </select>
                     </div>
                     <div class="form-group full">

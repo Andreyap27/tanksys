@@ -146,7 +146,7 @@
     <table>
         <thead><tr>
             <th style="width:3%">#</th>
-            <th>Tanggal</th><th>Vendor</th><th>Deskripsi</th><th>Warna</th>
+            <th>Tanggal</th><th>Vendor</th><th>Deskripsi</th>
             <th class="r">Qty (L)</th><th class="r">Extra (L)</th>
             <th class="r">Harga/L</th><th class="c">Status</th><th class="r">Amount</th>
         </tr></thead>
@@ -156,39 +156,38 @@
                 <td class="c">{{ $i+1 }}</td>
                 <td>{{ $r->date->translatedFormat('d M Y') }}</td>
                 <td>{{ $r->vendor }}</td><td>{{ $r->description ?? '-' }}</td>
-                <td>{{ ucfirst($r->warna ?? '-') }}</td>
                 <td class="r">{{ $fmtQty($r->quantity) }}</td>
                 <td class="r">{{ $r->extra > 0 ? $fmtQty($r->extra) : '-' }}</td>
                 <td class="r">Rp {{ $fmt($r->price) }}</td>
                 <td class="c"><span class="badge badge-{{ $r->status }}">{{ ucfirst($r->status) }}</span></td>
                 <td class="r">Rp {{ $fmt($r->amount) }}</td>
             </tr>
-            @empty<tr><td colspan="10" style="text-align:center;color:#888;">Tidak ada data</td></tr>
+            @empty<tr><td colspan="9" style="text-align:center;color:#888;">Tidak ada data</td></tr>
             @endforelse
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="5"><strong>Total Pembelian</strong></td>
+                <td colspan="4"><strong>Total Pembelian</strong></td>
                 <td class="r">{{ $fmtQty($gQty) }}</td>
                 <td class="r">{{ $fmtQty($gExtra) }}</td>
                 <td></td><td></td>
                 <td class="r">Rp {{ $fmt($gAmt) }}</td>
             </tr>
             <tr style="background:#dbeafe;">
-                <td colspan="5" style="color:#1a5cb8;"><strong>Total Stok</strong></td>
+                <td colspan="4" style="color:#1a5cb8;"><strong>Total Stok</strong></td>
                 <td class="r" style="color:#1a5cb8;" colspan="2">{{ $fmtQty($gNetQty) }}</td>
                 <td></td><td></td>
                 <td class="r" style="color:#1a5cb8;">Rp {{ $fmt($gAmt) }}</td>
             </tr>
             <tr style="background:#dcfce7;">
-                <td colspan="5" style="color:#16a34a;"><strong>Total Paid</strong></td>
+                <td colspan="4" style="color:#16a34a;"><strong>Total Paid</strong></td>
                 <td class="r" style="color:#16a34a;">{{ $fmtQty($gQtyPaid) }}</td>
                 <td class="r" style="color:#16a34a;">{{ $fmtQty($gExtraPaid) }}</td>
                 <td></td><td></td>
                 <td class="r" style="color:#16a34a;">Rp {{ $fmt($gAmtPaid) }}</td>
             </tr>
             <tr style="background:#fee2e2;">
-                <td colspan="5" style="color:#dc2626;"><strong>Total Unpaid</strong></td>
+                <td colspan="4" style="color:#dc2626;"><strong>Total Unpaid</strong></td>
                 <td class="r" style="color:#dc2626;">{{ $fmtQty($gQtyUnpaid) }}</td>
                 <td class="r" style="color:#dc2626;">{{ $fmtQty($gExtraUnpaid) }}</td>
                 <td></td><td></td>
@@ -215,7 +214,7 @@
     <table>
         <thead><tr>
             <th style="width:3%">#</th>
-            <th>Tanggal</th><th>Invoice</th><th>Customer</th><th>Warna</th>
+            <th>Tanggal</th><th>Invoice</th><th>Customer</th>
             <th class="r">Qty (L)</th><th class="r">Extra (L)</th>
             <th class="r">Harga/L</th><th class="c">Status</th><th class="r">Amount</th>
         </tr></thead>
@@ -226,33 +225,32 @@
                 <td>{{ $r->date->translatedFormat('d M Y') }}</td>
                 <td>{{ $r->invoice_number }}</td>
                 <td>{{ $r->customer->name ?? '-' }}</td>
-                <td>{{ ucfirst($r->warna ?? '-') }}</td>
                 <td class="r">{{ $fmtQty($r->quantity) }}</td>
                 <td class="r">{{ $r->extra > 0 ? $fmtQty($r->extra) : '-' }}</td>
                 <td class="r">Rp {{ $fmt($r->price) }}</td>
                 <td class="c"><span class="badge badge-{{ $r->status }}">{{ ucfirst($r->status) }}</span></td>
                 <td class="r">Rp {{ $fmt($r->amount) }}</td>
             </tr>
-            @empty<tr><td colspan="10" style="text-align:center;color:#888;">Tidak ada data</td></tr>
+            @empty<tr><td colspan="9" style="text-align:center;color:#888;">Tidak ada data</td></tr>
             @endforelse
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="5"><strong>Total</strong></td>
+                <td colspan="4"><strong>Total</strong></td>
                 <td class="r">{{ $fmtQty($gQty) }}</td>
                 <td class="r">{{ $fmtQty($gExtra) }}</td>
                 <td></td><td></td>
                 <td class="r">Rp {{ $fmt($gAmt) }}</td>
             </tr>
             <tr style="background:#dcfce7;">
-                <td colspan="5" style="color:#16a34a;"><strong>Total Paid</strong></td>
+                <td colspan="4" style="color:#16a34a;"><strong>Total Paid</strong></td>
                 <td class="r" style="color:#16a34a;">{{ $fmtQty($gQtyPaid) }}</td>
                 <td class="r" style="color:#16a34a;">{{ $fmtQty($gExtraPaid) }}</td>
                 <td></td><td></td>
                 <td class="r" style="color:#16a34a;">Rp {{ $fmt($gAmtPaid) }}</td>
             </tr>
             <tr style="background:#fee2e2;">
-                <td colspan="5" style="color:#dc2626;"><strong>Total Unpaid</strong></td>
+                <td colspan="4" style="color:#dc2626;"><strong>Total Unpaid</strong></td>
                 <td class="r" style="color:#dc2626;">{{ $fmtQty($gQtyUnpaid) }}</td>
                 <td class="r" style="color:#dc2626;">{{ $fmtQty($gExtraUnpaid) }}</td>
                 <td></td><td></td>
@@ -405,7 +403,7 @@
     <table>
         <thead><tr>
             <th style="width:3%">#</th>
-            <th>Tanggal</th><th>Keperluan</th><th>Warna</th>
+            <th>Tanggal</th><th>Keperluan</th>
             <th class="r">Qty (L)</th>
         </tr></thead>
         <tbody>
@@ -414,14 +412,13 @@
                 <td class="c">{{ $i+1 }}</td>
                 <td>{{ $r->date->translatedFormat('d M Y') }}</td>
                 <td>{{ $r->keperluan ?? '-' }}</td>
-                <td>{{ ucfirst($r->warna) }}</td>
                 <td class="r">{{ $fmtQty($r->quantity) }}</td>
             </tr>
-            @empty<tr><td colspan="5" style="text-align:center;color:#888;">Tidak ada data</td></tr>
+            @empty<tr><td colspan="4" style="text-align:center;color:#888;">Tidak ada data</td></tr>
             @endforelse
         </tbody>
         <tfoot><tr>
-            <td colspan="4"><strong>Total</strong></td>
+            <td colspan="3"><strong>Total</strong></td>
             <td class="r">{{ $fmtQty($gQty) }}</td>
         </tr></tfoot>
     </table>
@@ -531,11 +528,11 @@
                 <td class="r">Rp {{ $fmt($gNom) }}</td><td></td>
             </tr>
             <tr style="background:#dcfce7;">
-                <td colspan="5" style="color:#16a34a;"><strong>Total Paid</strong></td>
+                <td colspan="4" style="color:#16a34a;"><strong>Total Paid</strong></td>
                 <td class="r" style="color:#16a34a;">Rp {{ $fmt($gNomPaid) }}</td><td></td>
             </tr>
             <tr style="background:#fee2e2;">
-                <td colspan="5" style="color:#dc2626;"><strong>Total Unpaid</strong></td>
+                <td colspan="4" style="color:#dc2626;"><strong>Total Unpaid</strong></td>
                 <td class="r" style="color:#dc2626;">Rp {{ $fmt($gNomUnpaid) }}</td><td></td>
             </tr>
         </tfoot>
@@ -588,7 +585,7 @@
                 <td class="r">Rp {{ $fmt($gNom) }}</td><td></td>
             </tr>
             <tr style="background:#dcfce7;">
-                <td colspan="5" style="color:#16a34a;"><strong>Total Paid</strong></td>
+                <td colspan="4" style="color:#16a34a;"><strong>Total Paid</strong></td>
                 <td class="r" style="color:#16a34a;">Rp {{ $fmt($gNomPaid) }}</td><td></td>
             </tr>
             <tr style="background:#fef9c3;">
