@@ -27,32 +27,6 @@
 
 {{-- Summary Cards --}}
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.25rem;margin-bottom:1.5rem;">
-    <div class="dash-stat ds-profit">
-        <div class="dash-stat__header">
-            <div class="dash-stat__icon"><i data-lucide="circle-check" style="width:20px;height:20px;"></i></div>
-            <div>
-                <div class="dash-stat__label">Total Paid</div>
-                <div class="dash-stat__value" id="expensesPaidCard">Rp 0</div>
-                <div class="dash-stat__trend flat">
-                    <i data-lucide="clipboard-list"></i> <span id="expensesPaidCountCard">0</span> transaksi
-                </div>
-            </div>
-        </div>
-        <div class="dash-stat__bg-icon"><i data-lucide="circle-check" style="width:110px;height:110px;"></i></div>
-    </div>
-    <div class="dash-stat ds-lori">
-        <div class="dash-stat__header">
-            <div class="dash-stat__icon"><i data-lucide="hourglass" style="width:20px;height:20px;"></i></div>
-            <div>
-                <div class="dash-stat__label">Total Unpaid</div>
-                <div class="dash-stat__value" id="expensesUnpaidCard">Rp 0</div>
-                <div class="dash-stat__trend flat">
-                    <i data-lucide="clipboard-list"></i> <span id="expensesUnpaidCountCard">0</span> transaksi
-                </div>
-            </div>
-        </div>
-        <div class="dash-stat__bg-icon"><i data-lucide="hourglass" style="width:110px;height:110px;"></i></div>
-    </div>
     <div class="dash-stat ds-expense">
         <div class="dash-stat__header">
             <div class="dash-stat__icon"><i data-lucide="trending-down" style="width:20px;height:20px;"></i></div>
@@ -93,7 +67,6 @@
             <option value="">Semua Status</option>
             <option value="pending">Pending</option>
             <option value="approved">Approved</option>
-            <option value="paid">Paid</option>
             <option value="rejected">Rejected</option>
         </select>
     </div>
@@ -279,13 +252,6 @@
                            </button>` :
                             '';
 
-                        const payBtn = canApprove && row.status === 'approved' ?
-                            `<button class="icon-btn success" title="Tandai Paid"
-                               onclick="payExpense('${row.id}', '${escHtml(row.description)}')">
-                               <i data-lucide="banknote" style="width:14px;height:14px;"></i>
-                           </button>` :
-                            '';
-
                         const deleteBtn = canDelete ?
                             `<button class="icon-btn danger" title="Hapus"
                                onclick="deleteExpense('${row.id}', '${escHtml(row.description)}')">
@@ -293,7 +259,7 @@
                            </button>` :
                             '';
 
-                        return `<div class="table-actions">${editBtn}${approveBtn}${payBtn}${deleteBtn}</div>`;
+                        return `<div class="table-actions">${editBtn}${approveBtn}${deleteBtn}</div>`;
                     }
                 }
             ],
@@ -321,8 +287,6 @@
 
     function updateExpensesTotal(api) {
         const rows = api.rows({ search: 'applied' }).data();
-        let totalPaid = 0, countPaid = 0;
-        let totalUnpaid = 0, countUnpaid = 0;
         let totalOut = 0, countOut = 0;
         let totalIn = 0, countIn = 0;
         const _now = new Date(), _cy = _now.getFullYear(), _cm = _now.getMonth() + 1;
@@ -330,23 +294,13 @@
             const _d = new Date((rows[i].date_raw || '').replace(' ', 'T'));
             if (_d.getFullYear() !== _cy || (_d.getMonth() + 1) !== _cm) continue;
             const nom = parseFloat(rows[i].nominal_raw) || 0;
-            const st  = rows[i].status;
-            if (st === 'paid') {
-                totalPaid += nom; countPaid++;
-            } else if (st === 'approved' || st === 'pending') {
-                totalUnpaid += nom; countUnpaid++;
-            }
             if (rows[i].type === 'out') { totalOut += nom; countOut++; }
             else if (rows[i].type === 'in') { totalIn += nom; countIn++; }
         }
-        document.getElementById('expensesPaidCard').textContent       = 'Rp ' + Currency.number(totalPaid);
-        document.getElementById('expensesPaidCountCard').textContent   = countPaid;
-        document.getElementById('expensesUnpaidCard').textContent      = 'Rp ' + Currency.number(totalUnpaid);
-        document.getElementById('expensesUnpaidCountCard').textContent = countUnpaid;
-        document.getElementById('expensesOutCard').textContent         = 'Rp ' + Currency.number(totalOut);
-        document.getElementById('expensesOutCountCard').textContent    = countOut;
-        document.getElementById('expensesInCard').textContent          = 'Rp ' + Currency.number(totalIn);
-        document.getElementById('expensesInCountCard').textContent     = countIn;
+        document.getElementById('expensesOutCard').textContent      = 'Rp ' + Currency.number(totalOut);
+        document.getElementById('expensesOutCountCard').textContent = countOut;
+        document.getElementById('expensesInCard').textContent       = 'Rp ' + Currency.number(totalIn);
+        document.getElementById('expensesInCountCard').textContent  = countIn;
     }
 
     function escHtml(str) {
@@ -470,25 +424,6 @@
                     table.ajax.reload(null, false);
                 } catch (err) {
                     showError('Gagal', err.response?.data?.message || 'Gagal menolak data');
-                }
-            }
-        });
-    }
-
-    // ── Pay ───────────────────────────────────────────────────────────────────────
-    function payExpense(id, description) {
-        showConfirm({
-            title: 'Tandai Paid',
-            message: `Tandai pengeluaran "${description}" sebagai sudah dibayar?`,
-            type: 'success',
-            confirmText: 'Ya, Paid',
-            onConfirm: async () => {
-                try {
-                    const res = await axios.post(`/expenses/${id}/paid`);
-                    showSuccess('Berhasil', res.data.message);
-                    table.ajax.reload(null, false);
-                } catch (err) {
-                    showError('Gagal', err.response?.data?.message || 'Gagal memperbarui status');
                 }
             }
         });

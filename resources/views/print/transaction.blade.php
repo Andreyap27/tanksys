@@ -262,12 +262,8 @@
     {{-- ── EXPENSES SHIP ───────────────────────────────────────────────── --}}
     @elseif($section === 'expenses')
     @php
-        $gNom=0; $gNomPaid=0; $gNomUnpaid=0;
-        foreach($rows as $r){
-            $gNom+=$r->nominal;
-            if($r->status==='paid') $gNomPaid+=$r->nominal;
-            else $gNomUnpaid+=$r->nominal;
-        }
+        $gNom=0;
+        foreach($rows as $r){ $gNom+=$r->nominal; }
     @endphp
     <table>
         <thead><tr>
@@ -291,14 +287,6 @@
             <tr>
                 <td colspan="4"><strong>Total</strong></td>
                 <td class="r">Rp {{ $fmt($gNom) }}</td><td></td>
-            </tr>
-            <tr style="background:#dcfce7;">
-                <td colspan="4" style="color:#16a34a;"><strong>Total Paid</strong></td>
-                <td class="r" style="color:#16a34a;">Rp {{ $fmt($gNomPaid) }}</td><td></td>
-            </tr>
-            <tr style="background:#fee2e2;">
-                <td colspan="4" style="color:#dc2626;"><strong>Total Unpaid</strong></td>
-                <td class="r" style="color:#dc2626;">Rp {{ $fmt($gNomUnpaid) }}</td><td></td>
             </tr>
         </tfoot>
     </table>
