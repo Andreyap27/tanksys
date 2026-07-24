@@ -52,6 +52,7 @@ class SaleController extends Controller
                 'date'           => $this->resolveDate($s)->translatedFormat('d M Y H:i'),
                 'date_raw'       => $s->date->format('Y-m-d H:i:s'),
                 'invoice_number' => $s->invoice_number,
+                'do_number'      => $s->do_number ?? '',
                 'customer_id'    => $s->customer_id,
                 'customer_name'  => $s->customer->name,
                 'description'    => $s->description ?? '-',
@@ -77,6 +78,7 @@ class SaleController extends Controller
         $request->validate([
             'date'           => 'required|date',
             'invoice_number' => 'required|string|unique:sales,invoice_number,NULL,id,deleted_at,NULL',
+            'do_number'      => 'nullable|string|max:5',
             'customer_id'    => 'required|exists:customers,id',
             'description'    => 'nullable|string|max:255',
             'warna'          => 'nullable|string',
@@ -101,6 +103,7 @@ class SaleController extends Controller
             $sale = Sale::create([
                 'date'           => $request->date . ' ' . now()->format('H:i:s'),
                 'invoice_number' => $request->invoice_number,
+                'do_number'      => $request->do_number ?: null,
                 'customer_id'    => $request->customer_id,
                 'description'    => $request->description,
                 'warna'          => $request->warna ?: null,
@@ -141,6 +144,7 @@ class SaleController extends Controller
         $request->validate([
             'date'           => 'required|date',
             'invoice_number' => 'required|string|unique:sales,invoice_number,' . $sale->id . ',id,deleted_at,NULL',
+            'do_number'      => 'nullable|string|max:5',
             'customer_id'    => 'required|exists:customers,id',
             'description'    => 'nullable|string|max:255',
             'warna'          => 'nullable|string',
@@ -172,6 +176,7 @@ class SaleController extends Controller
             $sale->update([
                 'date'           => $request->date . ' ' . now()->format('H:i:s'),
                 'invoice_number' => $request->invoice_number,
+                'do_number'      => $request->do_number ?: null,
                 'customer_id'    => $request->customer_id,
                 'description'    => $request->description,
                 'warna'          => $request->warna ?: null,

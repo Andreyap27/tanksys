@@ -7,10 +7,16 @@
         <div class="modal-body">
             <form id="editForm" onsubmit="return false;">
                 <div class="form-grid">
-                    <div class="form-group full">
-                        <label class="form-label">No Invoice</label>
-                        <input type="text" name="invoice_number" class="form-input"
-                            readonly style="background:#f5f5f4;cursor:not-allowed;">
+                    <div class="form-group full" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                        <div class="form-group full" style="margin:0;">
+                            <label class="form-label">No Invoice</label>
+                            <input type="text" name="invoice_number" class="form-input"
+                                readonly style="background:#f5f5f4;cursor:not-allowed;">
+                        </div>
+                        <div class="form-group full" style="margin:0;">
+                            <label class="form-label">DO</label>
+                            <input type="text" name="do_number" class="form-input" placeholder="12345" maxlength="5">
+                        </div>
                     </div>
                     <div class="form-group full">
                         <label class="form-label">Tanggal <span class="text-danger">*</span></label>

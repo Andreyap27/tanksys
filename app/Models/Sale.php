@@ -14,6 +14,7 @@ class Sale extends Model
         'kapal_id',
         'date',
         'invoice_number',
+        'do_number',
         'customer_id',
         'description',
         'warna',

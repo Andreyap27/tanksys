@@ -436,7 +436,7 @@
 
     function openEditModal(id, date, vendor, description, quantity, extra, price, noted, kapalId) {
         editId = id;
-        editForm.date.value = date;
+        editForm.date.value = date ? date.split(' ')[0] : '';
         editForm.description.value = description;
         editForm.noted.value = noted;
         document.getElementById('editKapalSelect').value = kapalId || '';

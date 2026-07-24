@@ -65,6 +65,7 @@
                     <tr>
                         <th>Tanggal</th>
                         <th>No Invoice</th>
+                        <th>DO</th>
                         <th>Customer</th>
                         <th>Deskripsi</th>
                         <th>Qty (L)</th>
@@ -276,6 +277,10 @@
                     data: 'invoice_number'
                 },
                 {
+                    data: 'do_number',
+                    render: (data) => data ? data : '<span class="text-muted">-</span>'
+                },
+                {
                     data: 'customer_name'
                 },
                 {
@@ -307,7 +312,7 @@
                         if (canManage) {
                             actions += `
                             <button class="icon-btn primary" title="Edit"
-                                onclick="openEditModal('${row.id}', '${row.date_raw}', '${escHtml(row.invoice_number)}', '${row.customer_id}', '${escHtml(row.description)}', '${row.quantity_raw}', '${row.extra_raw}', '${row.price_raw}', '${escHtml(row.noted)}')">
+                                onclick="openEditModal('${row.id}', '${row.date_raw}', '${escHtml(row.invoice_number)}', '${escHtml(row.do_number)}', '${row.customer_id}', '${escHtml(row.description)}', '${row.quantity_raw}', '${row.extra_raw}', '${row.price_raw}', '${escHtml(row.noted)}')">
                                 <i data-lucide="pencil" style="width:14px;height:14px;"></i>
                             </button>`;
                         }
@@ -388,6 +393,7 @@
         const payload = {
             date: createForm.date.value,
             invoice_number: createForm.invoice_number.value,
+            do_number: createForm.do_number.value || null,
             customer_id: customer,
             description: createForm.description.value,
             quantity: getRaw(createForm.quantity),
@@ -420,10 +426,11 @@
         document.getElementById('editAmountDisplay').value = Currency.format(qty * price);
     }
 
-    function openEditModal(id, date, invoice_number, customer_id, description, quantity, extra, price, noted) {
+    function openEditModal(id, date, invoice_number, do_number, customer_id, description, quantity, extra, price, noted) {
         editId = id;
         editForm.invoice_number.value = invoice_number;
-        editForm.date.value = date;
+        editForm.do_number.value = do_number || '';
+        editForm.date.value = date ? date.split(' ')[0] : '';
         editForm.description.value = description !== '-' ? description : '';
         editForm.noted.value = noted !== '-' ? noted : '';
 
@@ -458,6 +465,7 @@
         const payload = {
             date: editForm.date.value,
             invoice_number: editForm.invoice_number.value,
+            do_number: editForm.do_number.value || null,
             customer_id: customer,
             description: editForm.description.value,
             quantity: getRaw(editForm.quantity),
