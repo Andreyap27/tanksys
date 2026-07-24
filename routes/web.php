@@ -84,6 +84,7 @@ Route::middleware('auth.jwt')->group(function () {
     Route::get('/operasional/usage', [StockUsageController::class, 'index'])->name('stock-usage.index');
     Route::get('/operasional/usage/data', [StockUsageController::class, 'data'])->name('stock-usage.data');
     Route::post('/operasional/usage', [StockUsageController::class, 'store'])->name('stock-usage.store');
+    Route::put('/operasional/usage/{stockUsage}', [StockUsageController::class, 'update'])->name('stock-usage.update');
     Route::delete('/operasional/usage/{stockUsage}', [StockUsageController::class, 'destroy'])->name('stock-usage.destroy');
 
     // Notifications (Marketing allowed)

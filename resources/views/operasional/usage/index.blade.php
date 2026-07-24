@@ -89,6 +89,42 @@
         </div>
     </div>
 </div>
+{{-- Edit Modal --}}
+<div class="modal-overlay" id="editModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 class="modal-title">Edit Pemakaian Stok</h3>
+            <button class="modal-close-btn" onclick="closeEditModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="editForm" onsubmit="return false;">
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label class="form-label">Tanggal <span class="text-danger">*</span></label>
+                        <input type="date" name="date" class="form-input" required>
+                    </div>
+                    <div class="form-group full">
+                        <label class="form-label">Qty (Liter) <span class="text-danger">*</span></label>
+                        <input type="number" name="quantity" class="form-input" placeholder="0" step="0.01" min="0.01" required>
+                    </div>
+                    <div class="form-group full">
+                        <label class="form-label">Keperluan <span class="text-danger">*</span></label>
+                        <input type="text" name="keperluan" class="form-input" placeholder="Contoh: Operasional Mesin" required>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-danger" onclick="closeEditModal()">
+                <i data-lucide="x" style="width:15px;height:15px;"></i> Batal
+            </button>
+            <button class="btn btn-primary" onclick="updateUsage()">
+                <i data-lucide="save" style="width:15px;height:15px;"></i> Simpan
+            </button>
+        </div>
+    </div>
+</div>
+
 @php $txSection='stock-usage'; $txHasKapal=false; $txHasMobil=false; $txHasPc=false; @endphp
 @include('print._tx_filter_modal')
 @endsection
@@ -96,8 +132,11 @@
 @push('scripts')
 <script>
 let usageTable;
+let editId = null;
 const createForm = document.getElementById('createForm');
 const createModal = document.getElementById('createModal');
+const editForm = document.getElementById('editForm');
+const editModal = document.getElementById('editModal');
 
 function escHtml(s) {
     if (!s) return '';
@@ -132,12 +171,18 @@ $(document).ready(function () {
             {
                 data: null, orderable: false, searchable: false,
                 render: function (data, type, row) {
-                    if (!canDelete) return '';
-                    return `<div class="table-actions">
-                        <button class="icon-btn danger" title="Hapus" onclick="deleteUsage('${row.id}', '${escHtml(row.keperluan)}')">
+                    let actions = '';
+                    if (canManage) {
+                        actions += `<button class="icon-btn primary" title="Edit" onclick="openEditModal('${row.id}', '${row.date_raw}', '${row.quantity_raw}', '${escHtml(row.keperluan)}')">
+                            <i data-lucide="pencil" style="width:14px;height:14px;"></i>
+                        </button>`;
+                    }
+                    if (canDelete) {
+                        actions += `<button class="icon-btn danger" title="Hapus" onclick="deleteUsage('${row.id}', '${escHtml(row.keperluan)}')">
                             <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
-                        </button>
-                    </div>`;
+                        </button>`;
+                    }
+                    return actions ? `<div class="table-actions">${actions}</div>` : '';
                 }
             }
         ],
@@ -149,6 +194,36 @@ $(document).ready(function () {
 
 function openCreateModal() { createForm.reset(); createModal.classList.add('active'); }
 function closeCreateModal() { createModal.classList.remove('active'); }
+
+function openEditModal(id, dateRaw, qty, keperluan) {
+    editId = id;
+    editForm.date.value = dateRaw ? dateRaw.split(' ')[0] : '';
+    editForm.quantity.value = qty;
+    editForm.keperluan.value = keperluan;
+    editModal.classList.add('active');
+}
+function closeEditModal() { editModal.classList.remove('active'); editId = null; }
+
+function updateUsage() {
+    if (!editForm.keperluan.value) { showError('Validasi', 'Keperluan wajib diisi.'); return; }
+
+    const payload = {
+        date:      editForm.date.value,
+        quantity:  parseFloat(editForm.quantity.value),
+        keperluan: editForm.keperluan.value,
+    };
+
+    axios.put(`/operasional/usage/${editId}`, payload)
+        .then(res => {
+            showSuccess('Berhasil', res.data.message);
+            closeEditModal();
+            usageTable.ajax.reload(null, false);
+        })
+        .catch(err => {
+            const errors = err.response?.data?.errors;
+            showError('Gagal', errors ? Object.values(errors).flat().join('\n') : err.response?.data?.message || 'Terjadi kesalahan');
+        });
+}
 
 function storeUsage() {
     if (!createForm.keperluan.value) { showError('Validasi', 'Keperluan wajib diisi.'); return; }

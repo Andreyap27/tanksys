@@ -67,6 +67,45 @@ class StockUsageController extends Controller
         return response()->json(['message' => 'Pemakaian stok berhasil disimpan.']);
     }
 
+    public function update(Request $request, StockUsage $stockUsage)
+    {
+        if (!auth()->user()->canManage()) {
+            return response()->json(['message' => 'Tidak memiliki izin untuk mengedit.'], 403);
+        }
+
+        $request->validate([
+            'date'      => 'required|date',
+            'warna'     => 'nullable|string',
+            'quantity'  => 'required|numeric|min:0.01',
+            'keperluan' => 'required|string|max:255',
+        ]);
+
+        DB::transaction(function () use ($request, $stockUsage) {
+            $stockUsage->stock?->delete();
+
+            $stockUsage->update([
+                'date'      => $request->date . ' ' . now()->format('H:i:s'),
+                'warna'     => $request->warna ?: null,
+                'quantity'  => $request->quantity,
+                'keperluan' => $request->keperluan,
+            ]);
+
+            Stock::create([
+                'kapal_id'       => null,
+                'date'           => $stockUsage->date,
+                'type'           => 'usage',
+                'reference_id'   => $stockUsage->id,
+                'reference_type' => StockUsage::class,
+                'party'          => $stockUsage->keperluan,
+                'warna'          => $stockUsage->warna,
+                'qty_in'         => 0,
+                'qty_out'        => $stockUsage->quantity,
+            ]);
+        });
+
+        return response()->json(['message' => 'Pemakaian stok berhasil diupdate.']);
+    }
+
     public function destroy(StockUsage $stockUsage)
     {
         if (!auth()->user()->canDelete()) {
