@@ -70,7 +70,6 @@
                         <th>Qty (L)</th>
                         <th>Harga/L</th>
                         <th>Amount</th>
-                        <th>Status</th>
                         <th>Dihapus Oleh</th>
                         <th>Aksi</th>
                     </tr>
@@ -148,17 +147,6 @@
                 },
                 {
                     data: 'amount'
-                },
-                {
-                    data: 'status',
-                    render: function(data) {
-                        const colors = {
-                            'pending': 'badge-warning',
-                            'approved': 'badge-success',
-                            'rejected': 'badge-danger'
-                        };
-                        return `<span class="badge ${colors[data] || 'badge-info'}">${data}</span>`;
-                    }
                 },
                 {
                     data: 'deleted_by'

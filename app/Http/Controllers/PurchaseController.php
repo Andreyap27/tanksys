@@ -130,17 +130,25 @@ class PurchaseController extends Controller
                 'price'       => $request->price,
                 'amount'      => $request->quantity * $request->price,
                 'noted'       => $request->noted,
-                'status'      => 'pending',
-                'approved_by' => null,
-                'approved_at' => null,
+                'status'      => 'approved',
+                'approved_by' => auth()->id(),
+                'approved_at' => now(),
+            ]);
+
+            Stock::create([
+                'kapal_id'       => $purchase->kapal_id,
+                'date'           => $purchase->date,
+                'type'           => 'purchase',
+                'reference_id'   => $purchase->id,
+                'reference_type' => Purchase::class,
+                'party'          => $purchase->vendor,
+                'warna'          => $purchase->warna,
+                'qty_in'         => (float) $purchase->quantity + (float) $purchase->extra,
+                'qty_out'        => 0,
             ]);
         });
 
-        Notification::sendToApprovers('approval', 'Purchase Diupdate',
-            auth()->user()->name . ' mengubah purchase dari ' . $request->vendor . ' dan menunggu persetujuan.',
-            route('purchase.index'));
-
-        return response()->json(['message' => 'Purchase berhasil diupdate dan menunggu persetujuan ulang.']);
+        return response()->json(['message' => 'Purchase berhasil diupdate.']);
     }
 
     public function destroy(Purchase $purchase)

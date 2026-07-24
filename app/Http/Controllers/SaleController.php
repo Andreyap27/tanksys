@@ -150,7 +150,21 @@ class SaleController extends Controller
             'noted'          => 'nullable|string',
         ]);
 
-        DB::transaction(function () use ($request, $sale) {
+        $extra    = (float) ($request->extra ?? 0);
+        $totalOut = (float) $request->quantity + $extra;
+        $warna    = $request->warna ?: null;
+        $oldQtyOut = in_array($sale->status, ['approved', 'paid']) && ($sale->warna ?: null) === $warna
+            ? ((float) $sale->quantity + (float) $sale->extra)
+            : 0;
+        $effectiveBalance = Stock::currentBalance(null, $warna) + $oldQtyOut;
+        if ($totalOut > $effectiveBalance) {
+            $label = $warna ? " BBM " . ucfirst($warna) : '';
+            return response()->json([
+                'message' => 'Stok' . $label . ' tidak mencukupi. Stok saat ini: ' . number_format($effectiveBalance, 2, ',', '.') . ' L',
+            ], 422);
+        }
+
+        DB::transaction(function () use ($request, $sale, $extra) {
             if (in_array($sale->status, ['approved', 'paid'])) {
                 $sale->stock?->delete();
             }
@@ -162,22 +176,30 @@ class SaleController extends Controller
                 'description'    => $request->description,
                 'warna'          => $request->warna ?: null,
                 'quantity'       => $request->quantity,
-                'extra'          => (float) ($request->extra ?? 0),
+                'extra'          => $extra,
                 'short'          => 0,
                 'price'          => $request->price,
                 'amount'         => $request->quantity * $request->price,
                 'noted'          => $request->noted,
-                'status'         => 'pending',
-                'approved_by'    => null,
-                'approved_at'    => null,
+                'status'         => 'approved',
+                'approved_by'    => auth()->id(),
+                'approved_at'    => now(),
+            ]);
+
+            Stock::create([
+                'kapal_id'       => null,
+                'date'           => $sale->date,
+                'type'           => 'sale',
+                'reference_id'   => $sale->id,
+                'reference_type' => Sale::class,
+                'party'          => $sale->customer->name,
+                'warna'          => $sale->warna,
+                'qty_in'         => 0,
+                'qty_out'        => (float) $sale->quantity + (float) $sale->extra,
             ]);
         });
 
-        Notification::sendToApprovers('approval', 'Penjualan Diupdate',
-            auth()->user()->name . ' mengubah penjualan ' . $request->invoice_number . ' dan menunggu persetujuan.',
-            route('sales.index'));
-
-        return response()->json(['message' => 'Penjualan berhasil diupdate dan menunggu persetujuan ulang.']);
+        return response()->json(['message' => 'Penjualan berhasil diupdate.']);
     }
 
     public function destroy(Sale $sale)

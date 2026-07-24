@@ -57,13 +57,6 @@
 <div class="card">
     <div class="card-toolbar">
         <div class="dt-search-slot"></div>
-        <select id="salesStatusFilter" class="form-select" style="width:auto;min-width:130px;">
-            <option value="">Semua Status</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="paid">Paid</option>
-            <option value="rejected">Rejected</option>
-        </select>
     </div>
     <div class="card-content" style="padding:0;">
         <div class="table-wrap">
@@ -78,7 +71,6 @@
                         <th>Extra (L)</th>
                         <th>Harga/L</th>
                         <th>Amount</th>
-                        <th>Status</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -160,11 +152,9 @@
         for (let i = 0; i < rows.length; i++) {
             const _d = new Date((rows[i].date_raw || '').replace(' ', 'T'));
             if (_d.getFullYear() !== _cy || (_d.getMonth() + 1) !== _cm) continue;
-            if (rows[i].status === 'approved' || rows[i].status === 'paid') {
-                totalAmount += parseFloat(rows[i].amount_raw) || 0;
-                const qty = (parseFloat(rows[i].quantity_raw) || 0) + (parseFloat(rows[i].extra_raw) || 0);
-                qtyTotal += qty;
-            }
+            totalAmount += parseFloat(rows[i].amount_raw) || 0;
+            const qty = (parseFloat(rows[i].quantity_raw) || 0) + (parseFloat(rows[i].extra_raw) || 0);
+            qtyTotal += qty;
         }
         document.getElementById('salesTotalAmount').textContent = 'Rp ' + Currency.number(totalAmount);
         document.getElementById('salesQtyTotal').textContent = Currency.number(qtyTotal) + ' L';
@@ -308,18 +298,6 @@
                     render: (data) => Currency.symbol + ' ' + data
                 },
                 {
-                    data: 'status',
-                    render: function(data) {
-                        const map = {
-                            pending:  '<span class="badge badge-warning">Pending</span>',
-                            approved: '<span class="badge badge-info">Approved</span>',
-                            paid:     '<span class="badge badge-success">Paid</span>',
-                            rejected: '<span class="badge badge-danger">Rejected</span>',
-                        };
-                        return map[data] || data;
-                    }
-                },
-                {
                     data: null,
                     orderable: false,
                     searchable: false,
@@ -331,28 +309,6 @@
                             <button class="icon-btn primary" title="Edit"
                                 onclick="openEditModal('${row.id}', '${row.date_raw}', '${escHtml(row.invoice_number)}', '${row.customer_id}', '${escHtml(row.description)}', '${row.quantity_raw}', '${row.extra_raw}', '${row.price_raw}', '${escHtml(row.noted)}')">
                                 <i data-lucide="pencil" style="width:14px;height:14px;"></i>
-                            </button>`;
-                        }
-
-                        if (canApprove && row.status === 'pending') {
-                            actions += `
-                            <button class="icon-btn success" title="Setujui"
-                                onclick="approveSale('${row.id}', '${escHtml(row.invoice_number)}')">
-                                <i data-lucide="check" style="width:14px;height:14px;"></i>
-                            </button>
-                            <button class="icon-btn warning" title="Tolak"
-                                onclick="rejectSale('${row.id}', '${escHtml(row.invoice_number)}')">
-                                <i data-lucide="x" style="width:14px;height:14px;"></i>
-                            </button>`;
-                        }
-
-                        if (canApprove && (row.status === 'approved' || row.status === 'paid')) {
-                            const isPaid = row.status === 'paid';
-                            actions += `
-                            <button class="icon-btn" title="${isPaid ? 'Sudah Paid' : 'Tandai Paid'}"
-                                style="background:${isPaid ? 'rgba(22,163,74,0.15)' : 'rgba(22,163,74,0.1)'};color:#16a34a;${isPaid ? 'opacity:0.5;cursor:not-allowed;' : ''}"
-                                ${isPaid ? 'disabled' : `onclick="paidSale('${row.id}', '${escHtml(row.invoice_number)}')"`}>
-                                <i data-lucide="banknote" style="width:14px;height:14px;"></i>
                             </button>`;
                         }
 
@@ -383,17 +339,6 @@
             }
         });
 
-        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
-            if (settings.nTable.id !== 'salesTable') return true;
-            const filterVal = document.getElementById('salesStatusFilter').value;
-            if (!filterVal) return true;
-            const rowData = table.row(dataIndex).data();
-            return rowData && rowData.status === filterVal;
-        });
-
-        document.getElementById('salesStatusFilter').addEventListener('change', function() {
-            table.draw();
-        });
     });
 
     function escHtml(str) {
@@ -552,62 +497,6 @@
                     table.ajax.reload(null, false);
                 } catch (err) {
                     showError('Gagal', err.response?.data?.message || 'Gagal menghapus data');
-                }
-            }
-        });
-    }
-
-    // ── Approve / Reject ─────────────────────────────────────────────────────────
-
-    function approveSale(id, invoice) {
-        showConfirm({
-            title: 'Konfirmasi Persetujuan',
-            message: `Setujui penjualan "${invoice}"? Data akan masuk ke perhitungan stok dan laporan.`,
-            type: 'warning',
-            confirmText: 'Ya, Setujui',
-            onConfirm: async () => {
-                try {
-                    const res = await axios.post(`/sales/${id}/approve`);
-                    showSuccess('Disetujui', res.data.message);
-                    table.ajax.reload(null, false);
-                } catch (err) {
-                    showError('Gagal', err.response?.data?.message || 'Gagal menyetujui data');
-                }
-            }
-        });
-    }
-
-    function rejectSale(id, invoice) {
-        showConfirm({
-            title: 'Konfirmasi Penolakan',
-            message: `Tolak penjualan "${invoice}"?`,
-            type: 'danger',
-            confirmText: 'Ya, Tolak',
-            onConfirm: async () => {
-                try {
-                    const res = await axios.post(`/sales/${id}/reject`);
-                    showSuccess('Ditolak', res.data.message);
-                    table.ajax.reload(null, false);
-                } catch (err) {
-                    showError('Gagal', err.response?.data?.message || 'Gagal menolak data');
-                }
-            }
-        });
-    }
-
-    function paidSale(id, invoice) {
-        showConfirm({
-            title: 'Konfirmasi Paid',
-            message: `Tandai penjualan "${invoice}" sebagai paid?`,
-            type: 'warning',
-            confirmText: 'Ya, Paid',
-            onConfirm: async () => {
-                try {
-                    const res = await axios.post(`/sales/${id}/paid`);
-                    showSuccess('Paid', res.data.message);
-                    table.ajax.reload(null, false);
-                } catch (err) {
-                    showError('Gagal', err.response?.data?.message || 'Gagal menandai paid');
                 }
             }
         });
