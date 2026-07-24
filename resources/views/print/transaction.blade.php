@@ -129,19 +129,10 @@
     @elseif($section === 'purchase')
     @php
         $gQty=0; $gExtra=0; $gAmt=0;
-        $gQtyPaid=0; $gExtraPaid=0; $gAmtPaid=0;
-        $gQtyUnpaid=0; $gExtraUnpaid=0; $gAmtUnpaid=0;
         foreach($rows as $r){
             $gQty+=$r->quantity; $gExtra+=$r->extra; $gAmt+=$r->amount;
-            if($r->status==='paid'){
-                $gQtyPaid+=$r->quantity; $gExtraPaid+=$r->extra; $gAmtPaid+=$r->amount;
-            } else {
-                $gQtyUnpaid+=$r->quantity; $gExtraUnpaid+=$r->extra; $gAmtUnpaid+=$r->amount;
-            }
         }
-        $gNetQty       = $gQty       + $gExtra;
-        $gNetQtyPaid   = $gQtyPaid   + $gExtraPaid;
-        $gNetQtyUnpaid = $gQtyUnpaid + $gExtraUnpaid;
+        $gNetQty = $gQty + $gExtra;
     @endphp
     <table>
         <thead><tr>
@@ -179,20 +170,6 @@
                 <td></td><td></td>
                 <td class="r" style="color:#1a5cb8;">Rp {{ $fmt($gAmt) }}</td>
             </tr>
-            <tr style="background:#dcfce7;">
-                <td colspan="4" style="color:#16a34a;"><strong>Total Paid</strong></td>
-                <td class="r" style="color:#16a34a;">{{ $fmtQty($gQtyPaid) }}</td>
-                <td class="r" style="color:#16a34a;">{{ $fmtQty($gExtraPaid) }}</td>
-                <td></td><td></td>
-                <td class="r" style="color:#16a34a;">Rp {{ $fmt($gAmtPaid) }}</td>
-            </tr>
-            <tr style="background:#fee2e2;">
-                <td colspan="4" style="color:#dc2626;"><strong>Total Unpaid</strong></td>
-                <td class="r" style="color:#dc2626;">{{ $fmtQty($gQtyUnpaid) }}</td>
-                <td class="r" style="color:#dc2626;">{{ $fmtQty($gExtraUnpaid) }}</td>
-                <td></td><td></td>
-                <td class="r" style="color:#dc2626;">Rp {{ $fmt($gAmtUnpaid) }}</td>
-            </tr>
         </tfoot>
     </table>
 
@@ -200,15 +177,8 @@
     @elseif($section === 'sales')
     @php
         $gQty=0; $gExtra=0; $gAmt=0;
-        $gQtyPaid=0; $gExtraPaid=0; $gAmtPaid=0;
-        $gQtyUnpaid=0; $gExtraUnpaid=0; $gAmtUnpaid=0;
         foreach($rows as $r){
             $gQty+=$r->quantity; $gExtra+=$r->extra; $gAmt+=$r->amount;
-            if($r->status==='paid'){
-                $gQtyPaid+=$r->quantity; $gExtraPaid+=$r->extra; $gAmtPaid+=$r->amount;
-            } else {
-                $gQtyUnpaid+=$r->quantity; $gExtraUnpaid+=$r->extra; $gAmtUnpaid+=$r->amount;
-            }
         }
     @endphp
     <table>
@@ -241,20 +211,6 @@
                 <td class="r">{{ $fmtQty($gExtra) }}</td>
                 <td></td><td></td>
                 <td class="r">Rp {{ $fmt($gAmt) }}</td>
-            </tr>
-            <tr style="background:#dcfce7;">
-                <td colspan="4" style="color:#16a34a;"><strong>Total Paid</strong></td>
-                <td class="r" style="color:#16a34a;">{{ $fmtQty($gQtyPaid) }}</td>
-                <td class="r" style="color:#16a34a;">{{ $fmtQty($gExtraPaid) }}</td>
-                <td></td><td></td>
-                <td class="r" style="color:#16a34a;">Rp {{ $fmt($gAmtPaid) }}</td>
-            </tr>
-            <tr style="background:#fee2e2;">
-                <td colspan="4" style="color:#dc2626;"><strong>Total Unpaid</strong></td>
-                <td class="r" style="color:#dc2626;">{{ $fmtQty($gQtyUnpaid) }}</td>
-                <td class="r" style="color:#dc2626;">{{ $fmtQty($gExtraUnpaid) }}</td>
-                <td></td><td></td>
-                <td class="r" style="color:#dc2626;">Rp {{ $fmt($gAmtUnpaid) }}</td>
             </tr>
         </tfoot>
     </table>

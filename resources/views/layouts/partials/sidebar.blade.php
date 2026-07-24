@@ -199,9 +199,9 @@
                 <a href="{{ route('report.petty-cash') }}" class="nav-sub-item {{ request()->routeIs('report.petty-cash') ? 'active' : '' }}">
                     Petty Cash
                 </a>
-                <a href="{{ route('report.jasa-angkut') }}" class="nav-sub-item {{ request()->routeIs('report.jasa-angkut') ? 'active' : '' }}">
+                {{-- <a href="{{ route('report.jasa-angkut') }}" class="nav-sub-item {{ request()->routeIs('report.jasa-angkut') ? 'active' : '' }}">
                     Jasa Angkut
-                </a>
+                </a> --}}
             </div>
         </div>
         @endif {{-- !isFinance --}}
