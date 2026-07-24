@@ -44,15 +44,14 @@ class ReportController extends Controller
         $kapalId  = request('kapal_id') ?: null;
         $kapals   = Kapal::orderBy('code')->get();
 
-        $base = Purchase::selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(amount) as total_amount')
+        $purchases = Purchase::selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(amount) as total_amount')
             ->whereYear('date', $year)
+            ->whereIn('status', ['approved', 'paid'])
             ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
-            ->groupBy('month');
+            ->groupBy('month')
+            ->get()->keyBy('month');
 
-        $purchasesPaid     = (clone $base)->where('status', 'paid')->get()->keyBy('month');
-        $purchasesApproved = (clone $base)->where('status', 'approved')->get()->keyBy('month');
-
-        return view('report.purchase', compact('year', 'years', 'purchasesPaid', 'purchasesApproved', 'kapals', 'kapalId'));
+        return view('report.purchase', compact('year', 'years', 'purchases', 'kapals', 'kapalId'));
     }
 
     public function sale()
@@ -62,15 +61,14 @@ class ReportController extends Controller
         $kapalId = request('kapal_id') ?: null;
         $kapals  = Kapal::orderBy('code')->get();
 
-        $base = Sale::selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(amount) as total_amount')
+        $sales = Sale::selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(amount) as total_amount')
             ->whereYear('date', $year)
+            ->whereIn('status', ['approved', 'paid'])
             ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
-            ->groupBy('month');
+            ->groupBy('month')
+            ->get()->keyBy('month');
 
-        $salesPaid     = (clone $base)->where('status', 'paid')->get()->keyBy('month');
-        $salesApproved = (clone $base)->where('status', 'approved')->get()->keyBy('month');
-
-        return view('report.sale', compact('year', 'years', 'salesPaid', 'salesApproved', 'kapals', 'kapalId'));
+        return view('report.sale', compact('year', 'years', 'sales', 'kapals', 'kapalId'));
     }
 
     public function expense()
@@ -378,25 +376,21 @@ class ReportController extends Controller
 
         switch ($section) {
             case 'purchase':
-                if ($isTrash) {
-                    $data['purchasesPaid']     = Purchase::onlyTrashed()->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(amount) as total_amount')->whereYear('date', $year)->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))->groupBy('month')->get()->keyBy('month');
-                    $data['purchasesApproved'] = collect();
-                } else {
-                    $pBase = Purchase::selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(amount) as total_amount')->whereYear('date', $year)->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))->groupBy('month');
-                    $data['purchasesPaid']     = (clone $pBase)->where('status', 'paid')->get()->keyBy('month');
-                    $data['purchasesApproved'] = (clone $pBase)->where('status', 'approved')->get()->keyBy('month');
-                }
+                $pQuery = $isTrash ? Purchase::onlyTrashed() : Purchase::whereIn('status', ['approved', 'paid']);
+                $data['purchases'] = $pQuery
+                    ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(amount) as total_amount')
+                    ->whereYear('date', $year)
+                    ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
+                    ->groupBy('month')->get()->keyBy('month');
                 $data['title'] = $isTrash ? 'Total Purchase (Trash)' : 'Total Purchase';
                 break;
             case 'sale':
-                if ($isTrash) {
-                    $data['salesPaid']     = Sale::onlyTrashed()->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(amount) as total_amount')->whereYear('date', $year)->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))->groupBy('month')->get()->keyBy('month');
-                    $data['salesApproved'] = collect();
-                } else {
-                    $sBase = Sale::selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(amount) as total_amount')->whereYear('date', $year)->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))->groupBy('month');
-                    $data['salesPaid']     = (clone $sBase)->where('status', 'paid')->get()->keyBy('month');
-                    $data['salesApproved'] = (clone $sBase)->where('status', 'approved')->get()->keyBy('month');
-                }
+                $sQuery = $isTrash ? Sale::onlyTrashed() : Sale::whereIn('status', ['approved', 'paid']);
+                $data['sales'] = $sQuery
+                    ->selectRaw('MONTH(date) as month, SUM(quantity) as total_qty, SUM(extra) as total_extra, SUM(amount) as total_amount')
+                    ->whereYear('date', $year)
+                    ->when($kapalId, fn($q) => $q->where('kapal_id', $kapalId))
+                    ->groupBy('month')->get()->keyBy('month');
                 $data['title'] = $isTrash ? 'Total Sale (Trash)' : 'Total Sale';
                 break;
             case 'expense':

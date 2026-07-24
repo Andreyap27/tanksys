@@ -235,36 +235,30 @@
         {{-- ── Purchase ───────────────────────────────────────────── --}}
         @if($section === 'purchase')
             @php
-                $gQty=0; $gExtra=0; $gAmtP=0; $gAmtA=0;
+                $gQty=0; $gExtra=0; $gAmt=0;
                 foreach (range(1,12) as $m) {
-                    $gQty   += (float)($purchasesPaid->get($m)->total_qty      ?? 0) + (float)($purchasesApproved->get($m)->total_qty   ?? 0);
-                    $gExtra += (float)($purchasesPaid->get($m)->total_extra     ?? 0) + (float)($purchasesApproved->get($m)->total_extra  ?? 0);
-                    $gAmtP  += (float)($purchasesPaid->get($m)->total_amount    ?? 0);
-                    $gAmtA  += (float)($purchasesApproved->get($m)->total_amount ?? 0);
+                    $gQty   += (float)($purchases->get($m)->total_qty    ?? 0);
+                    $gExtra += (float)($purchases->get($m)->total_extra  ?? 0);
+                    $gAmt   += (float)($purchases->get($m)->total_amount ?? 0);
                 }
                 $gTot = $gQty + $gExtra;
             @endphp
-            <table class="rpt-table rpt-table--grid">
+            <table class="rpt-table">
                 <thead>
                     <tr>
-                        <th rowspan="2">Bulan</th>
-                        <th rowspan="2" class="r">Qty (L)</th>
-                        <th rowspan="2" class="r">Extra (L)</th>
-                        <th rowspan="2" class="r">Total Qty (L)</th>
-                        <th colspan="2" style="text-align:center;">Total Amount</th>
-                    </tr>
-                    <tr>
-                        <th style="text-align:center;color:#16a34a;">Paid</th>
-                        <th style="text-align:center;color:#dc2626;">Unpaid</th>
+                        <th>Bulan</th>
+                        <th class="r">Qty (L)</th>
+                        <th class="r">Extra (L)</th>
+                        <th class="r">Total Qty (L)</th>
+                        <th class="r">Total Amount</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($months as $m => $name)
                         @php
-                            $qty   = (float)($purchasesPaid->get($m)->total_qty      ?? 0) + (float)($purchasesApproved->get($m)->total_qty   ?? 0);
-                            $extra = (float)($purchasesPaid->get($m)->total_extra     ?? 0) + (float)($purchasesApproved->get($m)->total_extra  ?? 0);
-                            $amtP  = (float)($purchasesPaid->get($m)->total_amount    ?? 0);
-                            $amtA  = (float)($purchasesApproved->get($m)->total_amount ?? 0);
+                            $qty   = (float)($purchases->get($m)->total_qty    ?? 0);
+                            $extra = (float)($purchases->get($m)->total_extra  ?? 0);
+                            $amt   = (float)($purchases->get($m)->total_amount ?? 0);
                             $tot   = $qty + $extra;
                         @endphp
                         <tr>
@@ -272,8 +266,7 @@
                             <td class="r">{{ $qty   ? $fmtQty($qty)   : '-' }}</td>
                             <td class="r">{{ $extra ? $fmtQty($extra) : '-' }}</td>
                             <td class="r">{{ $tot   ? $fmtQty($tot)   : '-' }}</td>
-                            <td class="r">{{ $amtP  ? 'Rp '.$fmt($amtP) : '-' }}</td>
-                            <td class="r">{{ $amtA  ? 'Rp '.$fmt($amtA) : '-' }}</td>
+                            <td class="r">{{ $amt   ? 'Rp '.$fmt($amt) : '-' }}</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -283,8 +276,7 @@
                         <td class="r">{{ $fmtQty($gQty) }}</td>
                         <td class="r">{{ $fmtQty($gExtra) }}</td>
                         <td class="r">{{ $fmtQty($gTot) }}</td>
-                        <td class="r">Rp {{ $fmt($gAmtP) }}</td>
-                        <td class="r">Rp {{ $fmt($gAmtA) }}</td>
+                        <td class="r">Rp {{ $fmt($gAmt) }}</td>
                     </tr>
                 </tfoot>
             </table>
@@ -292,36 +284,30 @@
         {{-- ── Sale ───────────────────────────────────────────────── --}}
         @elseif($section === 'sale')
             @php
-                $gQty=0; $gExtra=0; $gAmtP=0; $gAmtA=0;
+                $gQty=0; $gExtra=0; $gAmt=0;
                 foreach (range(1,12) as $m) {
-                    $gQty   += (float)($salesPaid->get($m)->total_qty      ?? 0) + (float)($salesApproved->get($m)->total_qty   ?? 0);
-                    $gExtra += (float)($salesPaid->get($m)->total_extra     ?? 0) + (float)($salesApproved->get($m)->total_extra  ?? 0);
-                    $gAmtP  += (float)($salesPaid->get($m)->total_amount    ?? 0);
-                    $gAmtA  += (float)($salesApproved->get($m)->total_amount ?? 0);
+                    $gQty   += (float)($sales->get($m)->total_qty    ?? 0);
+                    $gExtra += (float)($sales->get($m)->total_extra  ?? 0);
+                    $gAmt   += (float)($sales->get($m)->total_amount ?? 0);
                 }
                 $gTot = $gQty + $gExtra;
             @endphp
-            <table class="rpt-table rpt-table--grid">
+            <table class="rpt-table">
                 <thead>
                     <tr>
-                        <th rowspan="2">Bulan</th>
-                        <th rowspan="2" class="r">Qty (L)</th>
-                        <th rowspan="2" class="r">Extra (L)</th>
-                        <th rowspan="2" class="r">Total Qty (L)</th>
-                        <th colspan="2" style="text-align:center;">Total Amount</th>
-                    </tr>
-                    <tr>
-                        <th style="text-align:center;color:#16a34a;">Paid</th>
-                        <th style="text-align:center;color:#dc2626;">Unpaid</th>
+                        <th>Bulan</th>
+                        <th class="r">Qty (L)</th>
+                        <th class="r">Extra (L)</th>
+                        <th class="r">Total Qty (L)</th>
+                        <th class="r">Total Amount</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($months as $m => $name)
                         @php
-                            $qty   = (float)($salesPaid->get($m)->total_qty      ?? 0) + (float)($salesApproved->get($m)->total_qty   ?? 0);
-                            $extra = (float)($salesPaid->get($m)->total_extra     ?? 0) + (float)($salesApproved->get($m)->total_extra  ?? 0);
-                            $amtP  = (float)($salesPaid->get($m)->total_amount    ?? 0);
-                            $amtA  = (float)($salesApproved->get($m)->total_amount ?? 0);
+                            $qty   = (float)($sales->get($m)->total_qty    ?? 0);
+                            $extra = (float)($sales->get($m)->total_extra  ?? 0);
+                            $amt   = (float)($sales->get($m)->total_amount ?? 0);
                             $tot   = $qty + $extra;
                         @endphp
                         <tr>
@@ -329,8 +315,7 @@
                             <td class="r">{{ $qty   ? $fmtQty($qty)   : '-' }}</td>
                             <td class="r">{{ $extra ? $fmtQty($extra) : '-' }}</td>
                             <td class="r">{{ $tot   ? $fmtQty($tot)   : '-' }}</td>
-                            <td class="r">{{ $amtP  ? 'Rp '.$fmt($amtP) : '-' }}</td>
-                            <td class="r">{{ $amtA  ? 'Rp '.$fmt($amtA) : '-' }}</td>
+                            <td class="r">{{ $amt   ? 'Rp '.$fmt($amt) : '-' }}</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -340,8 +325,7 @@
                         <td class="r">{{ $fmtQty($gQty) }}</td>
                         <td class="r">{{ $fmtQty($gExtra) }}</td>
                         <td class="r">{{ $fmtQty($gTot) }}</td>
-                        <td class="r">Rp {{ $fmt($gAmtP) }}</td>
-                        <td class="r">Rp {{ $fmt($gAmtA) }}</td>
+                        <td class="r">Rp {{ $fmt($gAmt) }}</td>
                     </tr>
                 </tfoot>
             </table>
