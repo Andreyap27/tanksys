@@ -252,6 +252,7 @@ class ReportController extends Controller
         }
 
         $saldoAkhir = $running;
+        $stocks = $stocks->reverse()->values();
 
         return view('report.stock-card', compact(
             'year', 'years', 'selectedMonth', 'months', 'stocks',
@@ -574,7 +575,7 @@ class ReportController extends Controller
                     if ($s->type === 'usage') $totalPemakaian += (float)$s->qty_out;
                     else $totalKeluar += (float)$s->qty_out;
                 }
-                $data['stocks']         = $stockRows;
+                $data['stocks']         = $stockRows->reverse()->values();
                 $data['openingBalance'] = $openingBalance;
                 $data['totalMasuk']     = $totalMasuk;
                 $data['totalKeluar']    = $totalKeluar;
