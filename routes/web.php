@@ -276,6 +276,7 @@ Route::middleware('auth.jwt')->group(function () {
     Route::get('/report/lori/trash',    [ReportController::class, 'loriTrash'])->name('report.lori.trash');
     Route::get('/report/profit-loss',   [ReportController::class, 'profitLoss'])->name('report.profit-loss');
     Route::get('/report/petty-cash',    [ReportController::class, 'pettyCash'])->name('report.petty-cash');
+    Route::get('/report/stock-card',           [ReportController::class, 'stockCard'])->name('report.stock-card');
     Route::get('/report/jasa-angkut',         [ReportController::class, 'jasaAngkut'])->name('report.jasa-angkut');
     Route::get('/report/jasa-angkut/print',   [ReportController::class, 'jasaAngkutPrint'])->name('report.jasa-angkut.print');
 

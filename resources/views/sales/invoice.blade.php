@@ -296,16 +296,10 @@
                     <div class="inv-meta-label">Tanggal</div>
                     <div class="inv-meta-value">{{ $sale->date->translatedFormat('d F Y') }}</div>
                 </div>
-                <div style="margin-bottom:0.75rem;">
-                    <div class="inv-meta-label">No. Invoice</div>
-                    <div class="inv-meta-value" style="color:#1a5cb8;">{{ $sale->invoice_number }}</div>
-                </div>
-                @if($sale->do_number)
                 <div>
-                    <div class="inv-meta-label">DO</div>
-                    <div class="inv-meta-value">{{ $sale->do_number }}</div>
+                    <div class="inv-meta-label">No. DO</div>
+                    <div class="inv-meta-value" style="color:#1a5cb8;">{{ $sale->do_number ?: '-' }}</div>
                 </div>
-                @endif
             </div>
         </div>
 

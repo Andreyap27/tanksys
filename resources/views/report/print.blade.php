@@ -615,6 +615,68 @@
                     </tr>
                 </tfoot>
             </table>
+        {{-- ── Stok Card ───────────────────────────────────────────── --}}
+        @elseif($section === 'stock-card')
+            @php
+                $fmtQty = fn($n) => number_format((float)$n, 2, ',', '.');
+                $typeBadge = [
+                    'purchase'     => 'Pembelian',
+                    'sale'         => 'Penjualan',
+                    'transfer_in'  => 'Transfer Masuk',
+                    'transfer_out' => 'Transfer Keluar',
+                    'usage'        => 'Pemakaian',
+                ];
+            @endphp
+            <p style="font-size:0.8rem;color:#64748b;margin-bottom:0.75rem;">
+                Periode: {{ isset($selectedMonth) && $selectedMonth ? $months[$selectedMonth].' '.$year : 'Tahun '.$year }}
+            </p>
+            <table class="rpt-table">
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Tipe</th>
+                        <th>Keterangan</th>
+                        <th class="r">Masuk (L)</th>
+                        <th class="r">Keluar (L)</th>
+                        <th class="r">Pemakaian (L)</th>
+                        <th class="r">Saldo (L)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if($openingBalance != 0)
+                    <tr style="background:#f8fafc;font-style:italic;">
+                        <td colspan="3" style="color:#64748b;font-size:0.8rem;">Saldo Awal Periode</td>
+                        <td class="r">-</td>
+                        <td class="r">-</td>
+                        <td class="r">-</td>
+                        <td class="r"><strong>{{ $fmtQty($openingBalance) }}</strong></td>
+                    </tr>
+                    @endif
+                    @forelse($stocks as $s)
+                        @php $isUsage = $s->type === 'usage'; @endphp
+                        <tr>
+                            <td>{{ $s->date->translatedFormat('d M Y') }}</td>
+                            <td>{{ $typeBadge[$s->type] ?? $s->type }}</td>
+                            <td>{{ $s->party ?: '-' }}</td>
+                            <td class="r">{{ $s->qty_in > 0 ? $fmtQty($s->qty_in) : '-' }}</td>
+                            <td class="r">{{ !$isUsage && $s->qty_out > 0 ? $fmtQty($s->qty_out) : '-' }}</td>
+                            <td class="r">{{ $isUsage && $s->qty_out > 0 ? $fmtQty($s->qty_out) : '-' }}</td>
+                            <td class="r"><strong>{{ $fmtQty($s->running_balance) }}</strong></td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="7" style="text-align:center;color:#94a3b8;">Tidak ada data</td></tr>
+                    @endforelse
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3">Total</td>
+                        <td class="r">{{ $fmtQty($totalMasuk) }}</td>
+                        <td class="r">{{ $fmtQty($totalKeluar) }}</td>
+                        <td class="r">{{ $fmtQty($totalPemakaian) }}</td>
+                        <td class="r"><strong>{{ $fmtQty($saldoAkhir) }}</strong></td>
+                    </tr>
+                </tfoot>
+            </table>
         @endif
 
     </div>{{-- /rpt-body --}}

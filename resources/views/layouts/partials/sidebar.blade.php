@@ -199,6 +199,9 @@
                 <a href="{{ route('report.petty-cash') }}" class="nav-sub-item {{ request()->routeIs('report.petty-cash') ? 'active' : '' }}">
                     Petty Cash
                 </a>
+                <a href="{{ route('report.stock-card') }}" class="nav-sub-item {{ request()->routeIs('report.stock-card') ? 'active' : '' }}">
+                    Stok Card
+                </a>
                 {{-- <a href="{{ route('report.jasa-angkut') }}" class="nav-sub-item {{ request()->routeIs('report.jasa-angkut') ? 'active' : '' }}">
                     Jasa Angkut
                 </a> --}}

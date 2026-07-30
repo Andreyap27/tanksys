@@ -13,6 +13,7 @@ use App\Models\Expense;
 use App\Models\GajiSlip;
 use App\Models\Lori;
 use App\Models\LoriExpense;
+use App\Models\Stock;
 use App\Models\UangKoordinasi;
 
 class ReportController extends Controller
@@ -208,6 +209,54 @@ class ReportController extends Controller
             ->pluck('total', 'month');
 
         return view('report.lori', compact('year', 'years', 'loris', 'loriExpenses', 'mobils', 'mobilId'));
+    }
+
+    public function stockCard()
+    {
+        $year          = $this->getYear();
+        $years         = $this->getYears();
+        $selectedMonth = request('month') ? (int) request('month') : null;
+
+        $months = [
+            1=>'Januari', 2=>'Februari', 3=>'Maret',    4=>'April',
+            5=>'Mei',     6=>'Juni',     7=>'Juli',      8=>'Agustus',
+            9=>'September', 10=>'Oktober', 11=>'November', 12=>'Desember',
+        ];
+
+        $periodStart = $selectedMonth
+            ? \Carbon\Carbon::createFromDate($year, $selectedMonth, 1)->startOfDay()
+            : \Carbon\Carbon::createFromDate($year, 1, 1)->startOfDay();
+
+        $openingBalance = (float) Stock::whereDate('date', '<', $periodStart)
+            ->selectRaw('COALESCE(SUM(qty_in) - SUM(qty_out), 0) as bal')
+            ->value('bal');
+
+        $stocks = Stock::whereYear('date', $year)
+            ->when($selectedMonth, fn($q) => $q->whereMonth('date', $selectedMonth))
+            ->orderBy('date')
+            ->orderBy('created_at')
+            ->get();
+
+        $running = $openingBalance;
+        $totalMasuk = 0; $totalKeluar = 0; $totalPemakaian = 0;
+
+        foreach ($stocks as $s) {
+            $running += (float)$s->qty_in - (float)$s->qty_out;
+            $s->running_balance = $running;
+            $totalMasuk += (float)$s->qty_in;
+            if ($s->type === 'usage') {
+                $totalPemakaian += (float)$s->qty_out;
+            } else {
+                $totalKeluar += (float)$s->qty_out;
+            }
+        }
+
+        $saldoAkhir = $running;
+
+        return view('report.stock-card', compact(
+            'year', 'years', 'selectedMonth', 'months', 'stocks',
+            'openingBalance', 'totalMasuk', 'totalKeluar', 'totalPemakaian', 'saldoAkhir'
+        ));
     }
 
     public function pettyCash()
@@ -499,6 +548,41 @@ class ReportController extends Controller
                     ->when($pettyCashId, fn($q) => $q->where('petty_cash_id', $pettyCashId))
                     ->groupBy('month')->pluck('total', 'month');
                 $data['title'] = 'Laporan Petty Cash';
+                break;
+            case 'stock-card':
+                $selectedMonth = request('month') ? (int) request('month') : null;
+                $months = [
+                    1=>'Januari', 2=>'Februari', 3=>'Maret',    4=>'April',
+                    5=>'Mei',     6=>'Juni',     7=>'Juli',      8=>'Agustus',
+                    9=>'September', 10=>'Oktober', 11=>'November', 12=>'Desember',
+                ];
+                $periodStart = $selectedMonth
+                    ? \Carbon\Carbon::createFromDate($year, $selectedMonth, 1)->startOfDay()
+                    : \Carbon\Carbon::createFromDate($year, 1, 1)->startOfDay();
+                $openingBalance = (float) Stock::whereDate('date', '<', $periodStart)
+                    ->selectRaw('COALESCE(SUM(qty_in) - SUM(qty_out), 0) as bal')
+                    ->value('bal');
+                $stockRows = Stock::whereYear('date', $year)
+                    ->when($selectedMonth, fn($q) => $q->whereMonth('date', $selectedMonth))
+                    ->orderBy('date')->orderBy('created_at')->get();
+                $running = $openingBalance;
+                $totalMasuk = 0; $totalKeluar = 0; $totalPemakaian = 0;
+                foreach ($stockRows as $s) {
+                    $running += (float)$s->qty_in - (float)$s->qty_out;
+                    $s->running_balance = $running;
+                    $totalMasuk += (float)$s->qty_in;
+                    if ($s->type === 'usage') $totalPemakaian += (float)$s->qty_out;
+                    else $totalKeluar += (float)$s->qty_out;
+                }
+                $data['stocks']         = $stockRows;
+                $data['openingBalance'] = $openingBalance;
+                $data['totalMasuk']     = $totalMasuk;
+                $data['totalKeluar']    = $totalKeluar;
+                $data['totalPemakaian'] = $totalPemakaian;
+                $data['saldoAkhir']     = $running;
+                $data['months']         = $months;
+                $data['selectedMonth']  = $selectedMonth;
+                $data['title']          = 'Stok Card BBM';
                 break;
             default:
                 abort(404);
