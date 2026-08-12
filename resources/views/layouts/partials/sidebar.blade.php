@@ -44,6 +44,11 @@
             <i data-lucide="flame"></i>
             <span>Pemakaian Stok</span>
         </a>
+        <div class="nav-section">Report</div>
+        <a href="{{ route('report.stock-card') }}" class="nav-item {{ request()->routeIs('report.stock-card') ? 'active' : '' }}">
+            <i data-lucide="file-bar-chart"></i>
+            <span>Stok Card BBM</span>
+        </a>
 
         @else
 
