@@ -575,7 +575,7 @@ class ReportController extends Controller
                     if ($s->type === 'usage') $totalPemakaian += (float)$s->qty_out;
                     else $totalKeluar += (float)$s->qty_out;
                 }
-                $data['stocks']         = $stockRows->reverse()->values();
+                $data['stocks']         = $stockRows->values();
                 $data['openingBalance'] = $openingBalance;
                 $data['totalMasuk']     = $totalMasuk;
                 $data['totalKeluar']    = $totalKeluar;
