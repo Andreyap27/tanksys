@@ -260,6 +260,60 @@ class ReportController extends Controller
         ));
     }
 
+    public function stockCardPrint()
+    {
+        $year          = $this->getYear();
+        $selectedMonth = request('month') ? (int) request('month') : null;
+
+        $months = [
+            1=>'Januari', 2=>'Februari', 3=>'Maret',    4=>'April',
+            5=>'Mei',     6=>'Juni',     7=>'Juli',      8=>'Agustus',
+            9=>'September', 10=>'Oktober', 11=>'November', 12=>'Desember',
+        ];
+
+        $periodStart = $selectedMonth
+            ? \Carbon\Carbon::createFromDate($year, $selectedMonth, 1)->startOfDay()
+            : \Carbon\Carbon::createFromDate($year, 1, 1)->startOfDay();
+
+        $openingBalance = (float) Stock::whereDate('date', '<', $periodStart)
+            ->selectRaw('COALESCE(SUM(qty_in) - SUM(qty_out), 0) as bal')
+            ->value('bal');
+
+        $stocks = Stock::whereYear('date', $year)
+            ->when($selectedMonth, fn($q) => $q->whereMonth('date', $selectedMonth))
+            ->orderBy('date')->orderBy('created_at')->get();
+
+        $running = $openingBalance;
+        $totalMasuk = 0; $totalKeluar = 0; $totalPemakaian = 0;
+
+        foreach ($stocks as $s) {
+            $running += (float)$s->qty_in - (float)$s->qty_out;
+            $s->running_balance = $running;
+            $totalMasuk += (float)$s->qty_in;
+            if ($s->type === 'usage') $totalPemakaian += (float)$s->qty_out;
+            else $totalKeluar += (float)$s->qty_out;
+        }
+
+        $saldoAkhir = $running;
+        $stocks = $stocks->reverse()->values();
+
+        return view('report.print', [
+            'section'       => 'stock-card',
+            'title'         => 'Stok Card BBM',
+            'year'          => $year,
+            'months'        => $months,
+            'selectedMonth' => $selectedMonth,
+            'stocks'        => $stocks,
+            'openingBalance'=> $openingBalance,
+            'totalMasuk'    => $totalMasuk,
+            'totalKeluar'   => $totalKeluar,
+            'totalPemakaian'=> $totalPemakaian,
+            'saldoAkhir'    => $saldoAkhir,
+            'kapalName'     => null,
+            'mobilName'     => null,
+        ]);
+    }
+
     public function pettyCash()
     {
         $year         = $this->getYear();

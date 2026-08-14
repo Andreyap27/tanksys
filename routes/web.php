@@ -96,7 +96,8 @@ Route::middleware('auth.jwt')->group(function () {
     Route::get('/tx-print', [TxPrintController::class, 'show'])->name('tx.print');
 
     // Stock Card report (Marketing allowed)
-    Route::get('/report/stock-card', [ReportController::class, 'stockCard'])->name('report.stock-card');
+    Route::get('/report/stock-card',       [ReportController::class, 'stockCard'])->name('report.stock-card');
+    Route::get('/report/stock-card/print', [ReportController::class, 'stockCardPrint'])->name('report.stock-card.print');
 
     // ── Routes blocked for Marketing ─────────────────────────────────────────────
     Route::middleware('not.marketing')->group(function () {

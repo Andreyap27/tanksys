@@ -105,9 +105,8 @@
 <script>
 function openPrintModal() {
     const params = new URLSearchParams(window.location.search);
-    params.set('section', 'stock-card');
     params.set('year', '{{ $year }}');
-    const url = '{{ route('report.print') }}?' + params.toString();
+    const url = '{{ route('report.stock-card.print') }}?' + params.toString();
     document.getElementById('printFrame').src = url;
     document.getElementById('printModal').classList.add('active');
     if (typeof lucide !== 'undefined') lucide.createIcons();
