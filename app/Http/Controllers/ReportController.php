@@ -295,7 +295,6 @@ class ReportController extends Controller
         }
 
         $saldoAkhir = $running;
-        $stocks = $stocks->reverse()->values();
 
         return view('report.print', [
             'section'       => 'stock-card',
