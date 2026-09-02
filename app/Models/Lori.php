@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Mobil;
 
 class Lori extends Model
 {
@@ -27,6 +28,11 @@ class Lori extends Model
             'date'  => 'datetime',
             'price' => 'decimal:2',
         ];
+    }
+
+    public function mobil()
+    {
+        return $this->belongsTo(Mobil::class);
     }
 
     public function customer()
