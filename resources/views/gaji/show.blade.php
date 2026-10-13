@@ -487,8 +487,11 @@
     // ── Generate ────────────────────────────────────────────────────────────────
     function openGenerateModal() {
         document.getElementById('generateForm').reset();
-        const now = new Date();
-        document.getElementById('genPeriod').value = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+        // Gaji dibayar setelah bulan berjalan selesai, jadi default periode = bulan lalu
+        const prev = new Date();
+        prev.setDate(1);
+        prev.setMonth(prev.getMonth() - 1);
+        document.getElementById('genPeriod').value = prev.getFullYear() + '-' + String(prev.getMonth()+1).padStart(2,'0');
         document.getElementById('genExtra').value        = '0';
         document.getElementById('genBonus').value        = '0';
         document.getElementById('genPotPinjaman').value  = pinjamanPerBulan ? parseInt(pinjamanPerBulan).toLocaleString('id-ID') : '0';
