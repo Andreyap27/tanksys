@@ -182,7 +182,7 @@ $profitIcon = $isProfit ? 'trending-up' : 'trending-down';
                 </div>
                 <div class="dash-stat__trend flat">
                     <i data-lucide="calculator"></i>
-                    Penjualan − Pembelian − Petty Cash − Koordinasi − Expenses
+                    Penjualan − Pembelian − Koordinasi − Expenses
                 </div>
             </div>
         </div>

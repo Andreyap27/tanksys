@@ -28,8 +28,8 @@ class DashboardController extends Controller
         $ukAmt       = (float) UangKoordinasi::where('status', 'approved')->whereYear('date', $thisYear)->whereMonth('date', $thisMonth)->sum('total');
         $totalExpenseAmt = $expenseAmt + $pcDebitAmt;
         $loriAmt     = (float) Lori::whereYear('date', $thisYear)->whereMonth('date', $thisMonth)->sum('price');
-        // Penjualan - Pembelian - Petty Cash Pemakaian - Uang Koordinasi - Expenses Ship
-        $profitAmt   = $salesAmt - $purchaseAmt - $pcDebitAmt - $ukAmt - $expenseAmt;
+        // Penjualan - Pembelian - Uang Koordinasi - Expenses Ship (petty cash tidak dihitung)
+        $profitAmt   = $salesAmt - $purchaseAmt - $ukAmt - $expenseAmt;
         $stockBal = Stock::currentBalance();
 
         $purchaseLtr = (float) Stock::where('type', 'purchase')
@@ -63,9 +63,8 @@ class DashboardController extends Controller
             $s  = (float) Sale::whereIn('status', ['approved', 'paid'])->whereYear('date', $m->year)->whereMonth('date', $m->month)->sum('amount');
             $p  = (float) Purchase::whereIn('status', ['approved', 'paid'])->whereYear('date', $m->year)->whereMonth('date', $m->month)->sum('amount');
             $e  = (float) Expense::whereYear('date', $m->year)->whereMonth('date', $m->month)->sum('nominal');
-            $pc = (float) PettyCashTransaction::where('type', 'out')->whereYear('date', $m->year)->whereMonth('date', $m->month)->sum('amount');
             $uk = (float) UangKoordinasi::where('status', 'approved')->whereYear('date', $m->year)->whereMonth('date', $m->month)->sum('total');
-            return round($s - $p - $e - $pc - $uk, 2);
+            return round($s - $p - $e - $uk, 2);
         })->values();
 
         // ── Expenses by category (this month) ───────────────────────
