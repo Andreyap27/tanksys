@@ -113,10 +113,12 @@
             <span>Expenses Ship</span>
             <span class="sidebar-notif-badge" id="sidebarBadge-expenses" style="display:none;"></span>
         </a>
+        @if(!$isSPV)
         <a href="{{ route('petty-cash-transaction.index') }}" class="nav-item {{ request()->routeIs('petty-cash-transaction.*') ? 'active' : '' }}">
             <i data-lucide="coins"></i>
             <span>Petty Cash</span>
         </a>
+        @endif
         <a href="{{ route('capital.index') }}" class="nav-item {{ request()->routeIs('capital.*') ? 'active' : '' }}">
             <i data-lucide="landmark"></i>
             <span>Capital</span>
@@ -201,9 +203,11 @@
                 <a href="{{ route('report.lori') }}" class="nav-sub-item {{ request()->routeIs('report.lori') ? 'active' : '' }}">
                     P/L Mobil
                 </a>
+                @if(!$isSPV)
                 <a href="{{ route('report.petty-cash') }}" class="nav-sub-item {{ request()->routeIs('report.petty-cash') ? 'active' : '' }}">
                     Petty Cash
                 </a>
+                @endif
                 <a href="{{ route('report.stock-card') }}" class="nav-sub-item {{ request()->routeIs('report.stock-card') ? 'active' : '' }}">
                     Stok Card
                 </a>
